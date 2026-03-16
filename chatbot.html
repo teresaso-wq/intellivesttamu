@@ -8,6 +8,81 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./styles.css" />
+  <style>
+    /* Chatbot toolbar */
+    .chatbot-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 20px;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+      background: var(--paper-2);
+      border-radius: var(--radius-2) var(--radius-2) 0 0;
+    }
+    .dark .chatbot-toolbar {
+      border-bottom-color: rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.02);
+    }
+    .chatbot-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ink-700);
+    }
+    .chatbot-status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      animation: pulse-dot 2s infinite;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+    .btn-clear-chat {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: none;
+      border: 1px solid var(--ink-100);
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink-500);
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+    .btn-clear-chat:hover {
+      background: var(--paper);
+      color: var(--ink-900);
+      border-color: var(--ink-200);
+    }
+    /* Disabled send button state */
+    .chatbot-send-btn:disabled {
+      background: var(--ink-200);
+      cursor: not-allowed;
+      transform: none;
+    }
+    .chatbot-send-btn:disabled:hover {
+      background: var(--ink-200);
+      transform: none;
+    }
+    /* Error message bubble */
+    .message-error .message-text {
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      color: #dc2626;
+    }
+    .dark .message-error .message-text {
+      background: rgba(239, 68, 68, 0.12);
+      color: #f87171;
+    }
+  </style>
 </head>
 <body>
   <div id="cursor"></div>
@@ -58,6 +133,22 @@
       </div>
 
       <div class="chatbot-window">
+        <div class="chatbot-toolbar">
+          <span class="chatbot-status">
+            <span class="chatbot-status-dot"></span>
+            Intellivest AI
+          </span>
+          <button id="clearChatBtn" class="btn-clear-chat" aria-label="Clear conversation" title="Clear conversation">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+              <path d="M10 11v6M14 11v6"></path>
+              <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>
+            </svg>
+            Clear
+          </button>
+        </div>
+
         <div class="chatbot-messages" id="chatbotMessages">
           <div class="message bot-message">
             <div class="message-avatar">IV</div>
@@ -84,9 +175,10 @@
               class="chatbot-input" 
               placeholder="Ask me anything about finance..." 
               autocomplete="off"
+              autofocus
               required
             />
-            <button type="submit" class="chatbot-send-btn" aria-label="Send message">
+            <button type="submit" id="chatbotSendBtn" class="chatbot-send-btn" aria-label="Send message">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="22" y1="2" x2="11" y2="13"></line>
                 <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
@@ -111,7 +203,7 @@
       <div class="footer-meta">
         <div class="meta-block">
           <div class="meta-label">Contact</div>
-          <a href="mailto:aitp@tamu.edu" class="link">aitp@tamu.edu</a>
+          <a href="/cdn-cgi/l/email-protection#e6878f9296a692878b93c8838293" class="link"><span class="__cf_email__" data-cfemail="fd9c94898dbd899c9088d3989988">[email&#160;protected]</span></a>
         </div>
         <div class="meta-block">
           <div class="meta-label">Developed by</div>
@@ -120,14 +212,4 @@
         <div class="meta-block">
           <div class="meta-text">© <span id="year"></span> Intellivest</div>
         </div>
-      </div>
-    </div>
-  </footer>
-
-  <script src="./app.js"></script>
-  <script src="./chatbot.js"></script>
-</body>
-</html>
-
-
-
+      <

@@ -26,24 +26,6 @@ const CATEGORY_SYMBOLS = {
   ]
 };
 
-// #region agent log
-function debugLog(runId, hypothesisId, location, message, data) {
-  fetch('http://127.0.0.1:7358/ingest/6cde8b47-2e94-4e16-8946-d652773068d7', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '69af8c' },
-    body: JSON.stringify({
-      sessionId: '69af8c',
-      runId,
-      hypothesisId,
-      location,
-      message,
-      data,
-      timestamp: Date.now()
-    })
-  }).catch(() => {});
-}
-// #endregion
-
 let stockChart = null;
 let currentSymbol = 'AAPL';
 let currentTimeframe = '1D';
@@ -261,18 +243,11 @@ async function fetchSP500Return(useCache = true) {
 // Fetch stock data with caching
 async function fetchStockData(symbol, useCache = true, options = {}) {
   const includeDetails = options.includeDetails !== false;
-  const startedAt = performance.now();
-  // #region agent log
-  debugLog('baseline', 'H1', 'stocks.js:fetchStockData', 'start', { symbol, useCache, includeDetails });
-  // #endregion
   const cacheKey = `stock_${symbol}_${includeDetails ? 'full' : 'fast'}`;
   // Check cache first
   if (useCache) {
     const cached = apiCache.get(cacheKey);
     if (cached) {
-      // #region agent log
-      debugLog('baseline', 'H1', 'stocks.js:fetchStockData', 'cache_hit', { symbol, ms: Math.round(performance.now() - startedAt) });
-      // #endregion
       return cached;
     }
   }
@@ -380,14 +355,6 @@ async function fetchStockData(symbol, useCache = true, options = {}) {
       if (useCache) {
         apiCache.set(cacheKey, stockData, includeDetails ? 5 * 60 * 1000 : 10 * 60 * 1000);
       }
-      // #region agent log
-      debugLog('baseline', 'H2', 'stocks.js:fetchStockData', 'success', {
-        symbol,
-        ms: Math.round(performance.now() - startedAt),
-        volume: stockData.volume || 0
-      });
-      // #endregion
-      
       return stockData;
     } catch (error) {
       console.log(`Method failed for ${symbol}:`, error.message);
@@ -497,7 +464,6 @@ function formatMarketCap(marketCap) {
 
 // Load category stocks - predefined sectors, sorted by volume (most active)
 async function filterStocksByCategory(category) {
-  const startedAt = performance.now();
   const symbols = CATEGORY_SYMBOLS[category] || [];
   if (symbols.length === 0) return [];
   try {
@@ -507,14 +473,6 @@ async function filterStocksByCategory(category) {
     const stocks = await Promise.all(stockDataPromises);
     const valid = stocks.filter(s => !s.error && s.price > 0);
     valid.sort((a, b) => (b.volume || 0) - (a.volume || 0));
-    // #region agent log
-    debugLog('baseline', 'H3', 'stocks.js:filterStocksByCategory', 'category_loaded', {
-      category,
-      requested: symbols.length,
-      valid: valid.length,
-      ms: Math.round(performance.now() - startedAt)
-    });
-    // #endregion
     return valid.slice(0, 12);
   } catch (error) {
     console.error('Error loading category:', error);
@@ -524,7 +482,6 @@ async function filterStocksByCategory(category) {
 
 // Load category stocks with dynamic filtering
 async function loadCategoryStocks(category) {
-  const startedAt = performance.now();
   currentCategory = category;
   const container = document.getElementById('categoryStocks');
   if (!container) return;
@@ -548,13 +505,6 @@ async function loadCategoryStocks(category) {
     }
     
     container.innerHTML = validStocks.map(stock => createStockCard(stock, true)).join('');
-    // #region agent log
-    debugLog('baseline', 'H4', 'stocks.js:loadCategoryStocks', 'rendered', {
-      category,
-      cards: validStocks.length,
-      ms: Math.round(performance.now() - startedAt)
-    });
-    // #endregion
   } catch (error) {
     console.error('Error loading category stocks:', error);
     container.innerHTML = '<div class="category-loading">Unable to load stocks. Please try again.</div>';
@@ -907,9 +857,6 @@ async function updateStockTicker() {
   
   // Update ticker if container exists
   if (tickerContainer) {
-    // #region agent log
-    debugLog('baseline', 'H5', 'stocks.js:initStocksPage', 'ticker_present', { hasTicker: true });
-    // #endregion
     updateStockTicker();
     setInterval(() => {
       updateStockTicker();

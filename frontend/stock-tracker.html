@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Live Stock Tracker - Intellivest @ Texas A&M</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,10 +13,10 @@
 <body>
   <div id="cursor"></div>
 
-  <header class="site-header">
+  <header class="site-header stock-tracker-header">
     <div class="container header-inner">
       <a href="./index.html" class="brand">
-        <img src="./f9b61d2f-3423-4d0e-9168-bb3ad73c27ef.png" alt="Intellivest logo" class="brand-logo" />
+        <img src="./assets/logo.png" alt="Intellivest logo" class="brand-logo" />
         <div class="brand-text">
           <div class="brand-line">Intellivest</div>
           <div class="brand-sub">@ Texas A&M</div>
@@ -38,7 +38,6 @@
         </div>
         <div class="nav-dropdown">
           <a href="./stocks.html" class="nav-link">Stocks</a>
-          <a href="./stock-tracker.html" class="nav-link active">Live Tracker</a>
         </div>
       </nav>
 
@@ -50,195 +49,184 @@
         </button>
       </div>
     </div>
+
+    <div class="market-summary-bar">
+      <div class="container market-summary">
+        <div class="market-item">
+          <span class="label">Dow</span>
+          <span class="value" id="dowPrice">--</span>
+          <span class="change" id="dowChange">--</span>
+        </div>
+        <div class="market-item">
+          <span class="label">S&P 500</span>
+          <span class="value" id="sp500Price">--</span>
+          <span class="change" id="sp500Change">--</span>
+        </div>
+        <div class="market-item">
+          <span class="label">Nasdaq</span>
+          <span class="value" id="nasdaqPrice">--</span>
+          <span class="change" id="nasdaqChange">--</span>
+        </div>
+        <div class="status-indicator" id="statusIndicator">
+          <span class="pulse"></span>
+          <span>Live</span>
+        </div>
+      </div>
+    </div>
   </header>
 
-  <main class="site-main stock-tracker-page">
-    <section class="page-hero">
-      <div class="container">
-        <h1>Live Stock Tracker</h1>
-        <p class="page-subtitle">Watch prices, build a watchlist, and learn how markets work — all in one place.</p>
+  <main class="stock-tracker-main">
+    <div class="container">
+      <nav class="tracker-nav">
+        <button class="nav-btn active" id="watchlistBtn" data-view="watchlist">Watchlist</button>
+        <button class="nav-btn" id="educationBtn" data-view="education">Education</button>
+      </nav>
+
+      <!-- Watchlist View -->
+      <div id="watchlistView" class="view-container active">
+        <section class="search-section">
+          <div class="search-container">
+            <input 
+              type="text" 
+              id="stockSearch" 
+              placeholder="Search for a stock (e.g., AAPL, TSLA, MSFT, GOOGL)" 
+              autocomplete="off"
+            />
+            <button id="addStockBtn" class="btn primary">Add to Watchlist</button>
+          </div>
+          <div class="default-stocks">
+            <button class="chip" data-symbol="AAPL">AAPL</button>
+            <button class="chip" data-symbol="GOOGL">GOOGL</button>
+            <button class="chip" data-symbol="MSFT">MSFT</button>
+            <button class="chip" data-symbol="TSLA">TSLA</button>
+            <button class="chip" data-symbol="AMZN">AMZN</button>
+            <button class="chip" data-symbol="META">META</button>
+            <button class="chip" data-symbol="NVDA">NVDA</button>
+            <button class="chip" data-symbol="NFLX">NFLX</button>
+          </div>
+        </section>
+
+        <section class="watchlist-section">
+          <div class="section-header">
+            <h2>Your Watchlist</h2>
+            <div class="last-update" id="lastUpdate">Updating...</div>
+          </div>
+          <div id="watchlistContainer" class="watchlist-grid">
+            <!-- Stock cards will be inserted here -->
+          </div>
+        </section>
       </div>
-    </section>
 
-    <section class="tracker-market-section" aria-label="Market summary">
-      <div class="container">
-        <div class="tracker-market-summary">
-          <div class="market-item">
-            <span class="label">Dow</span>
-            <span class="value" id="dowPrice">--</span>
-            <span class="change" id="dowChange">--</span>
-          </div>
-          <div class="market-item">
-            <span class="label">S&amp;P 500</span>
-            <span class="value" id="sp500Price">--</span>
-            <span class="change" id="sp500Change">--</span>
-          </div>
-          <div class="market-item">
-            <span class="label">Nasdaq</span>
-            <span class="value" id="nasdaqPrice">--</span>
-            <span class="change" id="nasdaqChange">--</span>
-          </div>
-          <div class="status-indicator" id="statusIndicator">
-            <span class="pulse" aria-hidden="true"></span>
-            <span>Live</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="tracker-content-section">
-      <div class="container">
-        <nav class="tracker-tabs" aria-label="Tracker views">
-          <button type="button" class="nav-btn active" id="watchlistBtn" data-view="watchlist">Watchlist</button>
-          <button type="button" class="nav-btn" id="educationBtn" data-view="education">Education</button>
-        </nav>
-
-        <!-- Watchlist View -->
-        <div id="watchlistView" class="view-container active">
-          <div class="tracker-search-section">
-            <div class="search-container">
-              <input
-                type="text"
-                id="stockSearch"
-                placeholder="Search for a stock (e.g., AAPL, TSLA, MSFT, GOOGL)"
-                autocomplete="off"
-              />
-              <button type="button" id="addStockBtn" class="btn primary">Add to Watchlist</button>
-            </div>
-            <div class="tracker-chips" role="group" aria-label="Quick tickers">
-              <button type="button" class="chip" data-symbol="AAPL">AAPL</button>
-              <button type="button" class="chip" data-symbol="GOOGL">GOOGL</button>
-              <button type="button" class="chip" data-symbol="MSFT">MSFT</button>
-              <button type="button" class="chip" data-symbol="TSLA">TSLA</button>
-              <button type="button" class="chip" data-symbol="AMZN">AMZN</button>
-              <button type="button" class="chip" data-symbol="META">META</button>
-              <button type="button" class="chip" data-symbol="NVDA">NVDA</button>
-              <button type="button" class="chip" data-symbol="NFLX">NFLX</button>
-            </div>
-          </div>
-
-          <div class="tracker-watchlist-section">
-            <div class="section-header">
-              <h2>Your Watchlist</h2>
-              <div class="last-update" id="lastUpdate">Updating...</div>
-            </div>
-            <div id="watchlistContainer" class="watchlist-grid">
-              <!-- Stock cards will be inserted here -->
-            </div>
-          </div>
+      <!-- Education View -->
+      <div id="educationView" class="view-container">
+        <div class="disclaimer-banner">
+          <strong>⚠️ Disclaimer:</strong> The information on this site is for educational purposes only and does not constitute financial, investment, or trading advice.
         </div>
 
-        <!-- Education View -->
-        <div id="educationView" class="view-container">
-          <div class="tracker-disclaimer">
-            <strong>Disclaimer:</strong> The information on this site is for educational purposes only and does not constitute financial, investment, or trading advice.
-          </div>
+        <section class="education-section">
+          <article class="education-card">
+            <h2>📚 How Stocks Work: A Beginner's Guide</h2>
+            
+            <h3>What is a Stock?</h3>
+            <p>A stock (also called a share or equity) represents a small piece of ownership in a company. When you buy a stock, you become a partial owner of that company, known as a shareholder.</p>
 
-          <div class="education-section">
-            <article class="education-card">
-              <h2>How stocks work: a beginner&apos;s guide</h2>
+            <h3>How Do Stocks Work?</h3>
+            <ol>
+              <li><strong>Companies Go Public:</strong> When a company wants to raise money, it can "go public" through an Initial Public Offering (IPO), selling shares to investors.</li>
+              <li><strong>Stock Exchanges:</strong> After the IPO, stocks are traded on exchanges like the New York Stock Exchange (NYSE) or NASDAQ, where buyers and sellers meet.</li>
+              <li><strong>Stock Prices:</strong> Prices fluctuate based on supply and demand. If more people want to buy than sell, the price goes up. If more want to sell, the price goes down.</li>
+              <li><strong>Making Money:</strong> Investors can profit in two ways:
+                <ul>
+                  <li><strong>Capital Gains:</strong> Buying low and selling high</li>
+                  <li><strong>Dividends:</strong> Some companies pay shareholders a portion of profits</li>
+                </ul>
+              </li>
+            </ol>
 
-              <h3>What is a stock?</h3>
-              <p>A stock (also called a share or equity) represents a small piece of ownership in a company. When you buy a stock, you become a partial owner of that company, known as a shareholder.</p>
+            <h3>Why Do Stock Prices Change?</h3>
+            <p>Stock prices change throughout the day based on:</p>
+            <ul>
+              <li>Company performance and earnings reports</li>
+              <li>Economic news and trends</li>
+              <li>Investor sentiment and market psychology</li>
+              <li>Industry developments and competition</li>
+              <li>Global events and geopolitical factors</li>
+            </ul>
 
-              <h3>How do stocks work?</h3>
-              <ol>
-                <li><strong>Companies go public:</strong> When a company wants to raise money, it can &quot;go public&quot; through an Initial Public Offering (IPO), selling shares to investors.</li>
-                <li><strong>Stock exchanges:</strong> After the IPO, stocks are traded on exchanges like the New York Stock Exchange (NYSE) or NASDAQ, where buyers and sellers meet.</li>
-                <li><strong>Stock prices:</strong> Prices fluctuate based on supply and demand. If more people want to buy than sell, the price goes up. If more want to sell, the price goes down.</li>
-                <li><strong>Making money:</strong> Investors can profit in two ways:
-                  <ul>
-                    <li><strong>Capital gains:</strong> Buying low and selling high</li>
-                    <li><strong>Dividends:</strong> Some companies pay shareholders a portion of profits</li>
-                  </ul>
-                </li>
-              </ol>
+            <h3>Key Concepts for Beginners</h3>
+            <ul>
+              <li><strong>Bull Market:</strong> A period of rising stock prices and investor optimism</li>
+              <li><strong>Bear Market:</strong> A period of falling stock prices and pessimism</li>
+              <li><strong>Market Volatility:</strong> How much stock prices fluctuate over time</li>
+              <li><strong>Diversification:</strong> Spreading investments across different stocks to reduce risk</li>
+            </ul>
+          </article>
 
-              <h3>Why do stock prices change?</h3>
-              <p>Stock prices change throughout the day based on:</p>
-              <ul>
-                <li>Company performance and earnings reports</li>
-                <li>Economic news and trends</li>
-                <li>Investor sentiment and market psychology</li>
-                <li>Industry developments and competition</li>
-                <li>Global events and geopolitical factors</li>
-              </ul>
+          <article class="education-card">
+            <h2>💡 Understanding Key Financial Concepts</h2>
+            
+            <h3>Market Capitalization (Market Cap)</h3>
+            <p><strong>What it is:</strong> The total value of all outstanding shares of a company.</p>
+            <p><strong>Formula:</strong> Current Stock Price × Total Number of Shares</p>
+            <p><strong>Categories:</strong></p>
+            <ul>
+              <li><strong>Large-Cap:</strong> $10+ billion (e.g., Apple, Microsoft)</li>
+              <li><strong>Mid-Cap:</strong> $2-10 billion</li>
+              <li><strong>Small-Cap:</strong> Under $2 billion</li>
+            </ul>
+            <p><strong>Why it matters:</strong> Market cap indicates company size and can influence investment risk and growth potential.</p>
 
-              <h3>Key concepts for beginners</h3>
-              <ul>
-                <li><strong>Bull market:</strong> A period of rising stock prices and investor optimism</li>
-                <li><strong>Bear market:</strong> A period of falling stock prices and pessimism</li>
-                <li><strong>Market volatility:</strong> How much stock prices fluctuate over time</li>
-                <li><strong>Diversification:</strong> Spreading investments across different stocks to reduce risk</li>
-              </ul>
-            </article>
+            <h3>Price-to-Earnings Ratio (P/E Ratio)</h3>
+            <p><strong>What it is:</strong> A valuation metric comparing a company's stock price to its earnings per share.</p>
+            <p><strong>Formula:</strong> Stock Price ÷ Earnings Per Share</p>
+            <p><strong>Interpretation:</strong></p>
+            <ul>
+              <li><strong>High P/E:</strong> Investors expect high future growth (can also mean overvalued)</li>
+              <li><strong>Low P/E:</strong> May indicate undervaluation or lower growth expectations</li>
+            </ul>
+            <p><strong>Example:</strong> If a stock costs $100 and earns $5 per share, the P/E ratio is 20.</p>
 
-            <article class="education-card">
-              <h2>Understanding key financial concepts</h2>
+            <h3>Dividends</h3>
+            <p><strong>What it is:</strong> A portion of a company's profits paid to shareholders, usually quarterly.</p>
+            <p><strong>Dividend Yield:</strong> Annual dividend payment ÷ Stock price, expressed as a percentage.</p>
+            <p><strong>Why it matters:</strong> Provides regular income and can indicate a company's financial health and stability.</p>
 
-              <h3>Market capitalization (market cap)</h3>
-              <p><strong>What it is:</strong> The total value of all outstanding shares of a company.</p>
-              <p><strong>Formula:</strong> Current stock price × total number of shares</p>
-              <p><strong>Categories:</strong></p>
-              <ul>
-                <li><strong>Large-cap:</strong> $10+ billion (e.g., Apple, Microsoft)</li>
-                <li><strong>Mid-cap:</strong> $2–10 billion</li>
-                <li><strong>Small-cap:</strong> Under $2 billion</li>
-              </ul>
-              <p><strong>Why it matters:</strong> Market cap indicates company size and can influence investment risk and growth potential.</p>
+            <h3>Volume</h3>
+            <p><strong>What it is:</strong> The number of shares traded during a specific time period.</p>
+            <p><strong>Why it matters:</strong> High volume suggests strong investor interest and better liquidity (easier to buy/sell).</p>
 
-              <h3>Price-to-earnings ratio (P/E ratio)</h3>
-              <p><strong>What it is:</strong> A valuation metric comparing a company&apos;s stock price to its earnings per share.</p>
-              <p><strong>Formula:</strong> Stock price ÷ earnings per share</p>
-              <p><strong>Interpretation:</strong></p>
-              <ul>
-                <li><strong>High P/E:</strong> Investors expect high future growth (can also mean overvalued)</li>
-                <li><strong>Low P/E:</strong> May indicate undervaluation or lower growth expectations</li>
-              </ul>
-              <p><strong>Example:</strong> If a stock costs $100 and earns $5 per share, the P/E ratio is 20.</p>
+            <h3>52-Week High/Low</h3>
+            <p><strong>What it is:</strong> The highest and lowest prices a stock has traded at over the past year.</p>
+            <p><strong>Why it matters:</strong> Helps understand a stock's price range and whether it's near historical highs or lows.</p>
 
-              <h3>Dividends</h3>
-              <p><strong>What it is:</strong> A portion of a company&apos;s profits paid to shareholders, usually quarterly.</p>
-              <p><strong>Dividend yield:</strong> Annual dividend payment ÷ stock price, expressed as a percentage.</p>
-              <p><strong>Why it matters:</strong> Provides regular income and can indicate a company&apos;s financial health and stability.</p>
+            <h3>Understanding Stock Charts</h3>
+            <ul>
+              <li><strong>Open:</strong> The price when the market opens</li>
+              <li><strong>High:</strong> The highest price during the trading day</li>
+              <li><strong>Low:</strong> The lowest price during the trading day</li>
+              <li><strong>Close:</strong> The final price at market close</li>
+              <li><strong>Change %:</strong> Percentage increase or decrease from the previous close</li>
+            </ul>
 
-              <h3>Volume</h3>
-              <p><strong>What it is:</strong> The number of shares traded during a specific time period.</p>
-              <p><strong>Why it matters:</strong> High volume suggests strong investor interest and better liquidity (easier to buy/sell).</p>
-
-              <h3>52-week high/low</h3>
-              <p><strong>What it is:</strong> The highest and lowest prices a stock has traded at over the past year.</p>
-              <p><strong>Why it matters:</strong> Helps understand a stock&apos;s price range and whether it&apos;s near historical highs or lows.</p>
-
-              <h3>Understanding stock charts</h3>
-              <ul>
-                <li><strong>Open:</strong> The price when the market opens</li>
-                <li><strong>High:</strong> The highest price during the trading day</li>
-                <li><strong>Low:</strong> The lowest price during the trading day</li>
-                <li><strong>Close:</strong> The final price at market close</li>
-                <li><strong>Change %:</strong> Percentage increase or decrease from the previous close</li>
-              </ul>
-
-              <h3>General investing principles</h3>
-              <ul>
-                <li><strong>Start early:</strong> Time in the market often beats timing the market</li>
-                <li><strong>Diversify:</strong> Don&apos;t put all your eggs in one basket</li>
-                <li><strong>Long-term focus:</strong> Stocks tend to perform well over long periods despite short-term volatility</li>
-                <li><strong>Research:</strong> Understand what you&apos;re investing in</li>
-                <li><strong>Risk management:</strong> Only invest what you can afford to lose</li>
-                <li><strong>Avoid emotional decisions:</strong> Stick to your investment strategy during market fluctuations</li>
-              </ul>
-            </article>
-          </div>
-        </div>
+            <h3>General Investing Principles</h3>
+            <ul>
+              <li><strong>Start Early:</strong> Time in the market often beats timing the market</li>
+              <li><strong>Diversify:</strong> Don't put all your eggs in one basket</li>
+              <li><strong>Long-Term Focus:</strong> Stocks tend to perform well over long periods despite short-term volatility</li>
+              <li><strong>Research:</strong> Understand what you're investing in</li>
+              <li><strong>Risk Management:</strong> Only invest what you can afford to lose</li>
+              <li><strong>Avoid Emotional Decisions:</strong> Stick to your investment strategy during market fluctuations</li>
+            </ul>
+          </article>
+        </section>
       </div>
-    </section>
+    </div>
   </main>
 
   <footer class="site-footer">
     <div class="container footer-inner">
       <div class="footer-brand">
-        <img src="./f9b61d2f-3423-4d0e-9168-bb3ad73c27ef.png" alt="Intellivest logo" class="footer-logo" />
+        <div class="brand-mark small">●</div>
         <div class="footer-text">
           <div class="footer-title">Intellivest @ Texas A&M</div>
           <div class="footer-tagline">Making financial literacy accessible to everyone, one person at a time.</div>
@@ -252,7 +240,7 @@
         </div>
         <div class="meta-block">
           <div class="meta-label">Developed by</div>
-          <div class="meta-text">Natalie Do, Denisse Aguilar, Teresa So, Monica Lin, Sahil Shah, Abhinav Chodimella, and Benjamin McCaulley</div>
+          <div class="meta-text">Natalie Do, Denisse Aguilar, Teresa So, Monica Lin, Sahil Shah, Abhinav Chodimella, and Aiden Schreier</div>
         </div>
         <div class="meta-block">
           <div class="meta-text">© <span id="year"></span> Intellivest</div>
@@ -265,3 +253,7 @@
   <script src="./stock-tracker.js"></script>
 </body>
 </html>
+
+
+
+

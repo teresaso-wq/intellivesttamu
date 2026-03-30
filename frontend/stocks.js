@@ -714,13 +714,47 @@ async function loadCategoryStocks(filterKey) {
   }
 }
 
+function openAnalysisPanel() {
+  const panel = document.getElementById('stockAnalysisPanel');
+  const hint = document.getElementById('stockSelectionHint');
+  const body = document.getElementById('analysisPanelBody');
+  if (panel) panel.classList.add('is-open');
+  if (hint) hint.classList.add('is-hidden');
+  if (body) body.hidden = false;
+  analysisPanelOpen = true;
+}
+
+function closeAnalysisPanel() {
+  const panel = document.getElementById('stockAnalysisPanel');
+  const hint = document.getElementById('stockSelectionHint');
+  const body = document.getElementById('analysisPanelBody');
+  if (panel) panel.classList.remove('is-open');
+  if (hint) hint.classList.remove('is-hidden');
+  if (body) body.hidden = true;
+  analysisPanelOpen = false;
+  currentSymbol = '';
+  highlightSelectedStockCard(null);
+  const stockSelect = document.getElementById('stockSelect');
+  if (stockSelect) stockSelect.value = '';
+  lastChartStockData = null;
+  if (stockChart) {
+    stockChart.destroy();
+    stockChart = null;
+  }
+}
+
 // Select stock from card or search
 window.selectStockFromCard = function(symbol) {
   if (!symbol) return;
+  if (currentSymbol === symbol && analysisPanelOpen) {
+    closeAnalysisPanel();
+    return;
+  }
   currentSymbol = symbol;
   highlightSelectedStockCard(symbol);
   const stockSelect = document.getElementById('stockSelect');
   if (stockSelect) stockSelect.value = symbol;
+  openAnalysisPanel();
   updateStockDetails(symbol);
 };
 
@@ -730,13 +764,14 @@ window.selectStockFromSearch = function(symbol) {
   highlightSelectedStockCard(symbol);
   const stockSelect = document.getElementById('stockSelect');
   if (stockSelect) stockSelect.value = symbol;
+  openAnalysisPanel();
   updateStockDetails(symbol);
 };
 
 function highlightSelectedStockCard(symbol) {
   const cards = document.querySelectorAll('.stock-card-category[data-symbol]');
   cards.forEach(card => {
-    if (card.dataset.symbol === symbol) card.classList.add('stock-card-selected');
+    if (symbol && card.dataset.symbol === symbol) card.classList.add('stock-card-selected');
     else card.classList.remove('stock-card-selected');
   });
 }

@@ -662,8 +662,8 @@ function formatMarketCap(marketCap) {
 }
 
 // Load category stocks - predefined sectors, sorted by volume (most active)
-async function filterStocksByCategory(category) {
-  const symbols = CATEGORY_SYMBOLS[category] || [];
+async function filterStocksByCategory(filterKey) {
+  const symbols = getSymbolsForFilter(filterKey);
   if (symbols.length === 0) return [];
   try {
     const stockDataPromises = symbols.map(sym =>
@@ -692,15 +692,15 @@ async function filterStocksByCategory(category) {
 }
 
 // Load category stocks with dynamic filtering
-async function loadCategoryStocks(category) {
-  currentCategory = category;
+async function loadCategoryStocks(filterKey) {
+  currentFilter = filterKey;
   const container = document.getElementById('categoryStocks');
   if (!container) return;
   
   container.innerHTML = '<div class="category-loading">Loading most active stocks...</div>';
   
   try {
-    const stocks = await filterStocksByCategory(category);
+    const stocks = await filterStocksByCategory(filterKey);
     
     if (stocks.length === 0) {
       container.innerHTML = '<div class="category-loading">No stocks available for this category right now.</div>';

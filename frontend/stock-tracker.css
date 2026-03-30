@@ -371,3 +371,66 @@
   }
 }
 
+/* Watchlist — Education tab cards */
+.wt-edu-section {
+  padding: 8px 0 32px;
+}
+.wt-edu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+.wt-edu-card {
+  background: var(--paper);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(10, 22, 40, 0.08);
+  padding: 20px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.dark .wt-edu-card {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+.wt-edu-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 22px rgba(10, 22, 40, 0.12);
+}
+.wt-edu-card-wide {
+  grid-column: 1 / -1;
+}
+@media (min-width: 900px) {
+  .wt-edu-card-wide {
+    grid-column: span 2;
+  }
+}
+.wt-edu-card-head {
+  font-size: 17px;
+  color: #0a1628;
+  margin-bottom: 4px;
+}
+.dark .wt-edu-card-head {
+  color: var(--ink-100);
+}
+.wt-edu-emoji {
+  margin-right: 6px;
+}
+.wt-edu-rule {
+  border: none;
+  border-top: 1px solid rgba(10, 22, 40, 0.12);
+  margin: 10px 0 12px;
+}
+.dark .wt-edu-rule {
+  border-top-color: rgba(255, 255, 255, 0.12);
+}
+.wt-edu-card ul {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--ink-700);
+  font-size: 14px;
+  line-height: 1.45;
+}
+.wt-edu-card li {
+  margin-bottom: 8px;
+}
+

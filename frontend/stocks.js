@@ -532,6 +532,7 @@ async function fetchStockData(symbol, useCache = true, options = {}) {
         marketCap: marketCap,
         industry: industry,
         analystRating: analystRating,
+        chartRangeScoped: false,
         timestamps: validData.map(d => d.timestamp),
         prices: validData.map(d => d.price)
       };
@@ -721,7 +722,7 @@ function openAnalysisPanel() {
   if (panel) panel.classList.add('is-open');
   if (hint) hint.classList.add('is-hidden');
   if (body) body.hidden = false;
-  analysisPanelOpen = true;
+  if (panel || body) analysisPanelOpen = true;
 }
 
 function closeAnalysisPanel() {
@@ -970,19 +971,9 @@ function formatVolume(volume) {
 }
 
 function showEmptyChartState() {
+  closeAnalysisPanel();
   const chartPlaceholder = document.getElementById('stockChartPlaceholder');
   if (chartPlaceholder) chartPlaceholder.style.display = 'block';
-  const nameElement = document.getElementById('selectedStockName');
-  const symbolElement = document.getElementById('selectedStockSymbol');
-  const priceEl = document.getElementById('stockPrice');
-  const changeEl = document.getElementById('priceChange');
-  if (nameElement) nameElement.textContent = 'No stock selected';
-  if (symbolElement) symbolElement.textContent = '—';
-  if (priceEl) priceEl.textContent = '—';
-  if (changeEl) {
-    changeEl.textContent = 'Select a stock above to view its chart';
-    changeEl.className = 'price-change';
-  }
   if (stockChart) {
     stockChart.destroy();
     stockChart = null;
@@ -1045,72 +1036,58 @@ async function updateStockTicker() {
   const tickerContainer = document.getElementById('stocksTicker');
   const searchInput = document.getElementById('stockSearchInput');
   const searchBtn = document.getElementById('searchStockBtn');
-  const categoryTabs = document.querySelectorAll('.stock-categories-section .category-tab');
-  const viewTabs = document.querySelectorAll('#stocksPageTabs .category-tab');
-  const viewPanels = document.querySelectorAll('[data-stock-view-panel]');
-  
-  // Stock selector (now an input field)
-  if (stockSelect) {
-    stockSelect.addEventListener('change', (e) => {
-      const symbol = e.target.value.trim().toUpperCase();
-      if (symbol) {
-        currentSymbol = symbol;
-        highlightSelectedStockCard(symbol);
-        updateStockDetails(symbol);
-      } else {
-        showEmptyChartState();
-      }
-    });
-    stockSelect.addEventListener('blur', (e) => {
-      const symbol = e.target.value.trim().toUpperCase();
-      if (symbol) {
-        currentSymbol = symbol;
-        highlightSelectedStockCard(symbol);
-        updateStockDetails(symbol);
-      } else {
-        showEmptyChartState();
-      }
-    });
-  }
-  
-  // Timeframe buttons
+  const filterTabs = document.querySelectorAll('#stockFilterTabs .category-tab');
+
+  // Timeframe buttons — refetch chart range via corsproxy
   if (timeframeButtons.length > 0) {
     timeframeButtons.forEach(btn => {
       btn.addEventListener('click', () => {
         timeframeButtons.forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         currentTimeframe = btn.dataset.timeframe;
-        updateStockDetails(currentSymbol);
-      });
-    });
-  }
-  
-  // Category tabs
-  if (categoryTabs.length > 0) {
-    categoryTabs.forEach(tab => {
-      if (tab.hasAttribute('data-stock-view')) return;
-      tab.addEventListener('click', () => {
-        categoryTabs.forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        loadCategoryStocks(tab.dataset.category);
+        if (currentSymbol) {
+          updateStockDetails(currentSymbol);
+        }
       });
     });
   }
 
-  if (viewTabs.length > 0) {
-    viewTabs.forEach(tab => {
+  // Category filter tabs
+  if (filterTabs.length > 0) {
+    filterTabs.forEach(tab => {
       tab.addEventListener('click', () => {
-        currentStockView = tab.dataset.stockView;
-        viewTabs.forEach(t => t.classList.remove('active'));
+        filterTabs.forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
-        viewPanels.forEach(panel => {
-          panel.style.display =
-            panel.dataset.stockViewPanel === currentStockView ? '' : 'none';
-        });
+        closeAnalysisPanel();
+        loadCategoryStocks(tab.dataset.filter);
       });
     });
   }
-  
+
+  const addWl = document.getElementById('addToWatchlistBtn');
+  if (addWl) {
+    addWl.addEventListener('click', () => {
+      const sym = currentSymbol;
+      if (!sym) return;
+      let wl = [];
+      try {
+        wl = JSON.parse(localStorage.getItem('intellivest_watchlist') || '[]');
+      } catch (e) {
+        wl = [];
+      }
+      if (!Array.isArray(wl)) wl = [];
+      if (!wl.includes(sym)) {
+        wl.push(sym);
+        localStorage.setItem('intellivest_watchlist', JSON.stringify(wl));
+      }
+      const prev = addWl.textContent;
+      addWl.textContent = 'Added ✓';
+      setTimeout(() => {
+        addWl.textContent = prev;
+      }, 1600);
+    });
+  }
+
   // Search functionality
   if (searchBtn) {
     searchBtn.addEventListener('click', () => {
@@ -1132,25 +1109,25 @@ async function updateStockTicker() {
     });
   }
   
-  // Initialize selector with optional URL symbol; otherwise keep empty until user selects.
   if (stockSelect) {
     const urlParams = new URLSearchParams(window.location.search);
     const symbolParam = urlParams.get('symbol');
     if (symbolParam) {
-      currentSymbol = symbolParam.toUpperCase();
-      stockSelect.value = currentSymbol;
-      updateStockDetails(currentSymbol);
+      const sym = symbolParam.toUpperCase();
+      stockSelect.value = sym;
+      openAnalysisPanel();
+      currentSymbol = sym;
+      highlightSelectedStockCard(sym);
+      updateStockDetails(sym);
     } else {
       stockSelect.value = '';
-      showEmptyChartState();
     }
   }
-  
-  // Load initial category
-  loadCategoryStocks('financials');
+
+  loadCategoryStocks('all');
 
   setInterval(() => {
-    loadCategoryStocks(currentCategory);
+    loadCategoryStocks(currentFilter);
     if (window.lastStockSearchQuery && String(window.lastStockSearchQuery).trim()) {
       searchStock(String(window.lastStockSearchQuery).trim());
     }

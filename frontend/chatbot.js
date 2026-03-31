@@ -181,10 +181,7 @@
       const risk = localStorage.getItem('intellivest_user_risk') || 'Moderate';
       const savings = localStorage.getItem('intellivest_user_savings') || 'Unknown';
 
-      if (msg.includes('house') || msg.includes('home') ||
-          msg.includes('mortgage') || msg.includes('property') ||
-          msg.includes('down payment') || msg.includes('real estate')) {
-
+      const houseResponse = () => {
         let savingsAdvice = '';
         if (savings.includes('Under $500')) {
           savingsAdvice = `Since you have under $500 saved right now,
@@ -219,13 +216,9 @@ BEST ACCOUNTS TO SAVE FOR A HOUSE:
 
 AVOID putting your down payment money in stocks.
 The market could drop right when you need the cash.`;
-      }
+      };
 
-      if (msg.includes('what stock') || msg.includes('which stock') ||
-          msg.includes('recommend a stock') || msg.includes('stock should') ||
-          msg.includes('stocks should') || msg.includes('stock to buy') ||
-          msg.includes('buy stock') || msg.includes('do you recommend')) {
-
+      const stockResponse = () => {
         if (risk === 'Aggressive' || risk === 'Very Aggressive') {
           return `Based on your aggressive risk profile, here are
 my top stock picks for you ${name}! 📈
@@ -250,8 +243,8 @@ HOW TO ACTUALLY BUY:
    (this is called Dollar Cost Averaging)
 
 ⚠️ Never invest money you need within 1-2 years.`;
-
-        } else if (risk === 'Moderate') {
+        }
+        if (risk === 'Moderate') {
           return `Based on your moderate risk profile, ${name},
 here are balanced picks for you! 📊
 
@@ -269,9 +262,8 @@ SUGGESTED SPLIT:
 
 Open a free account on Fidelity or Robinhood
 and you can start with as little as $1.`;
-
-        } else {
-          return `Based on your conservative profile, ${name},
+        }
+        return `Based on your conservative profile, ${name},
 here are safe and steady picks! 🛡️
 
 CONSERVATIVE PICKS:
@@ -287,14 +279,9 @@ SUGGESTED SPLIT:
 
 These give you market growth without wild swings.
 Fidelity is the best platform for conservative investors.`;
-        }
-      }
+      };
 
-      if (msg.includes('etf') || msg.includes('index fund') ||
-          msg.includes('what etf') || msg.includes('which etf') ||
-          msg.includes('etf should')) {
-
-        return `Great question ${name}! Here are the best ETFs
+      const etfResponse = () => `Great question ${name}! Here are the best ETFs
 based on your ${risk} risk level 📊
 
 WHAT IS AN ETF:
@@ -331,13 +318,8 @@ LOWEST FEE ETFs (fees eat your returns):
 • VTI — 0.03% per year
 • QQQ — 0.20% per year
 • SCHD — 0.06% per year`;
-      }
 
-      if (msg.includes('budget') || msg.includes('spending') ||
-          msg.includes('expenses') || msg.includes('manage money') ||
-          msg.includes('where does my money')) {
-
-        return `Here is a simple budget plan for you ${name}! 💰
+      const budgetResponse = () => `Here is a simple budget plan for you ${name}! 💰
 
 THE 50/30/20 RULE:
 • 50% → Needs: rent, food, utilities, transportation
@@ -361,12 +343,8 @@ FREE BUDGETING APPS:
 YOUR FIRST GOAL:
 Build a $1,000 starter emergency fund first.
 Even saving $50 per week gets you there in 5 months.`;
-      }
 
-      if (msg.includes('credit') || msg.includes('fico') ||
-          msg.includes('credit score') || msg.includes('credit card')) {
-
-        return `Here is your credit score game plan ${name}! 💳
+      const creditResponse = () => `Here is your credit score game plan ${name}! 💳
 
 HOW YOUR SCORE IS CALCULATED:
 • 35% — Payment history (never miss a payment)
@@ -399,13 +377,8 @@ Under 580 (Poor):
 CHECK YOUR SCORE FREE:
 • Credit Karma — free, updates weekly, no card needed
 • annualcreditreport.com — official government site`;
-      }
 
-      if (msg.includes('save') || msg.includes('saving') ||
-          msg.includes('savings account') || msg.includes('emergency fund') ||
-          msg.includes('hysa') || msg.includes('put money')) {
-
-        return `Here is how to start saving effectively ${name}! 🏦
+      const savingResponse = () => `Here is how to start saving effectively ${name}! 🏦
 
 YOUR SAVINGS GOAL LADDER:
 Step 1 → $1,000 starter emergency fund
@@ -431,12 +404,8 @@ ${savings.includes('Under $500') ?
 Your goal this month is to open a SoFi or Ally HYSA
 and set up even a $25 weekly automatic transfer.
 Small and consistent beats large and irregular.` : ''}`;
-      }
 
-      if (msg.includes('mutual fund') || msg.includes('fidelity') ||
-          msg.includes('vanguard fund') || msg.includes('managed fund')) {
-
-        return `Great topic ${name}! Here is the mutual fund breakdown 📊
+      const mutualResponse = () => `Great topic ${name}! Here is the mutual fund breakdown 📊
 
 ETF vs MUTUAL FUND — THE DIFFERENCE:
 • ETF: Trades like a stock all day, lower fees,
@@ -458,13 +427,8 @@ On $10,000 invested over 30 years:
 
 Always pick the lowest fee option available.
 FXAIX at Fidelity is the gold standard for beginners.`;
-      }
 
-      if (msg.includes('retire') || msg.includes('retirement') ||
-          msg.includes('401k') || msg.includes('roth') ||
-          msg.includes('ira') || msg.includes('pension')) {
-
-        return `Here is your retirement roadmap ${name}! 🏖️
+      const retirementResponse = () => `Here is your retirement roadmap ${name}! 🏖️
 
 OPEN THESE ACCOUNTS IN THIS ORDER:
 1. 401k up to your employer match — this is FREE money
@@ -487,9 +451,8 @@ By age 30 → Have 1x your annual salary saved
 By age 40 → Have 3x your annual salary saved
 By age 50 → Have 6x your annual salary saved
 By age 60 → Have 8x your annual salary saved`;
-      }
 
-      return `I want to make sure I give you the best answer ${name}!
+      const defaultResponse = () => `I want to make sure I give you the best answer ${name}!
 Could you ask me about one of these topics?
 
 💰 Budgeting and saving money
@@ -502,6 +465,103 @@ Could you ask me about one of these topics?
 🧾 Taxes basics
 
 What would you like help with?`;
+
+      const isHouse = msg.includes('house') ||
+        msg.includes('home') ||
+        msg.includes('mortgage') ||
+        msg.includes('property') ||
+        msg.includes('real estate') ||
+        msg.includes('down payment') ||
+        msg.includes('buy a home') ||
+        msg.includes('buying a home');
+
+      const isStock = msg.includes('stock') ||
+        msg.includes('share') ||
+        msg.includes('equity') ||
+        msg.includes('ticker') ||
+        msg.includes('nvda') ||
+        msg.includes('aapl') ||
+        msg.includes('invest in') ||
+        msg.includes('what should i buy') ||
+        msg.includes('what to buy') ||
+        msg.includes('what do i buy') ||
+        msg.includes('recommend') ||
+        msg.includes('should i buy') ||
+        msg.includes('stocks to buy') ||
+        msg.includes('stock to buy') ||
+        msg.includes('stocks should i buy') ||
+        msg.includes('what stocks') ||
+        msg.includes('which stocks') ||
+        msg.includes('good stocks') ||
+        msg.includes('best stocks') ||
+        msg.includes('top stocks') ||
+        msg.includes('stocks for beginners') ||
+        msg.includes('where to invest') ||
+        msg.includes('what to invest in') ||
+        msg.includes('how to invest') ||
+        msg.includes('start investing') ||
+        msg.includes('begin investing') ||
+        msg.includes('stocks recommendation') ||
+        (msg.includes('buy') && !msg.includes('house') &&
+         !msg.includes('home') && !msg.includes('car'));
+
+      const isETF = msg.includes('etf') ||
+        msg.includes('index fund') ||
+        msg.includes('voo') ||
+        msg.includes('vti') ||
+        msg.includes('qqq') ||
+        msg.includes('fund');
+
+      const isBudget = msg.includes('budget') ||
+        msg.includes('spending') ||
+        msg.includes('expenses') ||
+        msg.includes('manage money') ||
+        msg.includes('track') ||
+        msg.includes('where does my money') ||
+        msg.includes('50/30') ||
+        msg.includes('50 30');
+
+      const isCredit = msg.includes('credit') ||
+        msg.includes('fico') ||
+        msg.includes('score') ||
+        msg.includes('credit card') ||
+        msg.includes('debt') ||
+        msg.includes('loan');
+
+      const isSaving = msg.includes('save') ||
+        msg.includes('saving') ||
+        msg.includes('savings') ||
+        msg.includes('emergency') ||
+        msg.includes('hysa') ||
+        msg.includes('interest') ||
+        msg.includes('bank account') ||
+        msg.includes('put money') ||
+        msg.includes('store money');
+
+      const isMutual = msg.includes('mutual') ||
+        msg.includes('fidelity') ||
+        msg.includes('vanguard') ||
+        msg.includes('fxaix') ||
+        msg.includes('managed fund');
+
+      const isRetirement = msg.includes('retire') ||
+        msg.includes('401') ||
+        msg.includes('roth') ||
+        msg.includes('ira') ||
+        msg.includes('pension') ||
+        msg.includes('old age') ||
+        msg.includes('when i am older');
+
+      if (isHouse) { return houseResponse(); }
+      if (isETF) { return etfResponse(); }
+      if (isStock) { return stockResponse(); }
+      if (isBudget) { return budgetResponse(); }
+      if (isCredit) { return creditResponse(); }
+      if (isSaving) { return savingResponse(); }
+      if (isMutual) { return mutualResponse(); }
+      if (isRetirement) { return retirementResponse(); }
+
+      return defaultResponse();
     }
 
     function addMessage(text, isUser = false) {

@@ -216,28 +216,20 @@
           'Starting early gives compound interest more time to work — even small regular amounts can add up.'
         );
       }
-
-      const contextLine =
-        'Profile context: Risk=' +
-        (p.risk || 'N/A') +
-        ', Savings=' +
-        (p.savings || 'N/A') +
-        ', Goals=' +
-        ((p.goals || []).join(', ') || 'N/A') +
-        '.';
-      if (extras.length === 0) return baseResponse + '\n\n' + contextLine;
+      // IMPORTANT: never show internal profile context text in the chat UI.
+      if (extras.length === 0) return baseResponse;
       var pick = extras[Math.floor(Math.random() * extras.length)];
       if (
         (categoryKey === 'credit' && g.includes('credit')) ||
         (categoryKey === 'investing' && (g.includes('stock') || g.includes('etf'))) ||
         (categoryKey === 'saving' && g.includes('save'))
       ) {
-        return baseResponse + '\n\n' + contextLine + '\n' + pick;
+        return baseResponse + '\n\n' + pick;
       }
       if (/invest|stock|save|credit|budget|retire|fund|etf/i.test(lower)) {
-        return baseResponse + '\n\n' + contextLine + '\n' + pick;
+        return baseResponse + '\n\n' + pick;
       }
-      return baseResponse + '\n\n' + contextLine;
+      return baseResponse + '\n\n' + pick;
     }
 
     const financialKnowledge = {
@@ -389,7 +381,17 @@
     }
 
     function generateKnowledgeBaseResponse(userMessage) {
-      const lowerMessage = userMessage.toLowerCase().trim();
+      // Read profile values first (and only from localStorage).
+      const userName = localStorage.getItem('intellivest_user_name') || 'there';
+      const risk = localStorage.getItem('intellivest_user_risk') || 'Moderate';
+      const savings = localStorage.getItem('intellivest_user_savings') || 'Unknown';
+      const goals = JSON.parse(localStorage.getItem('intellivest_user_goals') || '[]');
+      const age = localStorage.getItem('intellivest_user_age') || 'Unknown';
+
+      const name = (userName || 'there').split(/\s+/)[0] || 'there';
+      const lowerMessage = String(userMessage || '').toLowerCase().trim();
+
+      // Greeting path stays fast and personal; never leaks "Profile context:".
       if (financialKnowledge.greeting.keywords.some(kw => lowerMessage.includes(kw))) {
         if (surveyDone()) return buildWelcomeAfterSurvey();
         if (surveySkipped()) return defaultWelcome();
@@ -397,34 +399,532 @@
         return responses[Math.floor(Math.random() * responses.length)];
       }
 
-      let matchedCategory = null;
-      let maxMatches = 0;
-      for (const [category, data] of Object.entries(financialKnowledge)) {
-        if (category === 'general' || category === 'greeting') continue;
-        const matches = data.keywords.filter(kw => lowerMessage.includes(kw)).length;
-        if (matches > maxMatches) {
-          maxMatches = matches;
-          matchedCategory = category;
+      function isHouseTopic() {
+        return (
+          lowerMessage.includes('house') ||
+          lowerMessage.includes('home') ||
+          lowerMessage.includes('mortgage') ||
+          lowerMessage.includes('buy a home') ||
+          lowerMessage.includes('down payment') ||
+          lowerMessage.includes('real estate') ||
+          lowerMessage.includes('property')
+        );
+      }
+
+      function isSmallStocksTopic() {
+        return (
+          /\$\s*(100|50|200)\b/.test(lowerMessage) ||
+          lowerMessage.includes('small amount') ||
+          lowerMessage.includes('little money') ||
+          lowerMessage.includes('not much money') ||
+          lowerMessage.includes('what stocks') ||
+          lowerMessage.includes('which stocks') ||
+          lowerMessage.includes('stocks should i buy') ||
+          /\binvest\s*\$\s*\d{1,6}\b/.test(lowerMessage)
+        );
+      }
+
+      function isBudgetTopic() {
+        return (
+          lowerMessage.includes('budget') ||
+          lowerMessage.includes('spending') ||
+          lowerMessage.includes('expenses') ||
+          lowerMessage.includes('where does my money go') ||
+          lowerMessage.includes('manage money') ||
+          lowerMessage.includes('track spending')
+        );
+      }
+
+      function isCreditTopic() {
+        return (
+          lowerMessage.includes('credit') ||
+          lowerMessage.includes('credit score') ||
+          lowerMessage.includes('credit card') ||
+          lowerMessage.includes('build credit') ||
+          lowerMessage.includes('improve credit') ||
+          lowerMessage.includes('fico')
+        );
+      }
+
+      function isSavingTopic() {
+        return (
+          lowerMessage.includes('save') ||
+          lowerMessage.includes('saving') ||
+          lowerMessage.includes('savings account') ||
+          lowerMessage.includes('emergency fund') ||
+          lowerMessage.includes('hysa') ||
+          lowerMessage.includes('put money away')
+        );
+      }
+
+      function isEtfOrMutualFundsTopic() {
+        return (
+          lowerMessage.includes('etf') ||
+          lowerMessage.includes('index fund') ||
+          lowerMessage.includes('mutual fund') ||
+          lowerMessage.includes('vanguard') ||
+          lowerMessage.includes('fidelity') ||
+          lowerMessage.includes('fund') ||
+          lowerMessage.includes('voo') ||
+          lowerMessage.includes('vti')
+        );
+      }
+
+      function isRetirementTopic() {
+        return (
+          lowerMessage.includes('retire') ||
+          lowerMessage.includes('retirement') ||
+          lowerMessage.includes('401k') ||
+          lowerMessage.includes('ira') ||
+          lowerMessage.includes('roth') ||
+          lowerMessage.includes('pension') ||
+          lowerMessage.includes('retire early')
+        );
+      }
+
+      function isLoansOrScholarshipsTopic() {
+        // Use the existing knowledge base keywords, but route via explicit topic detection.
+        const loanKeywords = (financialKnowledge.loans && financialKnowledge.loans.keywords) || [];
+        const scholarshipKeywords =
+          (financialKnowledge.scholarships && financialKnowledge.scholarships.keywords) || [];
+        const loanHit = loanKeywords.some(kw => lowerMessage.includes(String(kw).toLowerCase()));
+        const scholarshipHit = scholarshipKeywords.some(kw => lowerMessage.includes(String(kw).toLowerCase()));
+        return loanHit || scholarshipHit;
+      }
+
+      function isTaxesTopic() {
+        const taxKeywords = (financialKnowledge.taxes && financialKnowledge.taxes.keywords) || [];
+        return taxKeywords.some(kw => lowerMessage.includes(String(kw).toLowerCase()));
+      }
+
+      function savingsBucketForHouse(s) {
+        if (s === 'Under $500') return 'Under $500';
+        if (s === '$500–$2,000') return '$500–$2,000';
+        if (s === '$2,000–$10,000') return '$2,000–$10,000';
+        if (s === '$10,000–$50,000' || s === '$50,000+') return '$10,000+';
+        return 'Unknown';
+      }
+
+      function riskGroupForSmallStocks(r) {
+        if (r === 'Very Conservative' || r === 'Conservative') return 'conservative';
+        if (r === 'Moderate') return 'moderate';
+        if (r === 'Aggressive' || r === 'Very Aggressive') return 'aggressive';
+        return 'moderate';
+      }
+
+      const house = isHouseTopic();
+      if (house) {
+        const bucket = savingsBucketForHouse(savings);
+        // #region agent log
+        fetch('http://127.0.0.1:7358/ingest/6cde8b47-2e94-4e16-8946-d652773068d7', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '69af8c' },
+          body: JSON.stringify({
+            sessionId: '69af8c',
+            runId: 'run-topic-routing',
+            hypothesisId: 'H2',
+            location: 'chatbot.js:generateKnowledgeBaseResponse',
+            message: 'topic_template',
+            data: { topic: 'house', savingsBucket: bucket },
+            timestamp: Date.now()
+          })
+        }).catch(() => {});
+        // #endregion
+        return (
+          'Great question, ' +
+          name +
+          "! Here's your personalized home buying plan:\n\n" +
+          '🏠 STEP-BY-STEP PLAN:\n' +
+          '1. Build your credit score to 720+ \n' +
+          '   (best mortgage interest rates start here)\n' +
+          '2. Save a 20% down payment to avoid PMI insurance\n' +
+          '3. Keep your debt-to-income ratio below 43%\n' +
+          '4. Build a separate emergency fund of 3-6 months \n' +
+          '   of expenses BEFORE buying\n' +
+          '5. Get mortgage pre-approval before house hunting\n' +
+          '6. Budget an extra 2-5% of the home price for \n' +
+          '   closing costs\n\n' +
+          '💰 SINCE YOU HAVE ' +
+          savings +
+          ' SAVED:\n' +
+          (bucket === 'Under $500'
+            ? "You're in the early stages. \n  Start by saving $300-500/month in a High-Yield Savings Account (HYSA). At that rate you could have a $10,000 down payment foundation in 2 years."
+            : bucket === '$500–$2,000'
+              ? 'Good start! Open an Ally or \n  Marcus HYSA earning 4-5% APY and keep building.'
+              : bucket === '$2,000–$10,000'
+                ? 'You have momentum. \n  A $200,000 home needs ~$40,000 down. \n  Stay consistent with monthly savings.'
+                : bucket === '$10,000+'
+                  ? 'You may be ready to explore \n  pre-approval. Talk to a mortgage broker.'
+                  : 'Keep building your down payment and emergency fund steadily so you can move forward with confidence.') +
+          '\n\n' +
+          '🏦 BEST ACCOUNTS TO SAVE FOR A HOUSE:\n' +
+          '• High-Yield Savings Account: Ally, Marcus, SoFi \n' +
+          '  (4-5% APY)\n' +
+          '• Series I Bonds (inflation protection)\n' +
+          '• Short-term CDs (6-12 month laddering)\n\n' +
+          '⚠️ AVOID investing your down payment money \n' +
+          'in stocks — the market can drop right when \n' +
+          'you need the cash.'
+        );
+      }
+
+      const smallStocks = isSmallStocksTopic();
+      if (smallStocks) {
+        const rg = riskGroupForSmallStocks(risk);
+        const riskLabel = risk;
+        // #region agent log
+        fetch('http://127.0.0.1:7358/ingest/6cde8b47-2e94-4e16-8946-d652773068d7', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '69af8c' },
+          body: JSON.stringify({
+            sessionId: '69af8c',
+            runId: 'run-topic-routing',
+            hypothesisId: 'H2',
+            location: 'chatbot.js:generateKnowledgeBaseResponse',
+            message: 'topic_template',
+            data: { topic: 'stocks_small', riskGroup: rg },
+            timestamp: Date.now()
+          })
+        }).catch(() => {});
+        // #endregion
+        return (
+          "Here's exactly what I'd do with $100, " +
+          name +
+          '! 🚀\n\n' +
+          'Since your risk level is ' +
+          riskLabel +
+          ', here\'s your plan:\n\n' +
+          (rg === 'conservative'
+            ? '📊 SAFE PICKS FOR $100:\n' +
+              '• $40 → VOO (S&P 500 index — tracks top 500 US companies)\n' +
+              '• $30 → VTI (Total US market — even more diversified)\n' +
+              '• $20 → SCHD (Dividend stocks — pay you cash regularly)\n' +
+              '• $10 → Keep as cash reserve\n' +
+              'Why: These are the lowest risk way to start. \n' +
+              'You own a tiny piece of hundreds of companies.'
+            : rg === 'moderate'
+              ? '📊 BALANCED PICKS FOR $100:\n' +
+                '• $35 → VOO (S&P 500 foundation)\n' +
+                '• $25 → QQQ (Top 100 tech companies)\n' +
+                '• $25 → SCHD (Dividend income)\n' +
+                '• $15 → Pick 1 company you believe in \n' +
+                '        (AAPL, MSFT, or AMZN are solid)\n'
+              : '📊 GROWTH PICKS FOR $100:\n' +
+                '• $30 → QQQ (Heavy tech: Apple, Nvidia, Microsoft)\n' +
+                '• $20 → NVDA (AI chip leader, high growth)\n' +
+                '• $20 → MSFT (AI + cloud dominance)\n' +
+                '• $15 → AMZN (E-commerce + AWS cloud)\n' +
+                '• $15 → VOO (Always keep a stable base)\n\n') +
+          '\n💡 HOW TO ACTUALLY BUY THESE:\n' +
+          '1. Open a free brokerage account:\n' +
+          '   • Robinhood — easiest for beginners\n' +
+          '   • Fidelity — most trusted, no fees\n' +
+          '   • Webull — good charts and tools\n\n' +
+          '2. All of these let you buy FRACTIONAL shares\n' +
+          '   meaning you can buy $10 of NVDA even if \n' +
+          'one share costs $800\n\n' +
+          '3. Search the ticker symbol (like QQQ or NVDA)\n' +
+          '4. Click Buy → enter dollar amount → confirm\n\n' +
+          '⚡ GOLDEN RULE: Invest the same amount every \n' +
+          'month regardless of price. This is called \n' +
+          'Dollar Cost Averaging and it beats trying \n' +
+          'to time the market every time.'
+        );
+      }
+
+      if (isBudgetTopic()) {
+        // #region agent log
+        fetch('http://127.0.0.1:7358/ingest/6cde8b47-2e94-4e16-8946-d652773068d7', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '69af8c' },
+          body: JSON.stringify({
+            sessionId: '69af8c',
+            runId: 'run-topic-routing',
+            hypothesisId: 'H2',
+            location: 'chatbot.js:generateKnowledgeBaseResponse',
+            message: 'topic_template',
+            data: { topic: 'budget', savings },
+            timestamp: Date.now()
+          })
+        }).catch(() => {});
+        // #endregion
+        return (
+          "Here's a simple budget plan for you, " +
+          name +
+          '! 💰\n\n' +
+          '📊 THE 50/30/20 RULE:\n' +
+          '• 50% → Needs: rent, food, utilities, transport\n' +
+          '• 30% → Wants: dining out, subscriptions, fun\n' +
+          '• 20% → Savings + investing + debt payoff\n\n' +
+          '🛠️ FREE TOOLS TO TRACK IT:\n' +
+          '• Mint (automatic spending categories)\n' +
+          '• YNAB — You Need A Budget (best for discipline)\n' +
+          '• EveryDollar (simple and clean)\n' +
+          '• Just a Google Sheet works great too\n\n' +
+          '⚡ QUICK WINS THIS WEEK:\n' +
+          '1. List every subscription you pay — cancel unused ones\n' +
+          '2. Set up automatic transfer to savings on payday\n' +
+          '3. Use cash for groceries to spend less naturally\n' +
+          '4. Meal prep 2-3 days a week to cut food costs' +
+          (savings === 'Under $500'
+            ? '\n\n🎯 YOUR FIRST GOAL: Get to $1,000 emergency fund.\nEven saving $50/week gets you there in 5 months.'
+            : '')
+        );
+      }
+
+      if (isCreditTopic()) {
+        // #region agent log
+        fetch('http://127.0.0.1:7358/ingest/6cde8b47-2e94-4e16-8946-d652773068d7', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '69af8c' },
+          body: JSON.stringify({
+            sessionId: '69af8c',
+            runId: 'run-topic-routing',
+            hypothesisId: 'H2',
+            location: 'chatbot.js:generateKnowledgeBaseResponse',
+            message: 'topic_template',
+            data: { topic: 'credit', risk },
+            timestamp: Date.now()
+          })
+        }).catch(() => {});
+        // #endregion
+        return (
+          "Here's your credit score game plan, " +
+          name +
+          '! 💳\n\n' +
+          '📊 HOW YOUR SCORE IS CALCULATED:\n' +
+          '• 35% → Payment history (MOST important — never miss)\n' +
+          '• 30% → Credit utilization (keep under 30%, \n         ideally under 10%)\n' +
+          '• 15% → Length of credit history (keep old cards open)\n' +
+          '• 10% → Credit mix (card + loan = better)\n' +
+          '• 10% → New credit (don\'t apply for many at once)\n\n' +
+          '🎯 ACTION PLAN:\n' +
+          'Under 580 (Poor):\n' +
+          '→ Get a secured credit card: \n' +
+          '  Discover it Secured or Capital One Secured\n' +
+          '→ Use it for ONE small purchase per month\n' +
+          '→ Pay it off IN FULL every month\n' +
+          '→ Never miss a payment — set autopay\n\n' +
+          '580-669 (Fair):\n' +
+          '→ Apply for Capital One Quicksilver or Credit One\n' +
+          '→ Keep utilization under 30% always\n' +
+          '→ Ask for credit limit increase after 6 months\n\n' +
+          '670-739 (Good):\n' +
+          '→ Apply for a rewards card (Chase Freedom, \n' +
+          '  Discover it Cash Back)\n' +
+          '→ Goal: get to 740 for best loan rates\n\n' +
+          '740+ (Excellent):\n' +
+          '→ Premium cards: Chase Sapphire, Amex Gold\n' +
+          '→ You qualify for best mortgage and car loan rates\n\n' +
+          '🆓 CHECK YOUR SCORE FREE:\n' +
+          '• Credit Karma (free, no card needed)\n' +
+          '• annualcreditreport.com (official, once per year)'
+        );
+      }
+
+      if (isSavingTopic()) {
+        // #region agent log
+        fetch('http://127.0.0.1:7358/ingest/6cde8b47-2e94-4e16-8946-d652773068d7', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '69af8c' },
+          body: JSON.stringify({
+            sessionId: '69af8c',
+            runId: 'run-topic-routing',
+            hypothesisId: 'H2',
+            location: 'chatbot.js:generateKnowledgeBaseResponse',
+            message: 'topic_template',
+            data: { topic: 'saving', savingsBucket: savings },
+            timestamp: Date.now()
+          })
+        }).catch(() => {});
+        // #endregion
+        if (savings === 'Under $500') {
+          return (
+            "Here's exactly how to start saving, " +
+            name +
+            '! 🏦\n\n' +
+            '🎯 STEP 1: Hit $1,000 first (starter emergency fund)\n' +
+            '• Save $84/month = $1,000 in 12 months\n' +
+            '• Save $125/month = $1,000 in 8 months  \n' +
+            '• Save $200/month = $1,000 in 5 months\n' +
+            'Pick whichever fits your budget.\n\n' +
+            '🏦 WHERE TO PUT YOUR SAVINGS:\n' +
+            '• Ally Bank HYSA — 4.5% APY, no minimums\n' +
+            '• Marcus by Goldman Sachs — 4.4% APY\n' +
+            '• SoFi — 4.6% APY + free checking\n' +
+            'All are FDIC insured (your money is protected)\n\n' +
+            'vs a regular bank savings account that pays \n' +
+            'only 0.01% APY — these pay 400x more interest!\n\n' +
+            '⚡ TRICK THAT WORKS: \n' +
+            'Set up an automatic transfer of even $25 \n' +
+            'the same day you get paid. \n' +
+            'You won\'t miss what you never see.\n\n' +
+            '🎯 SAVINGS MILESTONES:\n' +
+            '$1,000 → Starter emergency fund ✓\n' +
+            '$3,000 → 1 month expenses covered ✓  \n' +
+            '$9,000 → 3 months expenses (full emergency fund) ✓\n' +
+            'After that → Start investing the rest'
+          );
         }
+
+        // For other savings tiers, keep it specific without mentioning live data.
+        return (
+          "Here's exactly how to keep building your savings, " +
+          name +
+          '! 🏦\n\n' +
+          '🎯 NEXT MILESTONE: \n' +
+          (savings === '$500–$2,000'
+            ? '$3,000 to cover about 1 month of expenses\n'
+            : savings === '$2,000–$10,000'
+              ? '$9,000 to fully fund about 3 months of expenses\n'
+              : '$9,000+ (your full emergency fund), then start investing the rest\n') +
+          '⚡ Use automatic transfers on payday and keep the emergency fund in a HYSA (Ally, Marcus, or SoFi).'
+        );
       }
 
-      const category = matchedCategory || 'general';
-      const responses = financialKnowledge[category].responses;
-      let response = responses[Math.floor(Math.random() * responses.length)];
+      if (isEtfOrMutualFundsTopic()) {
+        const rg = (risk || '').toLowerCase();
+        const rec =
+          rg.includes('conservative')
+            ? 'Conservative: \n  BND (bonds), SCHD (dividends), VTI (total market)\n\nModerate:\n  VOO (S&P 500), VTI (Total US), VXUS (international)\n\nAggressive:\n  QQQ (top 100 tech), VGT (tech sector), \n  ARKK (disruptive innovation — high risk)'
+            : rg.includes('aggressive')
+              ? 'Conservative: \n  BND (bonds), SCHD (dividends), VTI (total market)\n\nModerate:\n  VOO (S&P 500), VTI (Total US), VXUS (international)\n\nAggressive:\n  QQQ (top 100 tech), VGT (tech sector), \n  ARKK (disruptive innovation — high risk)'
+              : 'Conservative: \n  BND (bonds), SCHD (dividends), VTI (total market)\n\nModerate:\n  VOO (S&P 500), VTI (Total US), VXUS (international)\n\nAggressive:\n  QQQ (top 100 tech), VGT (tech sector), \n  ARKK (disruptive innovation — high risk)';
 
-      if (category !== 'general' && category !== 'greeting') {
-        response =
-          response +
-          "\n\nIs there anything specific about this topic you'd like me to explain further?";
+        // Use the exact template style, and show appropriate recommendations based on risk.
+        const topEtfs =
+          rg.includes('conservative')
+            ? 'TOP ETFs FOR BEGINNERS:\nConservative: \n  BND (bonds), SCHD (dividends), VTI (total market)'
+            : rg.includes('aggressive')
+              ? 'TOP ETFs FOR BEGINNERS:\nAggressive:\n  QQQ (top 100 tech), VGT (tech sector), \n  ARKK (disruptive innovation — high risk)'
+              : 'TOP ETFs FOR BEGINNERS:\nModerate:\n  VOO (S&P 500), VTI (total US), VXUS (international)';
+
+        const topMutual =
+          'TOP MUTUAL FUNDS (low cost):\n• FXAIX — Fidelity S&P 500 (0.015% fee — cheapest)\n• VFIAX — Vanguard S&P 500 (0.04% fee)\n• SWTSX — Schwab Total Market (0.03% fee)';
+
+        return (
+          'Great topic, ' +
+          name +
+          '! Here\'s the breakdown 📊\n\n' +
+          'ETF vs MUTUAL FUND — WHATS THE DIFFERENCE:\n' +
+          '• ETF: Trades like a stock during market hours,\n' +
+          '  lower fees, can buy fractional shares, \n' +
+          '  great for beginners\n' +
+          '• Mutual Fund: Only trades once per day at close,\n' +
+          '  often requires $1,000 minimum to start,\n' +
+          '  some are actively managed (higher fees)\n' +
+          '• Index Fund: Can be either ETF or mutual fund,\n' +
+          '  just tracks a market index like S&P 500,\n' +
+          '  lowest fees of all\n\n' +
+          '[Based on risk level - show appropriate recommendations]\n\n' +
+          topEtfs +
+          '\n\n' +
+          topMutual +
+          '\n\n' +
+          '💡 FEE MATTERS MORE THAN YOU THINK:\n' +
+          '1% fee vs 0.03% fee on $10,000 over 30 years:\n' +
+          '= $70,000 difference in your final balance'
+        );
       }
 
-      response = tailorResponse(response, userMessage, category);
-      return response;
+      if (isRetirementTopic()) {
+        return (
+          "Here's your retirement roadmap, " +
+          name +
+          '! 🏖️\n\n' +
+          'ACCOUNTS TO OPEN IN THIS ORDER:\n' +
+          '1. 401(k) up to employer match — its FREE money\n' +
+          '   If employer matches 3%, contribute at least 3%\n' +
+          '   Never leave this on the table\n' +
+          '2. Roth IRA — max it out ($7,000/year for under 50)\n' +
+          '   Best for young people: pay taxes now, \n' +
+          '   NEVER pay taxes on growth or withdrawals\n' +
+          '3. Back to 401(k) — contribute more if you can\n' +
+          '4. HSA — if you have high-deductible health plan\n' +
+          '   Triple tax advantage (best account that exists)\n' +
+          '5. Regular brokerage — no limits, no restrictions\n\n' +
+          '🧮 COMPOUND INTEREST IS MAGIC:\n' +
+          '$200/month starting at 22 → ~$1,000,000 at 65\n' +
+          '$200/month starting at 32 → ~$500,000 at 65\n' +
+          '$200/month starting at 42 → ~$220,000 at 65\n' +
+          '(assumes 8% average annual return)\n\n' +
+          'Starting 10 years earlier = 2x the money! 🤯\n\n' +
+          'RETIREMENT SAVINGS TARGETS BY AGE:\n' +
+          'By 30: Have 1x your annual salary saved\n' +
+          'By 40: Have 3x your annual salary saved\n' +
+          'By 50: Have 6x your annual salary saved\n' +
+          'By 60: Have 8x your annual salary saved'
+        );
+      }
+
+      // Loans / scholarships / taxes: keep deterministic, use existing knowledge base content.
+      if (isLoansOrScholarshipsTopic()) {
+        const key = isTaxesTopic() ? 'taxes' : 'loans';
+        const category = lowerMessage.includes('scholar') ? 'scholarships' : key;
+        const responses = (financialKnowledge[category] && financialKnowledge[category].responses) || [];
+        const response = responses[0] || defaultWelcome();
+        return response;
+      }
+      if (isTaxesTopic()) {
+        const responses = (financialKnowledge.taxes && financialKnowledge.taxes.responses) || [];
+        return responses[0] || defaultWelcome();
+      }
+
+      // FALLBACK for everything else (verbatim).
+      // #region agent log
+      fetch('http://127.0.0.1:7358/ingest/6cde8b47-2e94-4e16-8946-d652773068d7', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '69af8c' },
+        body: JSON.stringify({
+          sessionId: '69af8c',
+          runId: 'run-topic-routing',
+          hypothesisId: 'H2',
+          location: 'chatbot.js:generateKnowledgeBaseResponse',
+          message: 'topic_template',
+          data: { topic: 'fallback' },
+          timestamp: Date.now()
+        })
+      }).catch(() => {});
+      // #endregion
+      return (
+        'I want to make sure I give you the best answer, ' +
+        name +
+        '! Could you ask about one of these topics?\n\n' +
+        '💰 Budgeting & Saving\n' +
+        '📈 Stocks & Investing  \n' +
+        '🏠 Buying a House\n' +
+        '💳 Credit Score\n' +
+        '🏦 ETFs & Mutual Funds\n' +
+        '🏖️ Retirement Planning\n' +
+        '📚 Student Loans & Scholarships\n' +
+        '🧾 Taxes\n\n' +
+        'What would you like help with?'
+      );
     }
 
     async function generateResponse(userMessage) {
-      const profile = getSurveyProfile();
+      const userName = localStorage.getItem('intellivest_user_name') || 'there';
+      const risk = localStorage.getItem('intellivest_user_risk') || 'Moderate';
+      const savings = localStorage.getItem('intellivest_user_savings') || 'Unknown';
+      const goals = JSON.parse(localStorage.getItem('intellivest_user_goals') || '[]');
+      const age = localStorage.getItem('intellivest_user_age') || 'Unknown';
+      const profile = { risk, savings, goals, age };
       const ticker = isStockTicker(userMessage);
+      // #region agent log
+      fetch('http://127.0.0.1:7358/ingest/6cde8b47-2e94-4e16-8946-d652773068d7', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '69af8c' },
+        body: JSON.stringify({
+          sessionId: '69af8c',
+          runId: 'run-chatbot',
+          hypothesisId: 'H4',
+          location: 'chatbot.js:generateResponse',
+          message: 'ticker_detected',
+          data: { hasTicker: Boolean(ticker) },
+          timestamp: Date.now()
+        })
+      }).catch(() => {});
+      // #endregion
       if (ticker) {
         try {
           const live = await fetchLiveTickerData(ticker);
@@ -448,7 +948,12 @@
             buildRiskAdviceForTicker(ticker, live.pct, profile)
           );
         } catch (e) {
-          return generateKnowledgeBaseResponse(userMessage);
+          // Ticker requests fail fast; still respond cleanly without "live data" messaging.
+          return (
+            ticker +
+            ' quick guidance:\n\n' +
+            buildRiskAdviceForTicker(ticker, 0, profile)
+          );
         }
       }
       return generateKnowledgeBaseResponse(userMessage);

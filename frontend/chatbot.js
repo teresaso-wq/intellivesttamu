@@ -515,21 +515,6 @@
       const house = isHouseTopic();
       if (house) {
         const bucket = savingsBucketForHouse(savings);
-        // #region agent log
-        fetch('http://127.0.0.1:7358/ingest/6cde8b47-2e94-4e16-8946-d652773068d7', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '69af8c' },
-          body: JSON.stringify({
-            sessionId: '69af8c',
-            runId: 'run-topic-routing',
-            hypothesisId: 'H2',
-            location: 'chatbot.js:generateKnowledgeBaseResponse',
-            message: 'topic_template',
-            data: { topic: 'house', savingsBucket: bucket },
-            timestamp: Date.now()
-          })
-        }).catch(() => {});
-        // #endregion
         return (
           'Great question, ' +
           name +
@@ -572,21 +557,6 @@
       if (smallStocks) {
         const rg = riskGroupForSmallStocks(risk);
         const riskLabel = risk;
-        // #region agent log
-        fetch('http://127.0.0.1:7358/ingest/6cde8b47-2e94-4e16-8946-d652773068d7', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '69af8c' },
-          body: JSON.stringify({
-            sessionId: '69af8c',
-            runId: 'run-topic-routing',
-            hypothesisId: 'H2',
-            location: 'chatbot.js:generateKnowledgeBaseResponse',
-            message: 'topic_template',
-            data: { topic: 'stocks_small', riskGroup: rg },
-            timestamp: Date.now()
-          })
-        }).catch(() => {});
-        // #endregion
         return (
           "Here's exactly what I'd do with $100, " +
           name +
@@ -633,21 +603,6 @@
       }
 
       if (isBudgetTopic()) {
-        // #region agent log
-        fetch('http://127.0.0.1:7358/ingest/6cde8b47-2e94-4e16-8946-d652773068d7', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '69af8c' },
-          body: JSON.stringify({
-            sessionId: '69af8c',
-            runId: 'run-topic-routing',
-            hypothesisId: 'H2',
-            location: 'chatbot.js:generateKnowledgeBaseResponse',
-            message: 'topic_template',
-            data: { topic: 'budget', savings },
-            timestamp: Date.now()
-          })
-        }).catch(() => {});
-        // #endregion
         return (
           "Here's a simple budget plan for you, " +
           name +
@@ -673,21 +628,6 @@
       }
 
       if (isCreditTopic()) {
-        // #region agent log
-        fetch('http://127.0.0.1:7358/ingest/6cde8b47-2e94-4e16-8946-d652773068d7', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '69af8c' },
-          body: JSON.stringify({
-            sessionId: '69af8c',
-            runId: 'run-topic-routing',
-            hypothesisId: 'H2',
-            location: 'chatbot.js:generateKnowledgeBaseResponse',
-            message: 'topic_template',
-            data: { topic: 'credit', risk },
-            timestamp: Date.now()
-          })
-        }).catch(() => {});
-        // #endregion
         return (
           "Here's your credit score game plan, " +
           name +
@@ -723,21 +663,6 @@
       }
 
       if (isSavingTopic()) {
-        // #region agent log
-        fetch('http://127.0.0.1:7358/ingest/6cde8b47-2e94-4e16-8946-d652773068d7', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '69af8c' },
-          body: JSON.stringify({
-            sessionId: '69af8c',
-            runId: 'run-topic-routing',
-            hypothesisId: 'H2',
-            location: 'chatbot.js:generateKnowledgeBaseResponse',
-            message: 'topic_template',
-            data: { topic: 'saving', savingsBucket: savings },
-            timestamp: Date.now()
-          })
-        }).catch(() => {});
-        // #endregion
         if (savings === 'Under $500') {
           return (
             "Here's exactly how to start saving, " +
@@ -871,21 +796,6 @@
       }
 
       // FALLBACK for everything else (verbatim).
-      // #region agent log
-      fetch('http://127.0.0.1:7358/ingest/6cde8b47-2e94-4e16-8946-d652773068d7', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '69af8c' },
-        body: JSON.stringify({
-          sessionId: '69af8c',
-          runId: 'run-topic-routing',
-          hypothesisId: 'H2',
-          location: 'chatbot.js:generateKnowledgeBaseResponse',
-          message: 'topic_template',
-          data: { topic: 'fallback' },
-          timestamp: Date.now()
-        })
-      }).catch(() => {});
-      // #endregion
       return (
         'I want to make sure I give you the best answer, ' +
         name +
@@ -910,21 +820,6 @@
       const age = localStorage.getItem('intellivest_user_age') || 'Unknown';
       const profile = { risk, savings, goals, age };
       const ticker = isStockTicker(userMessage);
-      // #region agent log
-      fetch('http://127.0.0.1:7358/ingest/6cde8b47-2e94-4e16-8946-d652773068d7', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '69af8c' },
-        body: JSON.stringify({
-          sessionId: '69af8c',
-          runId: 'run-chatbot',
-          hypothesisId: 'H4',
-          location: 'chatbot.js:generateResponse',
-          message: 'ticker_detected',
-          data: { hasTicker: Boolean(ticker) },
-          timestamp: Date.now()
-        })
-      }).catch(() => {});
-      // #endregion
       if (ticker) {
         try {
           const live = await fetchLiveTickerData(ticker);

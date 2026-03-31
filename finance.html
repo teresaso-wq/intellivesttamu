@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Finance - Intellivest @ Texas A&M</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div id="cursor"></div>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="./index.html" class="brand">
+        <img src="intellivest-logo.png" 
+             alt="IntelliVest Logo" 
+             style="height: 40px; 
+                    width: auto; 
+                    filter: invert(1) brightness(2);
+                    cursor: pointer;"
+             onclick="window.location='index.html'">
+        <div class="brand-text">
+          <div class="brand-line">Intellivest</div>
+          <div class="brand-sub">@ Texas A&M</div>
+        </div>
+      </a>
+
+      <nav class="primary-nav">
+        <div class="nav-dropdown">
+          <a href="./index.html" class="nav-link">Home</a>
+        </div>
+        <div class="nav-dropdown">
+          <a href="./about-us.html" class="nav-link">About us</a>
+        </div>
+        <div class="nav-dropdown">
+          <a href="./capabilities.html" class="nav-link">Capabilities</a>
+        </div>
+        <div class="nav-dropdown">
+          <a href="./our-insights.html" class="nav-link">Our Insights</a>
+        </div>
+        <div class="nav-dropdown">
+          <a href="./finance.html" class="nav-link active">Finance</a>
+        </div>
+        <div class="nav-dropdown">
+          <a href="./stocks.html" class="nav-link">Stocks</a>
+        </div>
+        <div class="nav-dropdown">
+          <a href="./stock-tracker.html" class="nav-link">Watchlist</a>
+        </div>
+        <div class="nav-dropdown">
+          <a href="./education.html" class="nav-link">Education</a>
+        </div>
+      </nav>
+
+      <div class="header-actions">
+        <a href="./sign-in.html" class="btn secondary">Sign in</a>
+        <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode">
+          <span class="theme-icon moon">☾</span>
+          <span class="theme-icon sun">☀</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="site-main">
+    <section class="page-hero">
+      <div class="container">
+        <h1>Finance</h1>
+        <p class="page-subtitle">Explore fundamentals, investing, budgeting, and more.</p>
+      </div>
+    </section>
+
+    <!-- Stock Ticker Section -->
+    <section class="stocks-ticker-section">
+      <div class="container">
+        <h2 class="section-title">Tech Stocks</h2>
+        <div id="stocksTicker" class="stocks-ticker">
+          <!-- Stock cards will be inserted here -->
+        </div>
+      </div>
+    </section>
+
+    <section class="page-content">
+      <div class="container">
+        <div class="content-grid">
+          <article class="content-card">
+            <h2>Foundations</h2>
+            <p>Learn the basics of budgeting, saving, credit management, and building emergency funds. Essential knowledge for financial stability.</p>
+          </article>
+          <article class="content-card">
+            <h2>Investing</h2>
+            <p>Understand risk vs. return, diversification strategies, and long-term investment planning to grow your wealth.</p>
+          </article>
+          <article class="content-card">
+            <h2>Tools & Calculators</h2>
+            <p>Use our interactive calculators, templates, and actionable checklists to make informed financial decisions.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <div class="brand-mark small">●</div>
+        <div class="footer-text">
+          <div class="footer-title">Intellivest @ Texas A&M</div>
+          <div class="footer-tagline">Making financial literacy accessible to everyone, one person at a time.</div>
+        </div>
+      </div>
+
+      <div class="footer-meta">
+        <div class="meta-block">
+          <div class="meta-label">Contact</div>
+          <a href="mailto:aitp@tamu.edu" class="link">aitp@tamu.edu</a>
+        </div>
+        <div class="meta-block">
+          <div class="meta-label">Developed by</div>
+          <div class="meta-text">Natalie Do, Denisse Aguilar, Teresa So, Monica Lin, Sahil Shah, Abhinav Chodimella, and Aiden Schreier</div>
+        </div>
+        <div class="meta-block">
+          <div class="meta-text">© <span id="year"></span> Intellivest</div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="./app.js"></script>
+  <script src="./auth-ui.js"></script>
+  <script src="./market-data.js"></script>
+  <script src="./stocks.js"></script>
+  <script>
+    // Initialize stock ticker for this page
+    if (window.StockTicker) {
+      window.StockTicker.update();
+    }
+  </script>
+</body>
+</html>
+

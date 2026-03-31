@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Education - Intellivest @ Texas A&M</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div id="cursor"></div>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="./index.html" class="brand">
+        <img src="intellivest-logo.png" 
+             alt="IntelliVest Logo" 
+             style="height: 40px; 
+                    width: auto; 
+                    filter: invert(1) brightness(2);
+                    cursor: pointer;"
+             onclick="window.location='index.html'">
+        <div class="brand-text">
+          <div class="brand-line">Intellivest</div>
+          <div class="brand-sub">@ Texas A&M</div>
+        </div>
+      </a>
+
+      <nav class="primary-nav">
+        <div class="nav-dropdown"><a href="./index.html" class="nav-link">Home</a></div>
+        <div class="nav-dropdown"><a href="./about-us.html" class="nav-link">About us</a></div>
+        <div class="nav-dropdown"><a href="./capabilities.html" class="nav-link">Capabilities</a></div>
+        <div class="nav-dropdown"><a href="./our-insights.html" class="nav-link">Our Insights</a></div>
+        <div class="nav-dropdown"><a href="./finance.html" class="nav-link">Finance</a></div>
+        <div class="nav-dropdown"><a href="./stocks.html" class="nav-link">Stocks</a></div>
+        <div class="nav-dropdown"><a href="./stock-tracker.html" class="nav-link">Watchlist</a></div>
+        <div class="nav-dropdown"><a href="./education.html" class="nav-link active">Education</a></div>
+      </nav>
+
+      <div class="header-actions">
+        <a href="./sign-in.html" class="btn secondary">Sign in</a>
+        <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode">
+          <span class="theme-icon moon">☾</span>
+          <span class="theme-icon sun">☀</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="site-main">
+    <section class="page-hero">
+      <div class="container">
+        <h1>Financial Education Hub</h1>
+        <p class="page-subtitle">Everything you need to make smarter financial decisions - simplified.</p>
+      </div>
+    </section>
+
+    <section class="education-section education-light">
+      <div class="container">
+        <h2 class="education-title">Getting Started</h2>
+        <div class="education-grid grid-3">
+          <article class="education-card">
+            <div class="education-icon">💰</div>
+            <h3>Budgeting Basics</h3>
+            <ul>
+              <li>Follow the 50/30/20 rule</li>
+              <li>Track spending for 30 days</li>
+              <li>Automate your savings</li>
+            </ul>
+            <button class="btn secondary btn-sm edu-toggle" type="button">Learn More</button>
+            <div class="edu-extra">
+              <ul>
+                <li>50% -> Needs (rent, food, bills)</li>
+                <li>30% -> Wants (dining, fun)</li>
+                <li>20% -> Savings + debt payoff</li>
+                <li>Best free tools: Mint, YNAB, EveryDollar</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="education-card">
+            <div class="education-icon">🏦</div>
+            <h3>Savings Accounts</h3>
+            <ul>
+              <li>High-Yield Savings = 4-5% APY</li>
+              <li>Emergency fund = 3-6 months expenses</li>
+              <li>Pay yourself first on payday</li>
+            </ul>
+            <button class="btn secondary btn-sm edu-toggle" type="button">Learn More</button>
+            <div class="edu-extra">
+              <ul>
+                <li>Best HYSAs right now: Ally, Marcus, SoFi</li>
+                <li>Start with a $1,000 emergency fund goal</li>
+                <li>Then grow to your full 3-month cushion</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="education-card">
+            <div class="education-icon">💳</div>
+            <h3>Credit Score 101</h3>
+            <ul>
+              <li>35% is payment history - never miss</li>
+              <li>Keep credit utilization under 30%</li>
+              <li>Check your report free at annualcreditreport.com</li>
+            </ul>
+            <button class="btn secondary btn-sm edu-toggle" type="button">Learn More</button>
+            <div class="edu-extra">
+              <ul>
+                <li>300-579 Poor: Get a secured card</li>
+                <li>580-669 Fair: Pay full balance monthly</li>
+                <li>670-739 Good: Apply for rewards cards</li>
+                <li>740+ Excellent: Best rates on loans</li>
+              </ul>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="education-section education-dark">
+      <div class="container">
+        <h2 class="education-title">Investing 101</h2>
+        <div class="education-grid grid-2">
+          <article class="education-card dark-card">
+            <div class="education-icon">📈</div>
+            <h3>Stocks</h3>
+            <ul>
+              <li>Ownership stake in a company</li>
+              <li>Higher risk, higher potential reward</li>
+              <li>Best for long-term (5+ years)</li>
+            </ul>
+            <button class="btn secondary btn-sm edu-toggle" type="button">Learn More</button>
+            <div class="edu-extra">
+              <ul>
+                <li>Beginner picks: VTI, SPY, QQQ (ETFs)</li>
+                <li>Individual stocks: AAPL, MSFT, GOOGL</li>
+                <li>Never invest money you need soon</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="education-card dark-card">
+            <div class="education-icon">🧺</div>
+            <h3>ETFs &amp; Index Funds</h3>
+            <ul>
+              <li>Basket of many stocks in one trade</li>
+              <li>Lower fees than mutual funds</li>
+              <li>Great for beginners</li>
+            </ul>
+            <button class="btn secondary btn-sm edu-toggle" type="button">Learn More</button>
+            <div class="edu-extra">
+              <ul>
+                <li>VTI -> Total US market</li>
+                <li>QQQ -> Top 100 tech companies</li>
+                <li>SCHD -> Dividend focused</li>
+                <li>BND -> Bonds (lower risk)</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="education-card dark-card">
+            <div class="education-icon">🏛️</div>
+            <h3>Mutual Funds</h3>
+            <ul>
+              <li>Managed by professionals</li>
+              <li>Minimum investment often $1,000+</li>
+              <li>Good for retirement accounts</li>
+            </ul>
+            <button class="btn secondary btn-sm edu-toggle" type="button">Learn More</button>
+            <div class="edu-extra">
+              <ul>
+                <li>FXAIX -> Fidelity S&amp;P 500 (0.015% fee)</li>
+                <li>VFIAX -> Vanguard S&amp;P 500 (0.04% fee)</li>
+                <li>SWTSX -> Schwab Total Market (0.03% fee)</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="education-card dark-card">
+            <div class="education-icon">🏠</div>
+            <h3>Real Estate</h3>
+            <ul>
+              <li>Requires 20% down to avoid PMI</li>
+              <li>Credit score 720+ = best rates</li>
+              <li>Budget 2-5% for closing costs</li>
+            </ul>
+            <button class="btn secondary btn-sm edu-toggle" type="button">Learn More</button>
+            <div class="edu-extra">
+              <ul>
+                <li>1) Build credit above 720</li>
+                <li>2) Save 20% down payment</li>
+                <li>3) Get pre-approved for mortgage</li>
+                <li>4) Budget for closing + moving costs</li>
+                <li>Best savings vehicle while saving: HYSA</li>
+              </ul>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="education-section education-light">
+      <div class="container">
+        <h2 class="education-title">Market Concepts From Watchlist</h2>
+        <div class="education-grid grid-3">
+          <article class="education-card">
+            <div class="education-icon">📈</div>
+            <h3>Stocks and ETFs Deep Dive</h3>
+            <ul>
+              <li>A stock is a small ownership stake in a company</li>
+              <li>ETFs hold many assets and trade like one stock</li>
+              <li>Diversification helps lower single-company risk</li>
+            </ul>
+            <button class="btn secondary btn-sm edu-toggle" type="button">Learn More</button>
+            <div class="edu-extra">
+              <ul>
+                <li>IPO: first time shares are sold to the public</li>
+                <li>Prices move with supply and demand</li>
+                <li>Returns can come from capital gains and dividends</li>
+                <li>Bull market: broad rising prices; bear market: broad declines</li>
+                <li>Volatility measures how sharply prices swing</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="education-card">
+            <div class="education-icon">🧮</div>
+            <h3>Reading Stock Metrics</h3>
+            <ul>
+              <li>P/E ratio compares price to earnings per share</li>
+              <li>Volume shows trading activity and liquidity</li>
+              <li>52-week range gives annual context</li>
+            </ul>
+            <button class="btn secondary btn-sm edu-toggle" type="button">Learn More</button>
+            <div class="edu-extra">
+              <ul>
+                <li>Example: Price $100 and EPS $5 means P/E = 20</li>
+                <li>Dividend yield = annual dividend divided by stock price</li>
+                <li>Chart basics: Open, High, Low, Close, and Change %</li>
+                <li>Market cap = price x shares outstanding</li>
+                <li>Cap buckets: Large-cap ($10B+), Mid-cap ($2-$10B), Small-cap (under $2B)</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="education-card">
+            <div class="education-icon">🏠</div>
+            <h3>Buying a House Checklist</h3>
+            <ul>
+              <li>Build strong credit before applying</li>
+              <li>Plan down payment and closing costs</li>
+              <li>Compare lenders and loan types</li>
+            </ul>
+            <button class="btn secondary btn-sm edu-toggle" type="button">Learn More</button>
+            <div class="edu-extra">
+              <ul>
+                <li>Budget for moving costs and a repair buffer</li>
+                <li>Lenders review debt-to-income closely</li>
+                <li>Compare fixed-rate vs ARM mortgage structures</li>
+                <li>Use high-yield savings while building your down payment fund</li>
+              </ul>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="education-section education-light">
+      <div class="container">
+        <h2 class="education-title">Famous Investor Strategies</h2>
+        <div class="education-grid grid-4">
+          <article class="education-card investor-card">
+            <div class="investor-avatar">WB</div>
+            <h3>Warren Buffett 🏆</h3>
+            <ul>
+              <li><strong>Style:</strong> Value Investing</li>
+              <li>Buy great companies at fair prices</li>
+              <li>Hold forever and ignore short-term noise</li>
+              <li>Top holdings: AAPL, BAC, KO, AXP</li>
+            </ul>
+          </article>
+          <article class="education-card investor-card">
+            <div class="investor-avatar">RD</div>
+            <h3>Ray Dalio ⚖️</h3>
+            <ul>
+              <li><strong>Style:</strong> All Weather Portfolio</li>
+              <li>Balanced across all market conditions</li>
+              <li>30% stocks, 40% bonds, 15% mid bonds</li>
+              <li>7.5% gold, 7.5% commodities</li>
+            </ul>
+          </article>
+          <article class="education-card investor-card">
+            <div class="investor-avatar">CW</div>
+            <h3>Cathie Wood 🚀</h3>
+            <ul>
+              <li><strong>Style:</strong> Disruptive Innovation</li>
+              <li>High risk, high reward</li>
+              <li>Focus on AI, biotech, fintech, crypto</li>
+              <li>Top picks: TSLA, COIN, ROKU</li>
+            </ul>
+          </article>
+          <article class="education-card investor-card">
+            <div class="investor-avatar">PL</div>
+            <h3>Peter Lynch 📚</h3>
+            <ul>
+              <li><strong>Style:</strong> Invest in What You Know</li>
+              <li>Look for companies you use daily</li>
+              <li>Find P/E ratio under 15</li>
+              <li>Research before you invest</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="education-section education-muted">
+      <div class="container">
+        <h2 class="education-title">Quick Reference</h2>
+        <div class="education-grid grid-3">
+          <article class="education-card">
+            <h3>📊 Key Investment Terms</h3>
+            <ul>
+              <li>Bull Market -> Prices rising 20%+</li>
+              <li>Bear Market -> Prices falling 20%+</li>
+              <li>Dividend -> Company pays you cash</li>
+              <li>Portfolio -> Your collection of investments</li>
+              <li>Diversification -> Do not put all eggs in one basket</li>
+              <li>Compound Interest -> Returns on your returns</li>
+              <li>P/E Ratio -> Price vs earnings</li>
+              <li>Market Cap -> Total company value</li>
+            </ul>
+          </article>
+
+          <article class="education-card">
+            <h3>⏰ The Power of Starting Early</h3>
+            <table class="edu-table">
+              <thead>
+                <tr><th>Age Started</th><th>Monthly</th><th>At Age 65</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Age 22</td><td>$200/mo</td><td>~$1,000,000</td></tr>
+                <tr><td>Age 32</td><td>$200/mo</td><td>~$500,000</td></tr>
+                <tr><td>Age 42</td><td>$200/mo</td><td>~$220,000</td></tr>
+              </tbody>
+            </table>
+            <ul>
+              <li>Assuming 8% average annual return</li>
+              <li>This is why starting NOW matters.</li>
+            </ul>
+          </article>
+
+          <article class="education-card">
+            <h3>🎯 Account Types Cheat Sheet</h3>
+            <ul>
+              <li>401(k) -> Employer retirement, get the match</li>
+              <li>Roth IRA -> Tax-free growth, best for young people</li>
+              <li>Traditional IRA -> Tax deduction now, taxed later</li>
+              <li>HSA -> Triple tax advantage for medical costs</li>
+              <li>Brokerage -> Regular investing account, no limits</li>
+              <li>HYSA -> High-yield savings, 4-5% APY</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="education-cta">
+      <div class="container">
+        <h2>Ready to put your knowledge to work?</h2>
+        <div class="education-cta-actions">
+          <a href="./chatbot.html" class="btn primary">Open Chatbot Advisor</a>
+          <a href="./stocks.html" class="btn secondary">View Live Stocks</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <div class="brand-mark small">●</div>
+        <div class="footer-text">
+          <div class="footer-title">Intellivest @ Texas A&M</div>
+          <div class="footer-tagline">Making financial literacy accessible to everyone, one person at a time.</div>
+        </div>
+      </div>
+
+      <div class="footer-meta">
+        <div class="meta-block">
+          <div class="meta-label">Contact</div>
+          <a href="mailto:aitp@tamu.edu" class="link">aitp@tamu.edu</a>
+        </div>
+        <div class="meta-block">
+          <div class="meta-label">Developed by</div>
+          <div class="meta-text">Natalie Do, Denisse Aguilar, Teresa So, Monica Lin, Sahil Shah, Abhinav Chodimella, and Aiden Schreier</div>
+        </div>
+        <div class="meta-block">
+          <div class="meta-text">© <span id="year"></span> Intellivest</div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="./app.js"></script>
+  <script src="./auth-ui.js"></script>
+  <script>
+    (function () {
+      document.querySelectorAll('.edu-toggle').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var card = btn.closest('.education-card');
+          if (!card) return;
+          card.classList.toggle('is-open');
+          btn.textContent = card.classList.contains('is-open') ? 'Show Less' : 'Learn More';
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

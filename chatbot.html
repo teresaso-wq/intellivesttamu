@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ask Intellivest - AI Chatbot | Intellivest @ Texas A&M</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div id="cursor"></div>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="./index.html" class="brand">
+        <img src="intellivest-logo.png" 
+             alt="IntelliVest Logo" 
+             style="height: 40px; 
+                    width: auto; 
+                    filter: invert(1) brightness(2);
+                    cursor: pointer;"
+             onclick="window.location='index.html'">
+        <div class="brand-text">
+          <div class="brand-line">Intellivest</div>
+          <div class="brand-sub">@ Texas A&M</div>
+        </div>
+      </a>
+
+      <nav class="primary-nav">
+        <div class="nav-dropdown">
+          <a href="./index.html" class="nav-link">Home</a>
+        </div>
+        <div class="nav-dropdown">
+          <a href="./about-us.html" class="nav-link">About us</a>
+        </div>
+        <div class="nav-dropdown">
+          <a href="./capabilities.html" class="nav-link">Capabilities</a>
+        </div>
+        <div class="nav-dropdown">
+          <a href="./our-insights.html" class="nav-link">Our Insights</a>
+        </div>
+        <div class="nav-dropdown">
+          <a href="./finance.html" class="nav-link">Finance</a>
+        </div>
+        <div class="nav-dropdown">
+          <a href="./stocks.html" class="nav-link">Stocks</a>
+        </div>
+        <div class="nav-dropdown">
+          <a href="./stock-tracker.html" class="nav-link">Watchlist</a>
+        </div>
+        <div class="nav-dropdown">
+          <a href="./education.html" class="nav-link">Education</a>
+        </div>
+      </nav>
+
+      <div class="header-actions">
+        <a href="./sign-in.html" class="btn secondary">Sign in</a>
+        <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode">
+          <span class="theme-icon moon">☾</span>
+          <span class="theme-icon sun">☀</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="site-main chatbot-main">
+    <div class="container chatbot-container">
+      <div class="chatbot-header">
+        <h1>Ask Intellivest</h1>
+        <p class="chatbot-subtitle">Get personalized financial advice from our AI chatbot. Ask anything about financial literacy, investing, budgeting, and more.</p>
+        <div class="chatbot-toolbar">
+          <button type="button" class="btn secondary btn-sm" id="chatbotUpdateProfile">📋 Update My Profile</button>
+        </div>
+      </div>
+
+      <div class="chatbot-window">
+        <div class="chatbot-messages" id="chatbotMessages"></div>
+
+        <div class="chatbot-input-container">
+          <form id="chatbotForm" class="chatbot-form">
+            <input 
+              type="text" 
+              id="chatbotInput" 
+              class="chatbot-input" 
+              placeholder="Ask me anything about finance..." 
+              autocomplete="off"
+              required
+            />
+            <button type="submit" class="chatbot-send-btn" aria-label="Send message">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+              </svg>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <div class="brand-mark small">●</div>
+        <div class="footer-text">
+          <div class="footer-title">Intellivest @ Texas A&M</div>
+          <div class="footer-tagline">Making financial literacy accessible to everyone, one person at a time.</div>
+        </div>
+      </div>
+
+      <div class="footer-meta">
+        <div class="meta-block">
+          <div class="meta-label">Contact</div>
+          <a href="mailto:aitp@tamu.edu" class="link">aitp@tamu.edu</a>
+        </div>
+        <div class="meta-block">
+          <div class="meta-label">Developed by</div>
+          <div class="meta-text">Natalie Do, Denisse Aguilar, Teresa So, Monica Lin, Sahil Shah, Abhinav Chodimella, and Aiden Schreier</div>
+        </div>
+        <div class="meta-block">
+          <div class="meta-text">© <span id="year"></span> Intellivest</div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="./app.js"></script>
+  <script src="./auth-ui.js"></script>
+  <script src="./chatbot-survey.js"></script>
+  <script src="./chatbot.js"></script>
+</body>
+</html>
+
+
+

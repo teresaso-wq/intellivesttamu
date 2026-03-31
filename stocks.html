@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Stocks - Intellivest @ Texas A&M</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div id="cursor"></div>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="./index.html" class="brand">
+        <img src="intellivest-logo.png" 
+             alt="IntelliVest Logo" 
+             style="height: 40px; 
+                    width: auto; 
+                    filter: invert(1) brightness(2);
+                    cursor: pointer;"
+             onclick="window.location='index.html'">
+        <div class="brand-text">
+          <div class="brand-line">Intellivest</div>
+          <div class="brand-sub">@ Texas A&M</div>
+        </div>
+      </a>
+
+      <nav class="primary-nav">
+        <div class="nav-dropdown">
+          <a href="./index.html" class="nav-link">Home</a>
+        </div>
+        <div class="nav-dropdown">
+          <a href="./about-us.html" class="nav-link">About us</a>
+        </div>
+        <div class="nav-dropdown">
+          <a href="./capabilities.html" class="nav-link">Capabilities</a>
+        </div>
+        <div class="nav-dropdown">
+          <a href="./our-insights.html" class="nav-link">Our Insights</a>
+        </div>
+        <div class="nav-dropdown">
+          <a href="./finance.html" class="nav-link">Finance</a>
+        </div>
+        <div class="nav-dropdown">
+          <a href="./stocks.html" class="nav-link active">Stocks</a>
+        </div>
+        <div class="nav-dropdown">
+          <a href="./stock-tracker.html" class="nav-link">Watchlist</a>
+        </div>
+        <div class="nav-dropdown">
+          <a href="./education.html" class="nav-link">Education</a>
+        </div>
+      </nav>
+
+      <div class="header-actions">
+        <a href="./sign-in.html" class="btn secondary">Sign in</a>
+        <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode">
+          <span class="theme-icon moon">☾</span>
+          <span class="theme-icon sun">☀</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="site-main">
+    <section class="page-hero">
+      <div class="container">
+        <h1>Stock Analysis</h1>
+        <p class="page-subtitle">Real-time market data and analysis tools for informed investing.</p>
+      </div>
+    </section>
+
+    <!-- Stock Search Section -->
+    <section class="stock-search-section">
+      <div class="container">
+        <div class="search-container-large">
+          <div class="search-icon">🔍</div>
+          <input 
+            type="text" 
+            id="stockSearchInput" 
+            class="stock-search-input"
+            placeholder="Search any stock on Yahoo Finance (ticker or company name)"
+            autocomplete="off"
+          />
+          <button id="searchStockBtn" class="btn primary">Search</button>
+        </div>
+        <div id="searchResults" class="search-results"></div>
+      </div>
+    </section>
+
+    <!-- Category filters + Stock cards -->
+    <section class="stock-categories-section">
+      <div class="container">
+        <div class="categories-header">
+          <h2>Explore Stocks</h2>
+          <p class="section-subtitle">Filter by category, then tap a card for a full analysis</p>
+        </div>
+
+        <div class="category-tabs stock-filter-tabs" id="stockFilterTabs">
+          <button type="button" class="category-tab active" data-filter="all">All</button>
+          <button type="button" class="category-tab" data-filter="technology">Technology</button>
+          <button type="button" class="category-tab" data-filter="energy">Energy</button>
+          <button type="button" class="category-tab" data-filter="finance">Finance</button>
+          <button type="button" class="category-tab" data-filter="healthcare">Healthcare</button>
+          <button type="button" class="category-tab" data-filter="consumer">Consumer</button>
+          <button type="button" class="category-tab" data-filter="minerals">Minerals</button>
+        </div>
+
+        <p id="stockSelectionHint" class="stock-selection-hint">👆 Click any stock below to view its analysis</p>
+
+        <div id="categoryStocks" class="category-stocks-grid">
+          <!-- Stock cards will be inserted here -->
+        </div>
+      </div>
+    </section>
+
+    <input type="hidden" id="stockSelect" value="" />
+
+    <!-- Stock Analysis Panel (slides open when a stock is selected) -->
+    <section id="stockAnalysisPanel" class="stock-analysis-panel" aria-live="polite">
+      <div class="container">
+        <div id="analysisPanelBody" class="stock-analysis-panel-body" hidden>
+          <div class="stock-analysis-layout">
+            <div class="stock-analysis-left">
+              <div class="stock-header">
+                <h3 id="selectedStockName">—</h3>
+                <div class="stock-symbol" id="selectedStockSymbol">—</div>
+              </div>
+              <div class="stock-price stock-price-large">
+                <span class="price-value" id="stockPrice">—</span>
+                <span class="price-change" id="priceChange">—</span>
+              </div>
+              <div class="stock-stats">
+                <div class="stat-item">
+                  <span class="stat-label">52‑Week High</span>
+                  <span class="stat-value" id="stat52High">—</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">52‑Week Low</span>
+                  <span class="stat-value" id="stat52Low">—</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Market Cap</span>
+                  <span class="stat-value" id="statMarketCap">—</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Volume</span>
+                  <span class="stat-value" id="statVolume">—</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">P/E Ratio</span>
+                  <span class="stat-value" id="statPE">—</span>
+                </div>
+              </div>
+              <button type="button" class="btn secondary btn-sm" id="addToWatchlistBtn">Add to Watchlist</button>
+            </div>
+
+            <div class="stock-analysis-right">
+              <div class="timeframe-selector">
+                <button type="button" class="timeframe-btn active" data-timeframe="1D">1D</button>
+                <button type="button" class="timeframe-btn" data-timeframe="1W">1W</button>
+                <button type="button" class="timeframe-btn" data-timeframe="1M">1M</button>
+                <button type="button" class="timeframe-btn" data-timeframe="3M">3M</button>
+                <button type="button" class="timeframe-btn" data-timeframe="6M">6M</button>
+                <button type="button" class="timeframe-btn" data-timeframe="1Y">1Y</button>
+              </div>
+              <div class="chart-container chart-container-tall">
+                <div id="stockChartPlaceholder" class="category-loading">Loading chart…</div>
+                <canvas id="stockChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <div class="brand-mark small">●</div>
+        <div class="footer-text">
+          <div class="footer-title">Intellivest @ Texas A&M</div>
+          <div class="footer-tagline">Making financial literacy accessible to everyone, one person at a time.</div>
+        </div>
+      </div>
+
+      <div class="footer-meta">
+        <div class="meta-block">
+          <div class="meta-label">Contact</div>
+          <a href="mailto:aitp@tamu.edu" class="link">aitp@tamu.edu</a>
+        </div>
+        <div class="meta-block">
+          <div class="meta-label">Developed by</div>
+          <div class="meta-text">Natalie Do, Denisse Aguilar, Teresa So, Monica Lin, Sahil Shah, Abhinav Chodimella, and Aiden Schreier</div>
+        </div>
+        <div class="meta-block">
+          <div class="meta-text">© <span id="year"></span> Intellivest</div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="./app.js"></script>
+  <script src="./auth-ui.js"></script>
+  <script src="./market-data.js"></script>
+  <script src="./stocks.js"></script>
+</body>
+</html>

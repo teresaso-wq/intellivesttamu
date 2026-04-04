@@ -1,3 +1,6 @@
+// Site navigation is duplicated in each HTML file (no runtime injection).
+// Keep this order in sync: Home → About us → Capabilities → Our Insights → Finance → Stocks → Watchlist → Education → Investors (investors.html).
+
 // Theme toggle with persistence and sun/moon icons
 (function initTheme() {
   const stored = localStorage.getItem('theme');

@@ -2168,7 +2168,7 @@ input:hover #cursor,
   transition: max-height 0.3s ease, margin-top 0.3s ease;
 }
 .education-card.is-open .edu-extra {
-  max-height: 260px;
+  max-height: 560px;
   margin-top: 10px;
 }
 .investor-card {
@@ -2314,30 +2314,6 @@ input:hover #cursor,
   background: var(--paper);
 }
 
-.investors-search-input {
-  width: 100%;
-  padding: 14px;
-  font-size: 16px;
-  border-radius: 8px;
-  border: 2px solid #0a1628;
-  margin-bottom: 30px;
-  box-sizing: border-box;
-  font-family: inherit;
-  background: #fff;
-  color: #0a1628;
-}
-.dark .investors-search-input {
-  background: rgba(255, 255, 255, 0.06);
-  color: #fff;
-  border-color: rgba(255, 255, 255, 0.2);
-}
-.investors-search-input::placeholder {
-  color: rgba(10, 22, 40, 0.55);
-}
-.dark .investors-search-input::placeholder {
-  color: rgba(255, 255, 255, 0.45);
-}
-
 .investors-tabs {
   display: flex;
   flex-wrap: wrap;
@@ -2379,11 +2355,20 @@ input:hover #cursor,
   color: #fff;
 }
 
+.investors-pagination-wrap {
+  text-align: center;
+  margin-top: 28px;
+}
+
+.investors-show-more {
+  min-width: 200px;
+}
+
 .investors-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 24px;
-  align-items: start;
+  align-items: stretch;
 }
 
 @media (max-width: 1100px) {
@@ -2403,6 +2388,9 @@ input:hover #cursor,
   background: #fff;
   box-shadow: 0 2px 8px rgba(10, 22, 40, 0.06);
   transition: transform 0.25s ease, box-shadow 0.25s ease;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 .dark .investor-card {
   background: rgba(255, 255, 255, 0.04);
@@ -2417,7 +2405,34 @@ input:hover #cursor,
 }
 
 .investor-card-inner {
+  position: relative;
   padding: 22px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 400px;
+}
+
+.investor-card-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 220px;
+}
+
+.investor-source-badge {
+  font-size: 12px;
+  font-weight: 600;
+  color: #0a1628;
+  background: rgba(10, 22, 40, 0.06);
+  padding: 8px 10px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+.dark .investor-source-badge {
+  color: #dbe7fb;
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .investor-card-head {
@@ -2524,7 +2539,7 @@ input:hover #cursor,
   margin-top: 0;
 }
 .investor-card.is-expanded .investor-expanded {
-  max-height: 2200px;
+  max-height: 4800px;
   opacity: 1;
   margin-top: 18px;
   padding-top: 16px;
@@ -2575,4 +2590,427 @@ input:hover #cursor,
 }
 .dark .investor-networth {
   color: rgba(255, 255, 255, 0.9);
+}
+
+.portfolio-panel {
+  font-size: 14px;
+}
+
+.portfolio-panel-title {
+  margin: 0 0 8px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #0a1628;
+}
+.dark .portfolio-panel-title {
+  color: #e8eef8;
+}
+.portfolio-panel .portfolio-panel-title:not(:first-child) {
+  margin-top: 18px;
+}
+
+.portfolio-meta {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: var(--ink-500);
+  line-height: 1.45;
+}
+.dark .portfolio-meta {
+  color: rgba(255, 255, 255, 0.7);
+}
+.portfolio-meta a {
+  color: #1e5a96;
+  font-weight: 600;
+}
+.dark .portfolio-meta a {
+  color: #7eb8ff;
+}
+
+.table-scroll {
+  overflow-x: auto;
+  margin-bottom: 8px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.investor-data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  line-height: 1.4;
+}
+.investor-data-table th,
+.investor-data-table td {
+  border: 1px solid rgba(10, 22, 40, 0.12);
+  padding: 8px 10px;
+  text-align: left;
+  vertical-align: top;
+}
+.dark .investor-data-table th,
+.dark .investor-data-table td {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+.investor-data-table thead {
+  background: rgba(10, 22, 40, 0.06);
+}
+.dark .investor-data-table thead {
+  background: rgba(255, 255, 255, 0.08);
+}
+.investor-data-table th {
+  font-weight: 700;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.portfolio-footer-link {
+  margin: 14px 0 0;
+  font-size: 13px;
+}
+.portfolio-footer-link a {
+  font-weight: 600;
+  color: #1e5a96;
+}
+.dark .portfolio-footer-link a {
+  color: #7eb8ff;
+}
+
+.investor-disclaimer {
+  margin: 16px 0 0;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--ink-500);
+  opacity: 0.95;
+}
+.dark .investor-disclaimer {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+/* Investors page — feed, overlap, performance, compare, follow, rookie */
+.investors-block-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #0a1628;
+  margin: 0 0 8px;
+}
+.dark .investors-block-title {
+  color: #f0f4fa;
+}
+.investors-block-subtitle {
+  margin: 0 0 12px;
+  color: var(--ink-500);
+  font-size: 15px;
+}
+.investors-whos-buying-meta {
+  font-size: 13px;
+  color: var(--ink-500);
+  margin: 0 0 12px;
+}
+
+.investors-followed-block {
+  margin-bottom: 36px;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid rgba(10, 22, 40, 0.12);
+  background: rgba(10, 22, 40, 0.03);
+}
+.dark .investors-followed-block {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+}
+.investors-followed-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.followed-mini-card {
+  flex: 1 1 240px;
+  max-width: 320px;
+  padding: 14px;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid rgba(10, 22, 40, 0.1);
+  font-size: 14px;
+}
+.dark .followed-mini-card {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+.followed-mini-trades {
+  margin: 8px 0;
+  padding-left: 1.1em;
+  font-size: 13px;
+  color: var(--ink-600);
+}
+.followed-mini-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.investors-whos-buying-block {
+  margin-bottom: 36px;
+  position: relative;
+}
+.whos-buying-scroll-hint {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 52px;
+  font-size: 12px;
+  color: var(--ink-500);
+  pointer-events: none;
+}
+@media (max-width: 700px) {
+  .whos-buying-scroll-hint {
+    display: block;
+  }
+}
+
+.whos-buying-feed {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  padding: 8px 4px 16px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+.whos-buying-card {
+  flex: 0 0 220px;
+  scroll-snap-align: start;
+  padding: 14px;
+  border-radius: 12px;
+  background: #fff;
+  border: 3px solid #ccc;
+  box-shadow: 0 2px 10px rgba(10, 22, 40, 0.08);
+  font-size: 13px;
+}
+.dark .whos-buying-card {
+  background: rgba(255, 255, 255, 0.06);
+}
+.whos-buying-card.is-buy {
+  border-color: #15803d;
+}
+.whos-buying-card.is-sell {
+  border-color: #b91c1c;
+}
+.whos-buying-card.is-hold {
+  border-color: #1d4ed8;
+}
+.wbc-name {
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.wbc-action {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.wbc-amt,
+.wbc-period {
+  color: var(--ink-600);
+  margin-bottom: 4px;
+}
+.whos-buying-card .wbc-view {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.investors-tool-block {
+  margin-bottom: 36px;
+}
+.investors-overlap-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.investors-select {
+  flex: 1 1 200px;
+  min-width: 160px;
+  padding: 12px 14px;
+  font-size: 15px;
+  font-family: inherit;
+  border: 2px solid #0a1628;
+  border-radius: 8px;
+  background: #fff;
+  color: #0a1628;
+}
+.dark .investors-select {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+.investors-vs {
+  font-weight: 800;
+  color: #0a1628;
+}
+.dark .investors-vs {
+  color: #a8c4e8;
+}
+
+.overlap-results-box {
+  background: #0a1628;
+  color: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  max-width: 720px;
+  animation: ivFadeIn 0.4s ease;
+}
+.overlap-results-inner .overlap-h {
+  margin: 0 0 12px;
+  font-size: 1.1rem;
+}
+.overlap-results-inner p {
+  margin: 0 0 10px;
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+.performance-table-wrap {
+  overflow-x: auto;
+}
+.investors-performance-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.investors-performance-table th,
+.investors-performance-table td {
+  border: 1px solid rgba(10, 22, 40, 0.12);
+  padding: 10px 12px;
+  text-align: left;
+}
+.investors-performance-table thead {
+  background: rgba(10, 22, 40, 0.08);
+}
+.perf-vs-good {
+  color: #15803d;
+  font-weight: 600;
+}
+.perf-vs-bad {
+  color: #b91c1c;
+  font-weight: 600;
+}
+.perf-bar {
+  display: inline-block;
+  width: 80px;
+  height: 8px;
+  background: rgba(10, 22, 40, 0.12);
+  border-radius: 4px;
+  overflow: hidden;
+  vertical-align: middle;
+}
+.perf-bar-fill {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #0a1628, #1e5a96);
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+.investors-performance-disclaimer {
+  margin-top: 14px;
+  font-size: 12px;
+  color: var(--ink-500);
+}
+.perf-note-row td {
+  border: none;
+  padding-top: 8px;
+  color: var(--ink-500);
+}
+
+.compare-results-wrap {
+  margin-top: 16px;
+  animation: ivSlideIn 0.4s ease;
+}
+.investors-compare-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.investors-compare-table th,
+.investors-compare-table td {
+  border: 1px solid rgba(10, 22, 40, 0.12);
+  padding: 10px 12px;
+  text-align: left;
+}
+.investors-compare-table td.compare-gold {
+  background: rgba(201, 162, 39, 0.2);
+}
+.dark .investors-compare-table td.compare-gold {
+  background: rgba(201, 162, 39, 0.25);
+}
+
+@keyframes ivFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes ivSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.investor-rookie-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 6px;
+  line-height: 1.2;
+  max-width: 42%;
+  text-align: right;
+}
+.investor-rookie-badge.is-rookie {
+  background: rgba(21, 128, 61, 0.2);
+  color: #14532d;
+  border: 1px solid rgba(21, 128, 61, 0.4);
+}
+.investor-rookie-badge.is-advanced {
+  background: rgba(234, 88, 12, 0.15);
+  color: #9a3412;
+  border: 1px solid rgba(234, 88, 12, 0.4);
+}
+.dark .investor-rookie-badge.is-rookie {
+  color: #86efac;
+}
+.dark .investor-rookie-badge.is-advanced {
+  color: #fdba74;
+}
+
+.investor-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+}
+.investor-card-actions .investor-expand-btn {
+  flex: 1 1 140px;
+}
+.investor-follow-btn.is-following {
+  background: linear-gradient(135deg, #c9a227, #f5e6a3);
+  color: #3d3208;
+  border-color: #a16207;
+  font-weight: 700;
+}
+
+.investor-strategy-inline {
+  font-size: 13px;
+  margin: 0 0 10px;
+  color: var(--ink-700);
+}
+.dark .investor-strategy-inline {
+  color: rgba(255, 255, 255, 0.85);
 }

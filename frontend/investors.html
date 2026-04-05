@@ -1,0 +1,1466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Famous Investors & Market Movers - Intellivest @ Texas A&M</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div id="cursor"></div>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="./index.html" class="brand">
+        <img src="intellivest-logo.png" alt="IntelliVest Logo" style="height: 40px; width: auto; filter: invert(1) brightness(2); cursor: pointer;" onclick="window.location='index.html'">
+        <div class="brand-text">
+          <div class="brand-line">Intellivest</div>
+          <div class="brand-sub">@ Texas A&M</div>
+        </div>
+      </a>
+      <nav class="primary-nav">
+        <div class="nav-dropdown"><a href="./index.html" class="nav-link">Home</a></div>
+        <div class="nav-dropdown"><a href="./about-us.html" class="nav-link">About us</a></div>
+        <div class="nav-dropdown"><a href="./capabilities.html" class="nav-link">Capabilities</a></div>
+        <div class="nav-dropdown"><a href="./our-insights.html" class="nav-link">Our Insights</a></div>
+        <div class="nav-dropdown"><a href="./finance.html" class="nav-link">Finance</a></div>
+        <div class="nav-dropdown"><a href="./stocks.html" class="nav-link">Stocks</a></div>
+        <div class="nav-dropdown"><a href="./stock-tracker.html" class="nav-link">Watchlist</a></div>
+        <div class="nav-dropdown"><a href="./education.html" class="nav-link">Education</a></div>
+        <div class="nav-dropdown"><a href="./investors.html" class="nav-link active">Investors</a></div>
+      </nav>
+      <div class="header-actions">
+        <a href="./sign-in.html" class="btn secondary">Sign in</a>
+        <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode"><span class="theme-icon moon">☾</span><span class="theme-icon sun">☀</span></button>
+      </div>
+    </div>
+  </header>
+
+  <main class="site-main">
+    <section class="page-hero investors-hero">
+      <div class="container">
+        <h1>Famous Investors &amp; Market Movers</h1>
+        <p class="page-subtitle">Learn from the best — their strategies, portfolios, and latest moves</p>
+      </div>
+    </section>
+
+    <section class="investors-section">
+      <div class="container">
+        <div id="followedInvestorsSection" class="investors-followed-block" hidden>
+          <h2 class="investors-block-title">👀 My Followed Investors</h2>
+          <div id="followedInvestorsList" class="investors-followed-list"></div>
+        </div>
+
+        <div class="investors-whos-buying-block">
+          <h2 class="investors-block-title">🔥 Who's Buying Right Now</h2>
+          <p class="investors-block-subtitle">Most recent disclosed trades across all investors — updated from public filings</p>
+          <p id="whosBuyingMeta" class="investors-whos-buying-meta"></p>
+          <div class="whos-buying-scroll-hint" aria-hidden="true">Scroll →</div>
+          <div id="whosBuyingFeed" class="whos-buying-feed"></div>
+        </div>
+
+        <div class="investors-tool-block investors-overlap-block">
+          <h2 class="investors-block-title">📊 Portfolio Overlap Tool</h2>
+          <p class="investors-block-subtitle">See which stocks two investors both own at the same time</p>
+          <div class="investors-overlap-row">
+            <label class="visually-hidden" for="overlapSelect1">Select investor 1</label>
+            <select id="overlapSelect1" class="investors-select"><option value="">Select Investor 1</option></select>
+            <span class="investors-vs">VS</span>
+            <label class="visually-hidden" for="overlapSelect2">Select investor 2</label>
+            <select id="overlapSelect2" class="investors-select"><option value="">Select Investor 2</option></select>
+          </div>
+          <div id="overlapResults" class="overlap-results-box" hidden></div>
+        </div>
+
+        <div class="investors-tool-block investors-performance-block">
+          <h2 class="investors-block-title">📈 Investor Performance vs S&amp;P 500</h2>
+          <p class="investors-block-subtitle">Historical annual returns — how they compare to the market</p>
+          <div class="performance-table-wrap">
+            <table class="investors-performance-table">
+              <thead>
+                <tr>
+                  <th>Investor</th>
+                  <th>Strategy</th>
+                  <th>Est. Annual Return</th>
+                  <th>vs S&amp;P 500</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="performanceTableBody"></tbody>
+            </table>
+          </div>
+          <p class="investors-performance-disclaimer">⚠️ Past performance does not guarantee future results. Returns are estimates based on public information.</p>
+        </div>
+
+        <div class="investors-tool-block investors-compare-block">
+          <h2 class="investors-block-title">🆚 Compare Two Investors</h2>
+          <p class="investors-block-subtitle">Side by side strategy breakdown</p>
+          <div class="investors-overlap-row">
+            <label class="visually-hidden" for="compareSelect1">Investor 1</label>
+            <select id="compareSelect1" class="investors-select"><option value="">Investor 1</option></select>
+            <span class="investors-vs">vs</span>
+            <label class="visually-hidden" for="compareSelect2">Investor 2</label>
+            <select id="compareSelect2" class="investors-select"><option value="">Investor 2</option></select>
+          </div>
+          <div id="compareResults" class="compare-results-wrap" hidden></div>
+        </div>
+
+        <div class="investors-tabs" role="tablist" aria-label="Filter by category">
+          <button type="button" class="category-tab active" data-category="all" role="tab" aria-selected="true">All</button>
+          <button type="button" class="category-tab" data-category="legendary" role="tab" aria-selected="false">Legendary</button>
+          <button type="button" class="category-tab" data-category="ceos" role="tab" aria-selected="false">CEOs</button>
+          <button type="button" class="category-tab" data-category="hedge" role="tab" aria-selected="false">Hedge Funds</button>
+          <button type="button" class="category-tab" data-category="fed" role="tab" aria-selected="false">Federal Reserve</button>
+          <button type="button" class="category-tab" data-category="politicians" role="tab" aria-selected="false">Politicians</button>
+          <button type="button" class="category-tab" data-category="rookie" role="tab" aria-selected="false">🎓 Rookie Friendly</button>
+        </div>
+
+        <div class="investors-grid" id="investorsGrid">
+
+          <article class="investor-card" data-category="legendary">
+            <div class="investor-card-inner">
+              <div class="investor-card-main">
+                <div class="investor-card-head">
+                  <div class="investor-avatar" aria-hidden="true">WB</div>
+                  <div class="investor-card-titles">
+                    <h2 class="investor-name">Warren Buffett</h2>
+                    <p class="investor-role">Chairman &amp; CEO, Berkshire Hathaway</p>
+                    <span class="investor-badge badge-legendary">Legendary</span>
+                  </div>
+                </div>
+                <p class="investor-source-badge">📊 Data: SEC 13F — Berkshire Hathaway · Last updated Q4 2024</p>
+                <p class="investor-bio">The "Oracle of Omaha" — compounded wealth at ~20% annually for 60+ years by buying great companies at fair prices.</p>
+              </div>
+              <button type="button" class="btn secondary investor-expand-btn" aria-expanded="false">View Portfolio</button>
+              <div class="investor-expanded">
+                <div class="portfolio-panel">
+                  <h4 class="portfolio-panel-title">📊 Current Portfolio Holdings</h4>
+                  <p class="portfolio-meta">Source: SEC 13F Filing — Berkshire Hathaway · <a href="https://www.dataroma.com/m/holdings.php?m=BRK" target="_blank" rel="noopener noreferrer">View live data →</a></p>
+                  <div class="table-scroll">
+                    <table class="investor-data-table">
+                      <thead><tr><th>Stock</th><th>Shares / Value</th><th>% Portfolio</th></tr></thead>
+                      <tbody>
+                        <tr><td>AAPL</td><td>~915M shares · ~$174B</td><td>28%</td></tr>
+                        <tr><td>BAC</td><td>~903M shares · ~$35B</td><td>11%</td></tr>
+                        <tr><td>AXP</td><td>~151M shares · ~$27B</td><td>9%</td></tr>
+                        <tr><td>KO</td><td>~400M shares · ~$24B</td><td>7%</td></tr>
+                        <tr><td>CVX</td><td>~118M shares · ~$17B</td><td>6%</td></tr>
+                        <tr><td>OXY</td><td>~255M shares · ~$14B</td><td>5%</td></tr>
+                        <tr><td>KHC</td><td>~325M shares · ~$12B</td><td>4%</td></tr>
+                        <tr><td>MCO</td><td>~24M shares · ~$10B</td><td>3%</td></tr>
+                        <tr><td>CB</td><td>~26M shares · ~$6B</td><td>2%</td></tr>
+                        <tr><td>DVA</td><td>~36M shares · ~$4B</td><td>1%</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <h4 class="portfolio-panel-title">📅 Recent Trades</h4>
+                  <div class="table-scroll">
+                    <table class="investor-data-table">
+                      <thead><tr><th>Period</th><th>Stock</th><th>Action</th><th>Amount</th></tr></thead>
+                      <tbody>
+                        <tr><td>Q4 2024</td><td>OXY</td><td>Buy</td><td>Added ~8.9M shares · $405M</td></tr>
+                        <tr><td>Q3 2024</td><td>AAPL</td><td>Sell</td><td>Reduced by ~25% · ~$20B reduction</td></tr>
+                        <tr><td>Q3 2024</td><td>BAC</td><td>Sell</td><td>Reduced position · ~$5B reduction</td></tr>
+                        <tr><td>Q2 2024</td><td>SIRI</td><td>Buy</td><td>New position · ~$2.3B</td></tr>
+                        <tr><td>Q1 2024</td><td>CVX</td><td>Buy</td><td>Added to position · ~$2B</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <p class="portfolio-footer-link">🔗 <a href="https://www.dataroma.com/m/holdings.php?m=BRK" target="_blank" rel="noopener noreferrer">View live data on Dataroma</a></p>
+                  <p class="investor-disclaimer">📊 Data sourced from SEC 13F filings, Capitol Trades, and public disclosures. Holdings reflect most recent quarterly filing. Actual current holdings may differ.</p>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="investor-card" data-category="legendary">
+            <div class="investor-card-inner">
+              <div class="investor-card-main">
+                <div class="investor-card-head">
+                  <div class="investor-avatar" aria-hidden="true">PL</div>
+                  <div class="investor-card-titles">
+                    <h2 class="investor-name">Peter Lynch</h2>
+                    <p class="investor-role">Former Manager, Fidelity Magellan Fund</p>
+                    <span class="investor-badge badge-legendary">Legendary</span>
+                  </div>
+                </div>
+                <p class="investor-source-badge">📊 Historical — Fidelity Magellan (retired)</p>
+                <p class="investor-bio">Averaged 29.2% annual returns 1977–1990. Famous for "invest in what you know" and finding ten-baggers.</p>
+              </div>
+              <button type="button" class="btn secondary investor-expand-btn" aria-expanded="false">View Portfolio</button>
+              <div class="investor-expanded">
+                <div class="portfolio-panel">
+                  <h4 class="portfolio-panel-title">📊 Famous Positions (Historical 1977–1990)</h4>
+                  <p class="portfolio-meta">Source: Historical — Fidelity Magellan Fund · <a href="https://www.dataroma.com" target="_blank" rel="noopener noreferrer">Dataroma</a></p>
+                  <div class="table-scroll">
+                    <table class="investor-data-table">
+                      <thead><tr><th>Company</th><th>Note</th></tr></thead>
+                      <tbody>
+                        <tr><td>Fannie Mae</td><td>Largest single gain — 100x return</td></tr>
+                        <tr><td>Ford Motor</td><td>Classic turnaround play</td></tr>
+                        <tr><td>Taco Bell</td><td>"Invest in what you know" example</td></tr>
+                        <tr><td>La Quinta Inns</td><td>Spotted from highway driving</td></tr>
+                        <tr><td>Dunkin Donuts</td><td>Consumer observation pick</td></tr>
+                        <tr><td>Stop &amp; Shop</td><td>Retail value play</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <p class="investor-body"><strong>Current:</strong> Retired from active management. Teaches investing philosophy at Fidelity.</p>
+                  <p class="portfolio-footer-link">🔗 <a href="https://www.dataroma.com" target="_blank" rel="noopener noreferrer">View live data →</a></p>
+                  <p class="investor-disclaimer">📊 Data sourced from SEC 13F filings, Capitol Trades, and public disclosures. Holdings reflect most recent quarterly filing. Actual current holdings may differ.</p>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="investor-card" data-category="legendary">
+            <div class="investor-card-inner">
+              <div class="investor-card-main">
+                <div class="investor-card-head">
+                  <div class="investor-avatar" aria-hidden="true">GR</div>
+                  <div class="investor-card-titles">
+                    <h2 class="investor-name">Benjamin Graham</h2>
+                    <p class="investor-role">Father of Value Investing</p>
+                    <span class="investor-badge badge-legendary">Legendary</span>
+                  </div>
+                </div>
+                <p class="investor-source-badge">📊 Historical — Graham-Newman Fund (deceased 1976)</p>
+                <p class="investor-bio">Buffett's professor; wrote <em>The Intelligent Investor</em>. Created margin of safety and Mr. Market.</p>
+              </div>
+              <button type="button" class="btn secondary investor-expand-btn" aria-expanded="false">View Portfolio</button>
+              <div class="investor-expanded">
+                <div class="portfolio-panel">
+                  <h4 class="portfolio-panel-title">📊 Famous Positions (Historical)</h4>
+                  <p class="portfolio-meta">Source: Historical — Graham-Newman Fund</p>
+                  <ul class="investor-list">
+                    <li><strong>GEICO Insurance</strong> — Bought at massive discount to book</li>
+                    <li>Various deep value plays below liquidation value</li>
+                    <li>Taught: Only buy at 2/3 of net asset value</li>
+                  </ul>
+                  <p class="portfolio-footer-link">🔗 <a href="https://www.dataroma.com" target="_blank" rel="noopener noreferrer">Research tools →</a></p>
+                  <p class="investor-disclaimer">📊 Data sourced from SEC 13F filings, Capitol Trades, and public disclosures. Holdings reflect most recent quarterly filing. Actual current holdings may differ.</p>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="investor-card" data-category="legendary">
+            <div class="investor-card-inner">
+              <div class="investor-card-main">
+                <div class="investor-card-head">
+                  <div class="investor-avatar" aria-hidden="true">MB</div>
+                  <div class="investor-card-titles">
+                    <h2 class="investor-name">Michael Burry</h2>
+                    <p class="investor-role">Founder, Scion Asset Management</p>
+                    <span class="investor-badge badge-legendary">Legendary</span>
+                  </div>
+                </div>
+                <p class="investor-strategy-inline"><strong>Strategy:</strong> Deep Value + Contrarian · <strong>Net worth (approx.):</strong> ~$300M</p>
+                <p class="investor-source-badge">📊 Source: SEC 13F — Scion · <a href="https://www.dataroma.com/m/holdings.php?m=SCI" target="_blank" rel="noopener noreferrer">Dataroma</a></p>
+                <p class="investor-bio">Famous for predicting and profiting from the 2008 housing collapse (<em>The Big Short</em>). Deep fundamental research, extreme concentration, and dramatic quarterly portfolio changes — often betting against consensus.</p>
+              </div>
+              <button type="button" class="btn secondary investor-expand-btn" aria-expanded="false">View Portfolio</button>
+              <div class="investor-expanded">
+                <div class="portfolio-panel">
+                  <h4 class="portfolio-panel-title">Investment Strategy</h4>
+                  <ul class="investor-list">
+                    <li>Find assets priced wrong by the entire market</li>
+                    <li>High conviction — will hold through massive pain</li>
+                    <li>Often bets against the market (short selling)</li>
+                    <li>Changes portfolio dramatically every quarter</li>
+                    <li>Ignores consensus — often alone in the trade</li>
+                  </ul>
+                  <h4 class="portfolio-panel-title">📅 Recent Trades (Q3 2024)</h4>
+                  <div class="table-scroll">
+                    <table class="investor-data-table">
+                      <thead><tr><th>Symbol</th><th>Action</th><th>Detail</th></tr></thead>
+                      <tbody>
+                        <tr><td>JD.com (JD)</td><td>Buy</td><td>~$17M · New position</td></tr>
+                        <tr><td>Alibaba (BABA)</td><td>Buy</td><td>~$20M · New position</td></tr>
+                        <tr><td>HCA Healthcare</td><td>Buy</td><td>~$28M · New position</td></tr>
+                        <tr><td>SPY</td><td>Put</td><td>Large · Bearish market bet</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <h4 class="portfolio-panel-title">Top Holdings</h4>
+                  <p class="investor-body">JD.com, Alibaba, HCA Healthcare, various put options</p>
+                  <h4 class="portfolio-panel-title">Famous Trade</h4>
+                  <p class="investor-body">2008 — Shorted mortgage bonds · ~+489% return · ~$100M personally</p>
+                  <p class="portfolio-footer-link">🔗 <a href="https://www.dataroma.com/m/holdings.php?m=SCI" target="_blank" rel="noopener noreferrer">View live data</a></p>
+                  <p class="investor-disclaimer">📊 Data sourced from SEC 13F filings, Capitol Trades, and public disclosures. Holdings reflect most recent quarterly filing. Actual current holdings may differ.</p>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="investor-card" data-category="legendary">
+            <div class="investor-card-inner">
+              <div class="investor-card-main">
+                <div class="investor-card-head">
+                  <div class="investor-avatar" aria-hidden="true">BO</div>
+                  <div class="investor-card-titles">
+                    <h2 class="investor-name">John Bogle (Legacy)</h2>
+                    <p class="investor-role">Founder, Vanguard</p>
+                    <span class="investor-badge badge-legendary">Legendary</span>
+                  </div>
+                </div>
+                <p class="investor-source-badge">📊 Historical — Vanguard Founder (deceased 2019)</p>
+                <p class="investor-bio">Created index fund investing. "Don't look for the needle in the haystack. Just buy the haystack."</p>
+              </div>
+              <button type="button" class="btn secondary investor-expand-btn" aria-expanded="false">View Portfolio</button>
+              <div class="investor-expanded">
+                <div class="portfolio-panel">
+                  <h4 class="portfolio-panel-title">📊 Index Strategy (Historical)</h4>
+                  <p class="portfolio-meta">Source: Historical — Vanguard</p>
+                  <div class="table-scroll">
+                    <table class="investor-data-table">
+                      <thead><tr><th>Vehicle</th><th>Role</th></tr></thead>
+                      <tbody>
+                        <tr><td>VOO</td><td>Vanguard S&amp;P 500 Index ETF (he created the index fund)</td></tr>
+                        <tr><td>VTI</td><td>Vanguard Total Market ETF</td></tr>
+                        <tr><td>BND</td><td>Vanguard Total Bond Market ETF</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <p class="investor-body"><strong>Legacy:</strong> Saved investors trillions in fees.</p>
+                  <p class="investor-disclaimer">📊 Data sourced from SEC 13F filings, Capitol Trades, and public disclosures. Holdings reflect most recent quarterly filing. Actual current holdings may differ.</p>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="investor-card" data-category="legendary">
+            <div class="investor-card-inner">
+              <div class="investor-card-main">
+                <div class="investor-card-head">
+                  <div class="investor-avatar" aria-hidden="true">PF</div>
+                  <div class="investor-card-titles">
+                    <h2 class="investor-name">Philip Fisher</h2>
+                    <p class="investor-role">Fisher &amp; Company</p>
+                    <span class="investor-badge badge-legendary">Legendary</span>
+                  </div>
+                </div>
+                <p class="investor-source-badge">📊 Historical — Fisher &amp; Company (deceased 2004)</p>
+                <p class="investor-bio">Scuttlebutt method: talk to competitors, customers, and suppliers before buying.</p>
+              </div>
+              <button type="button" class="btn secondary investor-expand-btn" aria-expanded="false">View Portfolio</button>
+              <div class="investor-expanded">
+                <div class="portfolio-panel">
+                  <h4 class="portfolio-panel-title">📊 Famous Positions (Historical)</h4>
+                  <p class="portfolio-meta">Source: Historical — Fisher &amp; Company</p>
+                  <ul class="investor-list">
+                    <li><strong>Texas Instruments</strong> — Held 21 years</li>
+                    <li><strong>Motorola</strong> — Held for decades</li>
+                  </ul>
+                  <p class="investor-disclaimer">📊 Data sourced from SEC 13F filings, Capitol Trades, and public disclosures. Holdings reflect most recent quarterly filing. Actual current holdings may differ.</p>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <!-- CEOs -->
+          <article class="investor-card" data-category="ceos">
+            <div class="investor-card-inner">
+              <div class="investor-card-main">
+                <div class="investor-card-head">
+                  <div class="investor-avatar" aria-hidden="true">EM</div>
+                  <div class="investor-card-titles">
+                    <h2 class="investor-name">Elon Musk</h2>
+                    <p class="investor-role">CEO — Tesla, SpaceX, X</p>
+                    <span class="investor-badge badge-ceos">CEOs</span>
+                  </div>
+                </div>
+                <p class="investor-source-badge">📊 SEC Form 4 + Public Disclosures (TSLA)</p>
+                <p class="investor-bio">Heavy concentration in own companies; frequent Form 4 activity.</p>
+              </div>
+              <button type="button" class="btn secondary investor-expand-btn" aria-expanded="false">View Portfolio</button>
+              <div class="investor-expanded">
+                <div class="portfolio-panel">
+                  <h4 class="portfolio-panel-title">📊 Personal Holdings</h4>
+                  <p class="portfolio-meta">Source: SEC Form 4 — <a href="https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&amp;CIK=TSLA&amp;type=4" target="_blank" rel="noopener noreferrer">TSLA filings</a></p>
+                  <div class="table-scroll">
+                    <table class="investor-data-table">
+                      <thead><tr><th>Asset</th><th>Position</th></tr></thead>
+                      <tbody>
+                        <tr><td>Tesla (TSLA)</td><td>~411M shares · ~$100B+</td></tr>
+                        <tr><td>SpaceX</td><td>Private ~20% · ~$36B est.</td></tr>
+                        <tr><td>X (Twitter)</td><td>Private ~79% · ~$19B est.</td></tr>
+                        <tr><td>xAI / Neuralink</td><td>Private founder stakes</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <h4 class="portfolio-panel-title">📅 Recent Trades</h4>
+                  <div class="table-scroll">
+                    <table class="investor-data-table">
+                      <thead><tr><th>When</th><th>Symbol</th><th>Action</th><th>Detail</th></tr></thead>
+                      <tbody>
+                        <tr><td>2024</td><td>TSLA</td><td>Sold</td><td>~$3.6B to fund Twitter buy</td></tr>
+                        <tr><td>2022</td><td>TSLA</td><td>Sold</td><td>~$15.4B multiple txs</td></tr>
+                        <tr><td>2021</td><td>TSLA</td><td>Sold</td><td>~$16.4B after Twitter poll</td></tr>
+                        <tr><td>2022</td><td>X</td><td>Bought</td><td>Twitter acquisition $44B total</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <p class="portfolio-footer-link">🔗 <a href="https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&amp;CIK=TSLA&amp;type=4" target="_blank" rel="noopener noreferrer">View live SEC Form 4</a></p>
+                  <p class="investor-disclaimer">📊 Data sourced from SEC 13F filings, Capitol Trades, and public disclosures. Holdings reflect most recent quarterly filing. Actual current holdings may differ.</p>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="investor-card" data-category="ceos">
+            <div class="investor-card-inner">
+              <div class="investor-card-main">
+                <div class="investor-card-head">
+                  <div class="investor-avatar" aria-hidden="true">JB</div>
+                  <div class="investor-card-titles">
+                    <h2 class="investor-name">Jeff Bezos</h2>
+                    <p class="investor-role">Founder, Amazon · Executive Chairman</p>
+                    <span class="investor-badge badge-ceos">CEOs</span>
+                  </div>
+                </div>
+                <p class="investor-source-badge">📊 SEC Form 4 — Amazon (AMZN)</p>
+                <p class="investor-bio">Sells AMZN regularly to fund Blue Origin.</p>
+              </div>
+              <button type="button" class="btn secondary investor-expand-btn" aria-expanded="false">View Portfolio</button>
+              <div class="investor-expanded">
+                <div class="portfolio-panel">
+                  <h4 class="portfolio-panel-title">📊 Personal Holdings</h4>
+                  <p class="portfolio-meta">Source: SEC Form 4 — <a href="https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&amp;CIK=AMZN&amp;type=4" target="_blank" rel="noopener noreferrer">AMZN</a></p>
+                  <div class="table-scroll">
+                    <table class="investor-data-table">
+                      <thead><tr><th>Asset</th><th>Position</th></tr></thead>
+                      <tbody>
+                        <tr><td>Amazon (AMZN)</td><td>~970M shares · ~$170B</td></tr>
+                        <tr><td>Blue Origin</td><td>Private 100% · ~$10B est.</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <h4 class="portfolio-panel-title">📅 Recent Trades</h4>
+                  <div class="table-scroll">
+                    <table class="investor-data-table">
+                      <thead><tr><th>When</th><th>Symbol</th><th>Action</th><th>Detail</th></tr></thead>
+                      <tbody>
+                        <tr><td>Feb 2024</td><td>AMZN</td><td>Sold</td><td>50M shares · ~$8.5B</td></tr>
+                        <tr><td>Feb 2024</td><td>AMZN</td><td>Sold</td><td>Additional · ~$4B</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <p class="investor-body"><em>Note: Bezos sells Amazon shares regularly to fund Blue Origin.</em></p>
+                  <p class="portfolio-footer-link">🔗 <a href="https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&amp;CIK=AMZN&amp;type=4" target="_blank" rel="noopener noreferrer">View live data</a></p>
+                  <p class="investor-disclaimer">📊 Data sourced from SEC 13F filings, Capitol Trades, and public disclosures. Holdings reflect most recent quarterly filing. Actual current holdings may differ.</p>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="investor-card" data-category="ceos">
+            <div class="investor-card-inner">
+              <div class="investor-card-main">
+                <div class="investor-card-head">
+                  <div class="investor-avatar" aria-hidden="true">BG</div>
+                  <div class="investor-card-titles">
+                    <h2 class="investor-name">Bill Gates</h2>
+                    <p class="investor-role">Gates Foundation Trust</p>
+                    <span class="investor-badge badge-ceos">CEOs</span>
+                  </div>
+                </div>
+                <p class="investor-source-badge">📊 Gates Foundation Trust 13F · Q3 2024</p>
+                <p class="investor-bio">Diversified value tilt via foundation trust holdings.</p>
+              </div>
+              <button type="button" class="btn secondary investor-expand-btn" aria-expanded="false">View Portfolio</button>
+              <div class="investor-expanded">
+                <div class="portfolio-panel">
+                  <h4 class="portfolio-panel-title">📊 Portfolio Holdings</h4>
+                  <p class="portfolio-meta">Source: 13F — <a href="https://www.dataroma.com/m/holdings.php?m=GFT" target="_blank" rel="noopener noreferrer">GFT (Dataroma)</a></p>
+                  <div class="table-scroll">
+                    <table class="investor-data-table">
+                      <thead><tr><th>Holding</th><th>Position</th><th>%</th></tr></thead>
+                      <tbody>
+                        <tr><td>MSFT</td><td>~38M shares · ~$17B</td><td>33%</td></tr>
+                        <tr><td>BRK.B</td><td>~14M shares · ~$7B</td><td>17%</td></tr>
+                        <tr><td>CNI</td><td>~54M shares · ~$6B</td><td>16%</td></tr>
+                        <tr><td>WM</td><td>~35M shares · ~$7B</td><td>15%</td></tr>
+                        <tr><td>CAT</td><td>~5M shares · ~$2B</td><td>5%</td></tr>
+                        <tr><td>WMT</td><td>~11M shares · ~$2B</td><td>4%</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <h4 class="portfolio-panel-title">📅 Recent Trades</h4>
+                  <div class="table-scroll">
+                    <table class="investor-data-table">
+                      <thead><tr><th>Period</th><th>Symbol</th><th>Action</th><th>Detail</th></tr></thead>
+                      <tbody>
+                        <tr><td>Q3 2024</td><td>WM</td><td>Buy</td><td>Added 3M shares · ~$600M</td></tr>
+                        <tr><td>Q2 2024</td><td>CAT</td><td>Buy</td><td>New position · ~$800M</td></tr>
+                        <tr><td>Q1 2024</td><td>MSFT</td><td>Hold</td><td>Maintained large position</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <p class="portfolio-footer-link">🔗 <a href="https://www.dataroma.com/m/holdings.php?m=GFT" target="_blank" rel="noopener noreferrer">View live data</a></p>
+                  <p class="investor-disclaimer">📊 Data sourced from SEC 13F filings, Capitol Trades, and public disclosures. Holdings reflect most recent quarterly filing. Actual current holdings may differ.</p>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="investor-card" data-category="ceos">
+            <div class="investor-card-inner">
+              <div class="investor-card-main">
+                <div class="investor-card-head">
+                  <div class="investor-avatar" aria-hidden="true">CW</div>
+                  <div class="investor-card-titles">
+                    <h2 class="investor-name">Cathie Wood</h2>
+                    <p class="investor-role">CEO &amp; CIO, ARK Invest</p>
+                    <span class="investor-badge badge-ceos">CEOs</span>
+                  </div>
+                </div>
+                <p class="investor-source-badge">📊 ARK Invest Daily Holdings · Q4 2024</p>
+                <p class="investor-bio">ARKK — disruptive innovation, high conviction.</p>
+              </div>
+              <button type="button" class="btn secondary investor-expand-btn" aria-expanded="false">View Portfolio</button>
+              <div class="investor-expanded">
+                <div class="portfolio-panel">
+                  <h4 class="portfolio-panel-title">📊 ARKK Top Holdings</h4>
+                  <p class="portfolio-meta">Source: ARK Daily Disclosure · <a href="https://ark-funds.com/funds/arkk/" target="_blank" rel="noopener noreferrer">ARKK</a></p>
+                  <div class="table-scroll">
+                    <table class="investor-data-table">
+                      <thead><tr><th>Symbol</th><th>Position</th><th>%</th></tr></thead>
+                      <tbody>
+                        <tr><td>TSLA</td><td>~8.5M shares · ~$2.1B</td><td>11%</td></tr>
+                        <tr><td>COIN</td><td>~6.2M shares · ~$1.8B</td><td>9%</td></tr>
+                        <tr><td>RBLX</td><td>~25M shares · ~$900M</td><td>8%</td></tr>
+                        <tr><td>ROKU</td><td>~13M shares · ~$1.2B</td><td>7%</td></tr>
+                        <tr><td>SQ</td><td>~10M shares · ~$750M</td><td>6%</td></tr>
+                        <tr><td>PLTR</td><td>~15M shares · ~$600M</td><td>5%</td></tr>
+                        <tr><td>PATH</td><td>~35M shares · ~$450M</td><td>4%</td></tr>
+                        <tr><td>TWLO</td><td>~9M shares · ~$500M</td><td>4%</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <h4 class="portfolio-panel-title">📅 Recent Trades</h4>
+                  <div class="table-scroll">
+                    <table class="investor-data-table">
+                      <thead><tr><th>Period</th><th>Symbol</th><th>Action</th><th>Detail</th></tr></thead>
+                      <tbody>
+                        <tr><td>Q4 2024</td><td>PLTR</td><td>Buy</td><td>Added heavily · ~$200M</td></tr>
+                        <tr><td>Q4 2024</td><td>TSLA</td><td>Buy</td><td>Added on dip · ~$150M</td></tr>
+                        <tr><td>Q3 2024</td><td>COIN</td><td>Buy</td><td>~$300M</td></tr>
+                        <tr><td>Q3 2024</td><td>ROKU</td><td>Sell</td><td>Trimmed · ~$100M</td></tr>
+                        <tr><td>Q2 2024</td><td>NVDA</td><td>Sell</td><td>Sold entirely · ~$500M</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <p class="portfolio-footer-link">🔗 <a href="https://ark-funds.com/funds/arkk/" target="_blank" rel="noopener noreferrer">ARK daily holdings</a></p>
+                  <p class="investor-disclaimer">📊 Data sourced from SEC 13F filings, Capitol Trades, and public disclosures. Holdings reflect most recent quarterly filing. Actual current holdings may differ.</p>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="investor-card" data-category="ceos">
+            <div class="investor-card-inner">
+              <div class="investor-card-main">
+                <div class="investor-card-head">
+                  <div class="investor-avatar" aria-hidden="true">JH</div>
+                  <div class="investor-card-titles">
+                    <h2 class="investor-name">Jensen Huang</h2>
+                    <p class="investor-role">CEO, Nvidia</p>
+                    <span class="investor-badge badge-ceos">CEOs</span>
+                  </div>
+                </div>
+                <p class="investor-source-badge">📊 SEC Form 4 — NVDA</p>
+                <p class="investor-bio">Sells under 10b5-1 plans; retains massive majority stake.</p>
+              </div>
+              <button type="button" class="btn secondary investor-expand-btn" aria-expanded="false">View Portfolio</button>
+              <div class="investor-expanded">
+                <div class="portfolio-panel">
+                  <h4 class="portfolio-panel-title">📊 Personal Holdings</h4>
+                  <p class="portfolio-meta">Source: SEC Form 4 — <a href="https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&amp;CIK=NVDA&amp;type=4" target="_blank" rel="noopener noreferrer">NVDA</a></p>
+                  <div class="table-scroll">
+                    <table class="investor-data-table">
+                      <thead><tr><th>Asset</th><th>Position</th></tr></thead>
+                      <tbody>
+                        <tr><td>Nvidia (NVDA)</td><td>~86M shares · ~$105B (post split)</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <h4 class="portfolio-panel-title">📅 Recent Trades</h4>
+                  <div class="table-scroll">
+                    <table class="investor-data-table">
+                      <thead><tr><th>When</th><th>Symbol</th><th>Action</th><th>Detail</th></tr></thead>
+                      <tbody>
+                        <tr><td>2024</td><td>NVDA</td><td>Sold</td><td>~6M shares plan · ~$169M</td></tr>
+                        <tr><td>2024</td><td>NVDA</td><td>Sold</td><td>Regular 10b5-1 · ~$300M+</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <p class="investor-body"><em>Still holds vast majority of stake.</em></p>
+                  <p class="portfolio-footer-link">🔗 <a href="https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&amp;CIK=NVDA&amp;type=4" target="_blank" rel="noopener noreferrer">View live Form 4</a></p>
+                  <p class="investor-disclaimer">📊 Data sourced from SEC 13F filings, Capitol Trades, and public disclosures. Holdings reflect most recent quarterly filing. Actual current holdings may differ.</p>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="investor-card" data-category="ceos">
+            <div class="investor-card-inner">
+              <div class="investor-card-main">
+                <div class="investor-card-head">
+                  <div class="investor-avatar" aria-hidden="true">MZ</div>
+                  <div class="investor-card-titles">
+                    <h2 class="investor-name">Mark Zuckerberg</h2>
+                    <p class="investor-role">CEO, Meta</p>
+                    <span class="investor-badge badge-ceos">CEOs</span>
+                  </div>
+                </div>
+                <p class="investor-source-badge">📊 SEC Form 4 — META</p>
+                <p class="investor-bio">Planned sales for philanthropy via 10b5-1.</p>
+              </div>
+              <button type="button" class="btn secondary investor-expand-btn" aria-expanded="false">View Portfolio</button>
+              <div class="investor-expanded">
+                <div class="portfolio-panel">
+                  <h4 class="portfolio-panel-title">📊 Personal Holdings</h4>
+                  <p class="portfolio-meta">Source: SEC Form 4 — <a href="https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&amp;CIK=META&amp;type=4" target="_blank" rel="noopener noreferrer">META</a></p>
+                  <div class="table-scroll">
+                    <table class="investor-data-table">
+                      <thead><tr><th>Asset</th><th>Position</th></tr></thead>
+                      <tbody>
+                        <tr><td>Meta (META)</td><td>~350M shares · ~$177B</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <h4 class="portfolio-panel-title">📅 Recent Trades</h4>
+                  <div class="table-scroll">
+                    <table class="investor-data-table">
+                      <thead><tr><th>When</th><th>Symbol</th><th>Action</th><th>Detail</th></tr></thead>
+                      <tbody>
+                        <tr><td>2024</td><td>META</td><td>Sold</td><td>~1.4M shares · ~$888M</td></tr>
+                        <tr><td>2024</td><td>META</td><td>Sold</td><td>Regular plan · ~$400M+</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <p class="portfolio-footer-link">🔗 <a href="https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&amp;CIK=META&amp;type=4" target="_blank" rel="noopener noreferrer">View live Form 4</a></p>
+                  <p class="investor-disclaimer">📊 Data sourced from SEC 13F filings, Capitol Trades, and public disclosures. Holdings reflect most recent quarterly filing. Actual current holdings may differ.</p>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <!-- Hedge Funds -->
+          <article class="investor-card" data-category="hedge">
+            <div class="investor-card-inner">
+              <div class="investor-card-main">
+                <div class="investor-card-head">
+                  <div class="investor-avatar" aria-hidden="true">RD</div>
+                  <div class="investor-card-titles">
+                    <h2 class="investor-name">Ray Dalio</h2>
+                    <p class="investor-role">Founder, Bridgewater Associates</p>
+                    <span class="investor-badge badge-hedge">Hedge Funds</span>
+                  </div>
+                </div>
+                <p class="investor-source-badge">📊 SEC 13F — Bridgewater · Q3 2024</p>
+                <p class="investor-bio">All Weather / macro; large ETF sleeves.</p>
+              </div>
+              <button type="button" class="btn secondary investor-expand-btn" aria-expanded="false">View Portfolio</button>
+              <div class="investor-expanded">
+                <div class="portfolio-panel">
+                  <h4 class="portfolio-panel-title">📊 Portfolio Holdings</h4>
+                  <p class="portfolio-meta">Source: SEC 13F — <a href="https://www.dataroma.com/m/holdings.php?m=BRI" target="_blank" rel="noopener noreferrer">Bridgewater (Dataroma)</a></p>
+                  <div class="table-scroll">
+                    <table class="investor-data-table">
+                      <thead><tr><th>Symbol</th><th>Position</th><th>%</th></tr></thead>
+                      <tbody>
+                        <tr><td>SPY</td><td>~3.9M shares · ~$1.7B</td><td>20%</td></tr>
+                        <tr><td>IVV</td><td>~1.6M shares · ~$920M</td><td>11%</td></tr>
+                        <tr><td>EEM</td><td>~10.5M shares · ~$420M</td><td>8%</td></tr>
+                        <tr><td>GLD</td><td>~3.7M shares · ~$620M</td><td>7%</td></tr>
+                        <tr><td>VWO</td><td>~8.3M shares · ~$370M</td><td>6%</td></tr>
+                        <tr><td>IEMG</td><td>~6.2M shares · ~$360M</td><td>5%</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <h4 class="portfolio-panel-title">📅 Recent Trades</h4>
+                  <div class="table-scroll">
+                    <table class="investor-data-table">
+                      <thead><tr><th>Period</th><th>Symbol</th><th>Action</th><th>Detail</th></tr></thead>
+                      <tbody>
+                        <tr><td>Q3 2024</td><td>SPY</td><td>Buy</td><td>~$300M</td></tr>
+                        <tr><td>Q3 2024</td><td>GLD</td><td>Buy</td><td>~$150M</td></tr>
+                        <tr><td>Q2 2024</td><td>EEM</td><td>Buy</td><td>~$200M</td></tr>
+                        <tr><td>Q1 2024</td><td>IVV</td><td>Buy</td><td>~$180M</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <p class="portfolio-footer-link">🔗 <a href="https://www.dataroma.com/m/holdings.php?m=BRI" target="_blank" rel="noopener noreferrer">View live data</a></p>
+                  <p class="investor-disclaimer">📊 Data sourced from SEC 13F filings, Capitol Trades, and public disclosures. Holdings reflect most recent quarterly filing. Actual current holdings may differ.</p>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="investor-card" data-category="hedge">
+            <div class="investor-card-inner">
+              <div class="investor-card-main">
+                <div class="investor-card-head">
+                  <div class="investor-avatar" aria-hidden="true">BA</div>
+                  <div class="investor-card-titles">
+                    <h2 class="investor-name">Bill Ackman</h2>
+                    <p class="investor-role">CEO, Pershing Square</p>
+                    <span class="investor-badge badge-hedge">Hedge Funds</span>
+                  </div>
+                </div>
+                <p class="investor-source-badge">📊 SEC 13F — Pershing Square · Q4 2024</p>
+                <p class="investor-bio">Concentrated activist positions.</p>
+              </div>
+              <button type="button" class="btn secondary investor-expand-btn" aria-expanded="false">View Portfolio</button>
+              <div class="investor-expanded">
+                <div class="portfolio-panel">
+                  <h4 class="portfolio-panel-title">📊 Portfolio Holdings</h4>
+                  <p class="portfolio-meta">Source: <a href="https://www.dataroma.com/m/holdings.php?m=PS" target="_blank" rel="noopener noreferrer">Pershing Square</a></p>
+                  <div class="table-scroll">
+                    <table class="investor-data-table">
+                      <thead><tr><th>Symbol</th><th>Position</th><th>%</th></tr></thead>
+                      <tbody>
+                        <tr><td>HLT</td><td>~9.5M shares · ~$2.1B</td><td>18%</td></tr>
+                        <tr><td>CMG</td><td>~705K shares · ~$2.0B</td><td>17%</td></tr>
+                        <tr><td>QSR</td><td>~17M shares · ~$1.1B</td><td>13%</td></tr>
+                        <tr><td>GOOGL</td><td>~3.6M shares · ~$630M</td><td>11%</td></tr>
+                        <tr><td>HHH</td><td>~6.5M shares · ~$570M</td><td>9%</td></tr>
+                        <tr><td>NKE</td><td>~17M shares · ~$1.3B</td><td>8%</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <h4 class="portfolio-panel-title">📅 Recent Trades</h4>
+                  <div class="table-scroll">
+                    <table class="investor-data-table">
+                      <thead><tr><th>Period</th><th>Symbol</th><th>Action</th><th>Detail</th></tr></thead>
+                      <tbody>
+                        <tr><td>Q4 2024</td><td>NKE</td><td>Buy</td><td>New · ~$1.3B</td></tr>
+                        <tr><td>Q3 2024</td><td>HLT</td><td>Buy</td><td>~$400M</td></tr>
+                        <tr><td>Q2 2024</td><td>GOOGL</td><td>Buy</td><td>New · ~$630M</td></tr>
+                        <tr><td>Q1 2024</td><td>CMG</td><td>Hold</td><td>Maintained</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <p class="portfolio-footer-link">🔗 <a href="https://www.dataroma.com/m/holdings.php?m=PS" target="_blank" rel="noopener noreferrer">View live data</a></p>
+                  <p class="investor-disclaimer">📊 Data sourced from SEC 13F filings, Capitol Trades, and public disclosures. Holdings reflect most recent quarterly filing. Actual current holdings may differ.</p>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="investor-card" data-category="hedge">
+            <div class="investor-card-inner">
+              <div class="investor-card-main">
+                <div class="investor-card-head">
+                  <div class="investor-avatar" aria-hidden="true">GS</div>
+                  <div class="investor-card-titles">
+                    <h2 class="investor-name">George Soros</h2>
+                    <p class="investor-role">Soros Fund Management</p>
+                    <span class="investor-badge badge-hedge">Hedge Funds</span>
+                  </div>
+                </div>
+                <p class="investor-source-badge">📊 SEC 13F — Soros · Q3 2024</p>
+                <p class="investor-bio">Global macro; high turnover themes.</p>
+              </div>
+              <button type="button" class="btn secondary investor-expand-btn" aria-expanded="false">View Portfolio</button>
+              <div class="investor-expanded">
+                <div class="portfolio-panel">
+                  <h4 class="portfolio-panel-title">📊 Portfolio Holdings</h4>
+                  <p class="portfolio-meta">Source: <a href="https://www.dataroma.com/m/holdings.php?m=SFM" target="_blank" rel="noopener noreferrer">Soros Fund</a></p>
+                  <div class="table-scroll">
+                    <table class="investor-data-table">
+                      <thead><tr><th>Symbol</th><th>Position</th><th>%</th></tr></thead>
+                      <tbody>
+                        <tr><td>NVDA</td><td>~180K shares · ~$235M</td><td>12%</td></tr>
+                        <tr><td>AMZN</td><td>~700K shares · ~$134M</td><td>9%</td></tr>
+                        <tr><td>PLTR</td><td>~2.7M shares · ~$74M</td><td>6%</td></tr>
+                        <tr><td>META</td><td>~225K shares · ~$144M</td><td>8%</td></tr>
+                        <tr><td>MSFT</td><td>~420K shares · ~$180M</td><td>10%</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <h4 class="portfolio-panel-title">📅 Recent Trades</h4>
+                  <div class="table-scroll">
+                    <table class="investor-data-table">
+                      <thead><tr><th>Period</th><th>Symbol</th><th>Action</th><th>Detail</th></tr></thead>
+                      <tbody>
+                        <tr><td>Q3 2024</td><td>NVDA</td><td>Buy</td><td>New · ~$235M</td></tr>
+                        <tr><td>Q3 2024</td><td>PLTR</td><td>Buy</td><td>~$74M</td></tr>
+                        <tr><td>Q2 2024</td><td>TSLA</td><td>Sell</td><td>Exited · ~$50M</td></tr>
+                        <tr><td>Q1 2024</td><td>META</td><td>Buy</td><td>~$144M</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <p class="portfolio-footer-link">🔗 <a href="https://www.dataroma.com/m/holdings.php?m=SFM" target="_blank" rel="noopener noreferrer">View live data</a></p>
+                  <p class="investor-disclaimer">📊 Data sourced from SEC 13F filings, Capitol Trades, and public disclosures. Holdings reflect most recent quarterly filing. Actual current holdings may differ.</p>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="investor-card" data-category="hedge">
+            <div class="investor-card-inner">
+              <div class="investor-card-main">
+                <div class="investor-card-head">
+                  <div class="investor-avatar" aria-hidden="true">KG</div>
+                  <div class="investor-card-titles">
+                    <h2 class="investor-name">Ken Griffin</h2>
+                    <p class="investor-role">Citadel Advisors</p>
+                    <span class="investor-badge badge-hedge">Hedge Funds</span>
+                  </div>
+                </div>
+                <p class="investor-source-badge">📊 SEC 13F — Citadel · Q3 2024 (5000+ positions)</p>
+                <p class="investor-bio">Quant — very high turnover.</p>
+              </div>
+              <button type="button" class="btn secondary investor-expand-btn" aria-expanded="false">View Portfolio</button>
+              <div class="investor-expanded">
+                <div class="portfolio-panel">
+                  <h4 class="portfolio-panel-title">📊 Top Holdings</h4>
+                  <p class="portfolio-meta">Source: <a href="https://www.dataroma.com/m/holdings.php?m=CIT" target="_blank" rel="noopener noreferrer">Citadel</a></p>
+                  <div class="table-scroll">
+                    <table class="investor-data-table">
+                      <thead><tr><th>Symbol</th><th>Position</th><th>%</th></tr></thead>
+                      <tbody>
+                        <tr><td>SPY</td><td>~2.1M shares · ~$915M</td><td>3%</td></tr>
+                        <tr><td>NVDA</td><td>~6.2M shares · ~$780M</td><td>2%</td></tr>
+                        <tr><td>AAPL</td><td>~11M shares · ~$220M</td><td>1%</td></tr>
+                        <tr><td>MSFT</td><td>~5.2M shares · ~$2.2B</td><td>2%</td></tr>
+                        <tr><td>AMZN</td><td>~12M shares · ~$235M</td><td>1%</td></tr>
+                        <tr><td>QQQ</td><td>~3.1M shares · ~$1.6B</td><td>2%</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <h4 class="portfolio-panel-title">📅 Recent Trades</h4>
+                  <p class="investor-body">Q3 2024 NVDA buy ~$400M; SPY ~$300M; Q2 AAPL ~$100M. <em>Most portfolio turns over each quarter.</em></p>
+                  <p class="portfolio-footer-link">🔗 <a href="https://www.dataroma.com/m/holdings.php?m=CIT" target="_blank" rel="noopener noreferrer">View live data</a></p>
+                  <p class="investor-disclaimer">📊 Data sourced from SEC 13F filings, Capitol Trades, and public disclosures. Holdings reflect most recent quarterly filing. Actual current holdings may differ.</p>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="investor-card" data-category="hedge">
+            <div class="investor-card-inner">
+              <div class="investor-card-main">
+                <div class="investor-card-head">
+                  <div class="investor-avatar" aria-hidden="true">TP</div>
+                  <div class="investor-card-titles">
+                    <h2 class="investor-name">David Tepper</h2>
+                    <p class="investor-role">Appaloosa Management</p>
+                    <span class="investor-badge badge-hedge">Hedge Funds</span>
+                  </div>
+                </div>
+                <p class="investor-source-badge">📊 SEC 13F — Appaloosa · Q3 2024</p>
+                <p class="investor-bio">Large-cap tech and macro themes.</p>
+              </div>
+              <button type="button" class="btn secondary investor-expand-btn" aria-expanded="false">View Portfolio</button>
+              <div class="investor-expanded">
+                <div class="portfolio-panel">
+                  <h4 class="portfolio-panel-title">📊 Portfolio Holdings</h4>
+                  <p class="portfolio-meta">Source: <a href="https://www.dataroma.com/m/holdings.php?m=APP" target="_blank" rel="noopener noreferrer">Appaloosa</a></p>
+                  <div class="table-scroll">
+                    <table class="investor-data-table">
+                      <thead><tr><th>Symbol</th><th>Position</th><th>%</th></tr></thead>
+                      <tbody>
+                        <tr><td>NVDA</td><td>~3.5M shares · ~$430M</td><td>16%</td></tr>
+                        <tr><td>AMZN</td><td>~2.2M shares · ~$425M</td><td>15%</td></tr>
+                        <tr><td>META</td><td>~730K shares · ~$465M</td><td>17%</td></tr>
+                        <tr><td>MSFT</td><td>~900K shares · ~$390M</td><td>14%</td></tr>
+                        <tr><td>GOOGL</td><td>~2.8M shares · ~$490M</td><td>18%</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <h4 class="portfolio-panel-title">📅 Recent Trades</h4>
+                  <div class="table-scroll">
+                    <table class="investor-data-table">
+                      <thead><tr><th>Period</th><th>Symbol</th><th>Action</th><th>Detail</th></tr></thead>
+                      <tbody>
+                        <tr><td>Q3 2024</td><td>NVDA</td><td>Buy</td><td>~$200M</td></tr>
+                        <tr><td>Q3 2024</td><td>META</td><td>Buy</td><td>~$150M</td></tr>
+                        <tr><td>Q2 2024</td><td>BABA</td><td>Buy</td><td>China bet ~$100M</td></tr>
+                        <tr><td>Q2 2024</td><td>AMZN</td><td>Buy</td><td>~$200M</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <p class="portfolio-footer-link">🔗 <a href="https://www.dataroma.com/m/holdings.php?m=APP" target="_blank" rel="noopener noreferrer">View live data</a></p>
+                  <p class="investor-disclaimer">📊 Data sourced from SEC 13F filings, Capitol Trades, and public disclosures. Holdings reflect most recent quarterly filing. Actual current holdings may differ.</p>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="investor-card" data-category="hedge">
+            <div class="investor-card-inner">
+              <div class="investor-card-main">
+                <div class="investor-card-head">
+                  <div class="investor-avatar" aria-hidden="true">SC</div>
+                  <div class="investor-card-titles">
+                    <h2 class="investor-name">Steve Cohen</h2>
+                    <p class="investor-role">Point72 Asset Management</p>
+                    <span class="investor-badge badge-hedge">Hedge Funds</span>
+                  </div>
+                </div>
+                <p class="investor-source-badge">📊 SEC 13F — Point72 · Q3 2024</p>
+                <p class="investor-bio">Multi-strategy; heavy tech names.</p>
+              </div>
+              <button type="button" class="btn secondary investor-expand-btn" aria-expanded="false">View Portfolio</button>
+              <div class="investor-expanded">
+                <div class="portfolio-panel">
+                  <h4 class="portfolio-panel-title">📊 Portfolio Holdings</h4>
+                  <p class="portfolio-meta">Source: <a href="https://www.dataroma.com/m/holdings.php?m=PT7" target="_blank" rel="noopener noreferrer">Point72</a></p>
+                  <div class="table-scroll">
+                    <table class="investor-data-table">
+                      <thead><tr><th>Symbol</th><th>Position</th><th>%</th></tr></thead>
+                      <tbody>
+                        <tr><td>NVDA</td><td>~4.3M shares · ~$525M</td><td>10%</td></tr>
+                        <tr><td>MSFT</td><td>~3.1M shares · ~$1.3B</td><td>8%</td></tr>
+                        <tr><td>AMZN</td><td>~4.5M shares · ~$870M</td><td>7%</td></tr>
+                        <tr><td>META</td><td>~1.1M shares · ~$700M</td><td>6%</td></tr>
+                        <tr><td>AAPL</td><td>~5.2M shares · ~$1.1B</td><td>5%</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <h4 class="portfolio-panel-title">📅 Recent Trades</h4>
+                  <div class="table-scroll">
+                    <table class="investor-data-table">
+                      <thead><tr><th>Period</th><th>Symbol</th><th>Action</th><th>Detail</th></tr></thead>
+                      <tbody>
+                        <tr><td>Q3 2024</td><td>NVDA</td><td>Buy</td><td>~$300M</td></tr>
+                        <tr><td>Q3 2024</td><td>AMZN</td><td>Buy</td><td>~$200M</td></tr>
+                        <tr><td>Q2 2024</td><td>META</td><td>Buy</td><td>New ~$400M</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <p class="portfolio-footer-link">🔗 <a href="https://www.dataroma.com/m/holdings.php?m=PT7" target="_blank" rel="noopener noreferrer">View live data</a></p>
+                  <p class="investor-disclaimer">📊 Data sourced from SEC 13F filings, Capitol Trades, and public disclosures. Holdings reflect most recent quarterly filing. Actual current holdings may differ.</p>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="investor-card" data-category="hedge">
+            <div class="investor-card-inner">
+              <div class="investor-card-main">
+                <div class="investor-card-head">
+                  <div class="investor-avatar" aria-hidden="true">PT</div>
+                  <div class="investor-card-titles">
+                    <h2 class="investor-name">Paul Tudor Jones</h2>
+                    <p class="investor-role">Founder, Tudor Investment Corp</p>
+                    <span class="investor-badge badge-hedge">Hedge Funds</span>
+                  </div>
+                </div>
+                <p class="investor-strategy-inline"><strong>Strategy:</strong> Global Macro + Technical Analysis · <strong>Net worth (approx.):</strong> ~$8B</p>
+                <p class="investor-source-badge">📊 Public interviews + 13F filings</p>
+                <p class="investor-bio">One of the most famous macro traders — known for navigating the 1987 Black Monday crash and for emphasizing risk management, gold, and Bitcoin as inflation hedges.</p>
+              </div>
+              <button type="button" class="btn secondary investor-expand-btn" aria-expanded="false">View Portfolio</button>
+              <div class="investor-expanded">
+                <div class="portfolio-panel">
+                  <h4 class="portfolio-panel-title">Strategy</h4>
+                  <ul class="investor-list">
+                    <li>Technical analysis — charts tell the story</li>
+                    <li>Never average down on losing trades</li>
+                    <li>Risk management above everything else</li>
+                    <li>Gold and Bitcoin as inflation stores of value</li>
+                    <li>Target 5:1 reward-to-risk on trades</li>
+                  </ul>
+                  <p class="investor-body"><em>“The most important rule of trading is to play great defense, not great offense.”</em></p>
+                  <h4 class="portfolio-panel-title">Recent Known Positions (2024)</h4>
+                  <ul class="investor-list">
+                    <li>Gold (GLD/futures) — large long</li>
+                    <li>Bitcoin (BTC) — ~5% of portfolio (interviews)</li>
+                    <li>S&amp;P futures — tactical trades</li>
+                    <li>Inflation hedges — TIPS, commodities</li>
+                  </ul>
+                  <h4 class="portfolio-panel-title">Famous Trade</h4>
+                  <p class="investor-body">Oct 1987 — Shorted S&amp;P 500 before Black Monday · ~+200% during crash</p>
+                  <p class="investor-disclaimer">📊 Data sourced from SEC 13F filings, Capitol Trades, and public disclosures. Holdings reflect most recent quarterly filing. Actual current holdings may differ.</p>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <!-- Federal Reserve -->
+          <article class="investor-card" data-category="fed">
+            <div class="investor-card-inner">
+              <div class="investor-card-main">
+                <div class="investor-card-head">
+                  <div class="investor-avatar" aria-hidden="true">JP</div>
+                  <div class="investor-card-titles">
+                    <h2 class="investor-name">Jerome Powell</h2>
+                    <p class="investor-role">Federal Reserve Chair</p>
+                    <span class="investor-badge badge-fed">Federal Reserve</span>
+                  </div>
+                </div>
+                <p class="investor-source-badge">📊 Fed disclosures · Policy focus (restricted stock rules)</p>
+                <p class="investor-bio">Rate decisions move all markets; banned from individual stocks since 2021 ethics rule.</p>
+              </div>
+              <button type="button" class="btn secondary investor-expand-btn" aria-expanded="false">View Portfolio</button>
+              <div class="investor-expanded">
+                <div class="portfolio-panel">
+                  <h4 class="portfolio-panel-title">📊 Disclosed Personal Holdings</h4>
+                  <p class="portfolio-meta">Source: Federal Reserve disclosures · <a href="https://www.federalreserve.gov/aboutthefed/bios/board/powell.htm" target="_blank" rel="noopener noreferrer">Bio</a></p>
+                  <ul class="investor-list">
+                    <li>Vanguard index funds — $1M–$5M range</li>
+                    <li>BlackRock funds — $1M–$5M range</li>
+                    <li>Municipal bonds — various</li>
+                  </ul>
+                  <h4 class="portfolio-panel-title">📅 Key Rate Decisions &amp; Market Impact</h4>
+                  <div class="table-scroll">
+                    <table class="investor-data-table">
+                      <thead><tr><th>When</th><th>Decision</th><th>Impact</th></tr></thead>
+                      <tbody>
+                        <tr><td>Mar 2020</td><td>Rates → 0%</td><td>S&amp;P +70% over next year</td></tr>
+                        <tr><td>Mar 2022</td><td>First hike</td><td>S&amp;P fell ~20%</td></tr>
+                        <tr><td>2022–23</td><td>11 hikes</td><td>Markets fell hard</td></tr>
+                        <tr><td>Sep 2024</td><td>First cut 0.5%</td><td>S&amp;P ATH</td></tr>
+                        <tr><td>Dec 2024</td><td>Cut again</td><td>Rally</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <p class="portfolio-footer-link">🔗 <a href="https://www.federalreserve.gov/aboutthefed/bios/board/powell.htm" target="_blank" rel="noopener noreferrer">Fed bio</a></p>
+                  <p class="investor-disclaimer">📊 Data sourced from SEC 13F filings, Capitol Trades, and public disclosures. Fed officials: policy tables illustrative. Actual current holdings may differ.</p>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="investor-card" data-category="fed">
+            <div class="investor-card-inner">
+              <div class="investor-card-main">
+                <div class="investor-card-head">
+                  <div class="investor-avatar" aria-hidden="true">JY</div>
+                  <div class="investor-card-titles">
+                    <h2 class="investor-name">Janet Yellen</h2>
+                    <p class="investor-role">Treasury Secretary · Former Fed Chair</p>
+                    <span class="investor-badge badge-fed">Federal Reserve</span>
+                  </div>
+                </div>
+                <p class="investor-source-badge">📊 Treasury disclosures</p>
+                <p class="investor-bio">Fiscal + monetary influence; dove reputation.</p>
+              </div>
+              <button type="button" class="btn secondary investor-expand-btn" aria-expanded="false">View Portfolio</button>
+              <div class="investor-expanded">
+                <div class="portfolio-panel">
+                  <h4 class="portfolio-panel-title">📅 Key Decisions &amp; Market Impact</h4>
+                  <p class="portfolio-meta">Source: <a href="https://home.treasury.gov" target="_blank" rel="noopener noreferrer">Treasury</a></p>
+                  <div class="table-scroll">
+                    <table class="investor-data-table">
+                      <thead><tr><th>When</th><th>Topic</th><th>Effect</th></tr></thead>
+                      <tbody>
+                        <tr><td>2021</td><td>$1.9T stimulus</td><td>Inflation concerns rose</td></tr>
+                        <tr><td>2021</td><td>Near-zero rates support</td><td>Markets surged</td></tr>
+                        <tr><td>2022</td><td>Debt ceiling</td><td>Volatility</td></tr>
+                        <tr><td>2023</td><td>SVB response</td><td>Banking stocks fell</td></tr>
+                        <tr><td>2024</td><td>Spending decisions</td><td>Dollar moves</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <p class="portfolio-footer-link">🔗 <a href="https://home.treasury.gov" target="_blank" rel="noopener noreferrer">Treasury</a></p>
+                  <p class="investor-disclaimer">📊 Data sourced from SEC 13F filings, Capitol Trades, and public disclosures. Holdings reflect most recent quarterly filing. Actual current holdings may differ.</p>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="investor-card" data-category="fed">
+            <div class="investor-card-inner">
+              <div class="investor-card-main">
+                <div class="investor-card-head">
+                  <div class="investor-avatar" aria-hidden="true">BB</div>
+                  <div class="investor-card-titles">
+                    <h2 class="investor-name">Ben Bernanke</h2>
+                    <p class="investor-role">Former Fed Chair · Nobel 2022</p>
+                    <span class="investor-badge badge-fed">Federal Reserve</span>
+                  </div>
+                </div>
+                <p class="investor-source-badge">📊 Historical Fed records</p>
+                <p class="investor-bio">QE era; emergency response during GFC.</p>
+              </div>
+              <button type="button" class="btn secondary investor-expand-btn" aria-expanded="false">View Portfolio</button>
+              <div class="investor-expanded">
+                <div class="portfolio-panel">
+                  <h4 class="portfolio-panel-title">📅 Key Decisions (2006–2014)</h4>
+                  <div class="table-scroll">
+                    <table class="investor-data-table">
+                      <thead><tr><th>When</th><th>Decision</th><th>Impact</th></tr></thead>
+                      <tbody>
+                        <tr><td>2008</td><td>Emergency cuts to 0%</td><td>Saved banking system</td></tr>
+                        <tr><td>2008</td><td>TARP $700B</td><td>Markets stabilized</td></tr>
+                        <tr><td>2010</td><td>QE2 $600B</td><td>Markets +30%</td></tr>
+                        <tr><td>2012</td><td>QE3 unlimited</td><td>Bull market began</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <p class="investor-body"><strong>Legacy:</strong> "Helicopter Ben" — modern QE.</p>
+                  <p class="investor-disclaimer">📊 Data sourced from SEC 13F filings, Capitol Trades, and public disclosures. Holdings reflect most recent quarterly filing. Actual current holdings may differ.</p>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="investor-card" data-category="fed">
+            <div class="investor-card-inner">
+              <div class="investor-card-main">
+                <div class="investor-card-head">
+                  <div class="investor-avatar" aria-hidden="true">PV</div>
+                  <div class="investor-card-titles">
+                    <h2 class="investor-name">Paul Volcker</h2>
+                    <p class="investor-role">Former Fed Chair (deceased 2019)</p>
+                    <span class="investor-badge badge-fed">Federal Reserve</span>
+                  </div>
+                </div>
+                <p class="investor-source-badge">📊 Historical Fed records</p>
+                <p class="investor-bio">Volcker Shock — crushed inflation with double-digit rates.</p>
+              </div>
+              <button type="button" class="btn secondary investor-expand-btn" aria-expanded="false">View Portfolio</button>
+              <div class="investor-expanded">
+                <div class="portfolio-panel">
+                  <h4 class="portfolio-panel-title">📅 Key Decisions (1979–1987)</h4>
+                  <div class="table-scroll">
+                    <table class="investor-data-table">
+                      <thead><tr><th>When</th><th>Decision</th><th>Impact</th></tr></thead>
+                      <tbody>
+                        <tr><td>1980</td><td>Rates to ~20%</td><td>Killed 14% inflation</td></tr>
+                        <tr><td>1981</td><td>Rates high</td><td>Severe recession</td></tr>
+                        <tr><td>1983</td><td>Began cutting</td><td>1980s bull market</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <p class="investor-disclaimer">📊 Data sourced from SEC 13F filings, Capitol Trades, and public disclosures. Holdings reflect most recent quarterly filing. Actual current holdings may differ.</p>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="investor-card" data-category="fed">
+            <div class="investor-card-inner">
+              <div class="investor-card-main">
+                <div class="investor-card-head">
+                  <div class="investor-avatar" aria-hidden="true">AG</div>
+                  <div class="investor-card-titles">
+                    <h2 class="investor-name">Alan Greenspan</h2>
+                    <p class="investor-role">Former Fed Chair (1987–2006)</p>
+                    <span class="investor-badge badge-fed">Federal Reserve</span>
+                  </div>
+                </div>
+                <p class="investor-source-badge">📊 Historical Fed records</p>
+                <p class="investor-bio">Dot-com era; "irrational exuberance"; Greenspan Put narrative.</p>
+              </div>
+              <button type="button" class="btn secondary investor-expand-btn" aria-expanded="false">View Portfolio</button>
+              <div class="investor-expanded">
+                <div class="portfolio-panel">
+                  <h4 class="portfolio-panel-title">📅 Key Decisions</h4>
+                  <div class="table-scroll">
+                    <table class="investor-data-table">
+                      <thead><tr><th>When</th><th>Decision</th><th>Impact</th></tr></thead>
+                      <tbody>
+                        <tr><td>1987</td><td>Crash response</td><td>Liquidity flood</td></tr>
+                        <tr><td>1996</td><td>Irrational exuberance</td><td>Bubble warning</td></tr>
+                        <tr><td>1998</td><td>LTCM</td><td>Systemic risk averted</td></tr>
+                        <tr><td>2001</td><td>Cut to 1%</td><td>Housing bubble debate</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <p class="investor-disclaimer">📊 Data sourced from SEC 13F filings, Capitol Trades, and public disclosures. Holdings reflect most recent quarterly filing. Actual current holdings may differ.</p>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="investor-card" data-category="fed">
+            <div class="investor-card-inner">
+              <div class="investor-card-main">
+                <div class="investor-card-head">
+                  <div class="investor-avatar" aria-hidden="true">LB</div>
+                  <div class="investor-card-titles">
+                    <h2 class="investor-name">Lael Brainard</h2>
+                    <p class="investor-role">NEC Director · Former Fed Vice Chair</p>
+                    <span class="investor-badge badge-fed">Federal Reserve</span>
+                  </div>
+                </div>
+                <p class="investor-source-badge">📊 White House / Fed — policy focus</p>
+                <p class="investor-bio">Climate risk in finance, CBDC research, supervision.</p>
+              </div>
+              <button type="button" class="btn secondary investor-expand-btn" aria-expanded="false">View Portfolio</button>
+              <div class="investor-expanded">
+                <div class="portfolio-panel">
+                  <h4 class="portfolio-panel-title">📅 Key Policy Areas</h4>
+                  <ul class="investor-list">
+                    <li>Climate risk in financial regulation</li>
+                    <li>Banking stress tests &amp; supervision</li>
+                    <li>Consumer protection</li>
+                    <li>Digital dollar (CBDC) research</li>
+                  </ul>
+                  <p class="investor-body"><strong>Impact:</strong> Influences Biden-era financial regulations.</p>
+                  <p class="investor-disclaimer">📊 Data sourced from SEC 13F filings, Capitol Trades, and public disclosures. Holdings reflect most recent quarterly filing. Actual current holdings may differ.</p>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <!-- Politicians -->
+          <article class="investor-card" data-category="politicians">
+            <div class="investor-card-inner">
+              <div class="investor-card-main">
+                <div class="investor-card-head">
+                  <div class="investor-avatar" aria-hidden="true">NP</div>
+                  <div class="investor-card-titles">
+                    <h2 class="investor-name">Nancy Pelosi</h2>
+                    <p class="investor-role">Former House Speaker</p>
+                    <span class="investor-badge badge-politicians">Politicians</span>
+                  </div>
+                </div>
+                <p class="investor-source-badge">📊 Capitol Trades / House disclosures · STOCK Act</p>
+                <p class="investor-bio">Widely tracked disclosures; Paul Pelosi trades.</p>
+              </div>
+              <button type="button" class="btn secondary investor-expand-btn" aria-expanded="false">View Portfolio</button>
+              <div class="investor-expanded">
+                <div class="portfolio-panel">
+                  <h4 class="portfolio-panel-title">📅 Recent Disclosed Trades (2023–2024)</h4>
+                  <p class="portfolio-meta">Sources: <a href="https://www.capitoltrades.com" target="_blank" rel="noopener noreferrer">Capitol Trades</a> · <a href="https://www.quiverquant.com/congresstrading/" target="_blank" rel="noopener noreferrer">Quiver</a></p>
+                  <div class="table-scroll">
+                    <table class="investor-data-table">
+                      <thead><tr><th>When</th><th>Symbol</th><th>Type</th><th>Range</th></tr></thead>
+                      <tbody>
+                        <tr><td>Dec 2023</td><td>NVDA</td><td>Calls</td><td>$1M–$5M · up 200%+</td></tr>
+                        <tr><td>Dec 2023</td><td>AAPL</td><td>Calls</td><td>$500K–$1M</td></tr>
+                        <tr><td>Jan 2024</td><td>MSFT</td><td>Buy</td><td>$500K–$1M</td></tr>
+                        <tr><td>Feb 2024</td><td>GOOGL</td><td>Calls</td><td>$500K–$1M</td></tr>
+                        <tr><td>Mar 2024</td><td>NVDA</td><td>Calls</td><td>$1M–$5M</td></tr>
+                        <tr><td>2024</td><td>CRM</td><td>Buy</td><td>$250K–$500K</td></tr>
+                        <tr><td>2024</td><td>PANW</td><td>Buy</td><td>$1M–$5M</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <p class="investor-body"><strong>5-year return:</strong> Beat S&amp;P significantly (disclosure-based studies).</p>
+                  <p class="portfolio-footer-link">🔗 <a href="https://www.capitoltrades.com" target="_blank" rel="noopener noreferrer">Capitol Trades</a></p>
+                  <p class="investor-disclaimer">📊 Data sourced from SEC 13F filings, Capitol Trades, and public disclosures. Holdings reflect most recent quarterly filing. Actual current holdings may differ.</p>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="investor-card" data-category="politicians">
+            <div class="investor-card-inner">
+              <div class="investor-card-main">
+                <div class="investor-card-head">
+                  <div class="investor-avatar" aria-hidden="true">DT</div>
+                  <div class="investor-card-titles">
+                    <h2 class="investor-name">Donald Trump</h2>
+                    <p class="investor-role">45th &amp; 47th President</p>
+                    <span class="investor-badge badge-politicians">Politicians</span>
+                  </div>
+                </div>
+                <p class="investor-source-badge">📊 Presidential financial disclosures</p>
+                <p class="investor-bio">DJT and real estate; market-moving policy headlines.</p>
+              </div>
+              <button type="button" class="btn secondary investor-expand-btn" aria-expanded="false">View Portfolio</button>
+              <div class="investor-expanded">
+                <div class="portfolio-panel">
+                  <h4 class="portfolio-panel-title">📊 Holdings &amp; Businesses</h4>
+                  <div class="table-scroll">
+                    <table class="investor-data-table">
+                      <thead><tr><th>Asset</th><th>Detail</th></tr></thead>
+                      <tbody>
+                        <tr><td>Trump Media (DJT)</td><td>~57% ownership · $2–$5B fluctuates</td></tr>
+                        <tr><td>Trump Org</td><td>Private · undisclosed</td></tr>
+                        <tr><td>Real estate</td><td>$1B+ est.</td></tr>
+                        <tr><td>Truth Social</td><td>Part of DJT</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <h4 class="portfolio-panel-title">📅 Recent</h4>
+                  <p class="investor-body">2024 DJT held post-IPO; fell ~70% from peak then recovered. Price tied to political news flow.</p>
+                  <p class="investor-disclaimer">📊 Data sourced from SEC 13F filings, Capitol Trades, and public disclosures. Holdings reflect most recent quarterly filing. Actual current holdings may differ.</p>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="investor-card" data-category="politicians">
+            <div class="investor-card-inner">
+              <div class="investor-card-main">
+                <div class="investor-card-head">
+                  <div class="investor-avatar" aria-hidden="true">DC</div>
+                  <div class="investor-card-titles">
+                    <h2 class="investor-name">Dan Crenshaw</h2>
+                    <p class="investor-role">US Representative</p>
+                    <span class="investor-badge badge-politicians">Politicians</span>
+                  </div>
+                </div>
+                <p class="investor-source-badge">📊 Capitol Trades — House</p>
+                <p class="investor-bio">Defense committee; contractor names.</p>
+              </div>
+              <button type="button" class="btn secondary investor-expand-btn" aria-expanded="false">View Portfolio</button>
+              <div class="investor-expanded">
+                <div class="portfolio-panel">
+                  <h4 class="portfolio-panel-title">📅 Recent Disclosed Trades</h4>
+                  <p class="portfolio-meta"><a href="https://www.capitoltrades.com/politicians" target="_blank" rel="noopener noreferrer">Capitol Trades</a></p>
+                  <div class="table-scroll">
+                    <table class="investor-data-table">
+                      <thead><tr><th>When</th><th>Symbol</th><th>Action</th><th>Range</th></tr></thead>
+                      <tbody>
+                        <tr><td>2024</td><td>LMT</td><td>Buy</td><td>$1K–$15K</td></tr>
+                        <tr><td>2024</td><td>RTX</td><td>Buy</td><td>$1K–$15K</td></tr>
+                        <tr><td>2024</td><td>GD</td><td>Buy</td><td>$1K–$15K</td></tr>
+                        <tr><td>2024</td><td>NOC</td><td>Buy</td><td>$1K–$15K</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <p class="investor-disclaimer">📊 Data sourced from SEC 13F filings, Capitol Trades, and public disclosures. Holdings reflect most recent quarterly filing. Actual current holdings may differ.</p>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="investor-card" data-category="politicians">
+            <div class="investor-card-inner">
+              <div class="investor-card-main">
+                <div class="investor-card-head">
+                  <div class="investor-avatar" aria-hidden="true">TT</div>
+                  <div class="investor-card-titles">
+                    <h2 class="investor-name">Tommy Tuberville</h2>
+                    <p class="investor-role">US Senator</p>
+                    <span class="investor-badge badge-politicians">Politicians</span>
+                  </div>
+                </div>
+                <p class="investor-source-badge">📊 Senate disclosures</p>
+                <p class="investor-bio">Broad mega-cap tech buys reported.</p>
+              </div>
+              <button type="button" class="btn secondary investor-expand-btn" aria-expanded="false">View Portfolio</button>
+              <div class="investor-expanded">
+                <div class="portfolio-panel">
+                  <h4 class="portfolio-panel-title">📅 Recent Disclosed Trades</h4>
+                  <div class="table-scroll">
+                    <table class="investor-data-table">
+                      <thead><tr><th>When</th><th>Symbol</th><th>Action</th><th>Range</th></tr></thead>
+                      <tbody>
+                        <tr><td>2024</td><td>AAPL</td><td>Buy</td><td>$1K–$15K</td></tr>
+                        <tr><td>2024</td><td>MSFT</td><td>Buy</td><td>$15K–$50K</td></tr>
+                        <tr><td>2024</td><td>AMZN</td><td>Buy</td><td>$15K–$50K</td></tr>
+                        <tr><td>2023</td><td>Various</td><td>—</td><td>Tech &amp; energy</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <p class="portfolio-footer-link">🔗 <a href="https://www.capitoltrades.com" target="_blank" rel="noopener noreferrer">Capitol Trades</a></p>
+                  <p class="investor-disclaimer">📊 Data sourced from SEC 13F filings, Capitol Trades, and public disclosures. Holdings reflect most recent quarterly filing. Actual current holdings may differ.</p>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="investor-card" data-category="politicians">
+            <div class="investor-card-inner">
+              <div class="investor-card-main">
+                <div class="investor-card-head">
+                  <div class="investor-avatar" aria-hidden="true">RK</div>
+                  <div class="investor-card-titles">
+                    <h2 class="investor-name">Ro Khanna</h2>
+                    <p class="investor-role">US Representative (CA)</p>
+                    <span class="investor-badge badge-politicians">Politicians</span>
+                  </div>
+                </div>
+                <p class="investor-source-badge">📊 Capitol Trades — House</p>
+                <p class="investor-bio">Silicon Valley district; tech-tilted disclosures.</p>
+              </div>
+              <button type="button" class="btn secondary investor-expand-btn" aria-expanded="false">View Portfolio</button>
+              <div class="investor-expanded">
+                <div class="portfolio-panel">
+                  <h4 class="portfolio-panel-title">📅 Recent Disclosed Trades</h4>
+                  <div class="table-scroll">
+                    <table class="investor-data-table">
+                      <thead><tr><th>When</th><th>Symbol</th><th>Action</th><th>Range</th></tr></thead>
+                      <tbody>
+                        <tr><td>2024</td><td>NVDA</td><td>Sell</td><td>$15K–$50K</td></tr>
+                        <tr><td>2024</td><td>GOOGL</td><td>Buy</td><td>$1K–$15K</td></tr>
+                        <tr><td>2024</td><td>TSLA</td><td>Buy</td><td>$1K–$15K</td></tr>
+                        <tr><td>2023</td><td>AMD</td><td>Buy</td><td>$15K–$50K</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <p class="investor-disclaimer">📊 Data sourced from SEC 13F filings, Capitol Trades, and public disclosures. Holdings reflect most recent quarterly filing. Actual current holdings may differ.</p>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="investor-card" data-category="politicians">
+            <div class="investor-card-inner">
+              <div class="investor-card-main">
+                <div class="investor-card-head">
+                  <div class="investor-avatar" aria-hidden="true">JG</div>
+                  <div class="investor-card-titles">
+                    <h2 class="investor-name">Josh Gottheimer</h2>
+                    <p class="investor-role">US Representative</p>
+                    <span class="investor-badge badge-politicians">Politicians</span>
+                  </div>
+                </div>
+                <p class="investor-source-badge">📊 Capitol Trades — House</p>
+                <p class="investor-bio">Large-cap tech buy disclosures.</p>
+              </div>
+              <button type="button" class="btn secondary investor-expand-btn" aria-expanded="false">View Portfolio</button>
+              <div class="investor-expanded">
+                <div class="portfolio-panel">
+                  <h4 class="portfolio-panel-title">📅 Recent Disclosed Trades</h4>
+                  <div class="table-scroll">
+                    <table class="investor-data-table">
+                      <thead><tr><th>When</th><th>Symbol</th><th>Action</th><th>Range</th></tr></thead>
+                      <tbody>
+                        <tr><td>2024</td><td>MSFT</td><td>Buy</td><td>$50K–$100K</td></tr>
+                        <tr><td>2024</td><td>AAPL</td><td>Buy</td><td>$15K–$50K</td></tr>
+                        <tr><td>2024</td><td>NVDA</td><td>Buy</td><td>$15K–$50K</td></tr>
+                        <tr><td>2024</td><td>META</td><td>Buy</td><td>$15K–$50K</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <p class="portfolio-footer-link">🔗 <a href="https://www.capitoltrades.com" target="_blank" rel="noopener noreferrer">View live data</a></p>
+                  <p class="investor-disclaimer">📊 Data sourced from SEC 13F filings, Capitol Trades, and public disclosures. Holdings reflect most recent quarterly filing. Actual current holdings may differ.</p>
+                </div>
+              </div>
+            </div>
+          </article>
+
+        </div>
+
+        <div class="investors-pagination-wrap">
+          <button type="button" class="btn secondary investors-show-more" id="investorsShowMore" hidden>Show More</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <div class="brand-mark small">●</div>
+        <div class="footer-text">
+          <div class="footer-title">Intellivest @ Texas A&amp;M</div>
+          <div class="footer-tagline">Making financial literacy accessible to everyone, one person at a time.</div>
+        </div>
+      </div>
+      <div class="footer-meta">
+        <div class="meta-block">
+          <div class="meta-label">Contact</div>
+          <a href="mailto:aitp@tamu.edu" class="link">aitp@tamu.edu</a>
+        </div>
+        <div class="meta-block">
+          <div class="meta-label">Developed by</div>
+          <div class="meta-text">Natalie Do, Denisse Aguilar, Teresa So, Monica Lin, Sahil Shah, Abhinav Chodimella, and Aiden Schreier</div>
+        </div>
+        <div class="meta-block">
+          <div class="meta-text">© <span id="year"></span> Intellivest</div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="./app.js"></script>
+  <script src="./auth-ui.js"></script>
+  <script src="./investors-page.js"></script>
+</body>
+</html>

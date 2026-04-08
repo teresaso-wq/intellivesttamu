@@ -1,270 +1,144 @@
-// Live Stock Tracker - Real-time data from Yahoo Finance
-let watchlist = [];
-let updateInterval = null;
-
-// Load watchlist from localStorage
-function loadWatchlist() {
-  const saved = localStorage.getItem('intellivest_watchlist');
-  if (saved) {
-    watchlist = JSON.parse(saved);
-  } else {
-    // Default watchlist
-    watchlist = ['AAPL', 'MSFT', 'GOOGL', 'TSLA'];
-  }
-}
-
-// Save watchlist to localStorage
-function saveWatchlist() {
-  localStorage.setItem('intellivest_watchlist', JSON.stringify(watchlist));
-}
-
-// Fetch stock data from Yahoo Finance
-async function fetchStockData(symbol) {
-  const methods = [
-    async () => {
-      const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=1d&includePrePost=false`;
-      const response = await fetch(url, { method: 'GET', headers: { 'Accept': 'application/json' }, mode: 'cors' });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      return await response.json();
-    },
-    async () => {
-      const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=1d&includePrePost=false`;
-      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-      const response = await fetch(proxyUrl, { method: 'GET', headers: { 'Accept': 'application/json' } });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      return await response.json();
-    }
-  ];
-
-  for (let method of methods) {
-    try {
-      const data = await method();
-      if (!data.chart || !data.chart.result || data.chart.result.length === 0) continue;
-      
-      const result = data.chart.result[0];
-      const meta = result.meta;
-      
-      const currentPrice = meta.regularMarketPrice || meta.previousClose || 0;
-      const previousClose = meta.previousClose || currentPrice;
-      const change = currentPrice - previousClose;
-      const changePercent = previousClose !== 0 ? (change / previousClose) * 100 : 0;
-      
-      return {
-        symbol: symbol,
-        name: meta.longName || symbol,
-        price: currentPrice,
-        change: change,
-        changePercent: changePercent,
-        open: meta.regularMarketOpen || previousClose,
-        high: meta.regularMarketDayHigh || currentPrice,
-        low: meta.regularMarketDayLow || currentPrice,
-        volume: meta.regularMarketVolume || 0,
-        marketCap: meta.marketCap || 0,
-        peRatio: meta.trailingPE || null,
-        dividendYield: meta.dividendYield ? meta.dividendYield * 100 : null,
-        yearHigh: meta.fiftyTwoWeekHigh || currentPrice,
-        yearLow: meta.fiftyTwoWeekLow || currentPrice
-      };
-    } catch (error) {
-      console.log(`Method failed for ${symbol}:`, error.message);
-    }
-  }
-  throw new Error(`Unable to fetch data for ${symbol}`);
-}
-
-// Update market summary (Dow, S&P 500, Nasdaq)
-async function updateMarketSummary() {
-  const indices = [
-    { symbol: '^DJI', id: 'dow' },
-    { symbol: '^GSPC', id: 'sp500' },
-    { symbol: '^IXIC', id: 'nasdaq' }
-  ];
-
-  for (let index of indices) {
-    try {
-      const data = await fetchStockData(index.symbol);
-      const priceEl = document.getElementById(`${index.id}Price`);
-      const changeEl = document.getElementById(`${index.id}Change`);
-      
-      if (priceEl) priceEl.textContent = data.price.toFixed(2);
-      if (changeEl) {
-        const isPositive = data.change >= 0;
-        changeEl.textContent = `${isPositive ? '+' : ''}${data.change.toFixed(2)} (${isPositive ? '+' : ''}${data.changePercent.toFixed(2)}%)`;
-        changeEl.className = `change ${isPositive ? 'positive' : 'negative'}`;
-      }
-    } catch (error) {
-      console.error(`Error updating ${index.id}:`, error);
-    }
-  }
-}
-
-// Update watchlist display
-async function updateWatchlist() {
-  const container = document.getElementById('watchlistContainer');
-  if (!container) return;
-  
-  if (watchlist.length === 0) {
-    container.innerHTML = '<div class="empty-watchlist">Your watchlist is empty. Add stocks to get started!</div>';
-    return;
-  }
-  
-  container.innerHTML = '<div class="watchlist-loading">Loading stocks...</div>';
-  
-  try {
-    const stockDataPromises = watchlist.map(symbol => 
-      fetchStockData(symbol).catch(err => ({
-        symbol: symbol,
-        name: symbol,
-        price: 0,
-        change: 0,
-        changePercent: 0,
-        error: true
-      }))
-    );
-    
-    const stocks = await Promise.all(stockDataPromises);
-    
-    container.innerHTML = stocks.map(stock => {
-      if (stock.error) {
-        return `
-          <div class="stock-card-tracker error">
-            <div class="stock-card-header-tracker">
-              <div class="stock-info-tracker">
-                <div class="stock-symbol-tracker">${stock.symbol}</div>
-                <div class="stock-name-tracker">Error loading</div>
-              </div>
-              <button class="remove-stock" data-symbol="${stock.symbol}">×</button>
-            </div>
-          </div>
-        `;
-      }
-      
-      const isPositive = stock.change >= 0;
-      
-      return `
-        <div class="stock-card-tracker">
-          <div class="stock-card-header-tracker">
-            <div class="stock-info-tracker">
-              <div class="stock-symbol-tracker">${stock.symbol}</div>
-              <div class="stock-name-tracker">${stock.name}</div>
-            </div>
-            <button class="remove-stock" data-symbol="${stock.symbol}" aria-label="Remove ${stock.symbol}">×</button>
-          </div>
-          <div class="stock-price-tracker">$${stock.price.toFixed(2)}</div>
-          <div class="stock-change-tracker ${isPositive ? 'positive' : 'negative'}">
-            ${isPositive ? '+' : ''}${stock.change.toFixed(2)} (${isPositive ? '+' : ''}${stock.changePercent.toFixed(2)}%)
-          </div>
-          <div class="stock-details-tracker">
-            <div class="detail-item">
-              <span class="detail-label">Open</span>
-              <span class="detail-value">$${stock.open.toFixed(2)}</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">High</span>
-              <span class="detail-value">$${stock.high.toFixed(2)}</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Low</span>
-              <span class="detail-value">$${stock.low.toFixed(2)}</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Volume</span>
-              <span class="detail-value">${formatVolume(stock.volume)}</span>
-            </div>
-          </div>
-        </div>
-      `;
-    }).join('');
-    
-    // Add remove button listeners
-    container.querySelectorAll('.remove-stock').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const symbol = btn.dataset.symbol;
-        watchlist = watchlist.filter(s => s !== symbol);
-        saveWatchlist();
-        updateWatchlist();
-      });
-    });
-    
-    // Update last update time
-    const lastUpdate = document.getElementById('lastUpdate');
-    if (lastUpdate) {
-      lastUpdate.textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
-    }
-  } catch (error) {
-    console.error('Error updating watchlist:', error);
-    container.innerHTML = '<div class="watchlist-loading">Unable to load stocks. Please try again.</div>';
-  }
-}
-
-// Format volume
-function formatVolume(volume) {
-  if (volume >= 1000000000) {
-    return (volume / 1000000000).toFixed(2) + 'B';
-  } else if (volume >= 1000000) {
-    return (volume / 1000000).toFixed(2) + 'M';
-  } else if (volume >= 1000) {
-    return (volume / 1000).toFixed(2) + 'K';
-  }
-  return volume.toString();
-}
-
-// Initialize
+/**
+ * Live Tracker: indices + tech watchlist using IntellivestMarket (Yahoo / demo fallback).
+ */
 (function initStockTracker() {
-  // Load watchlist
-  loadWatchlist();
-  
-  // Search and add stock
-  const stockSearch = document.getElementById('stockSearch');
-  const addStockBtn = document.getElementById('addStockBtn');
-  
-  function addStock() {
-    const symbol = stockSearch.value.trim().toUpperCase();
-    if (!symbol) return;
-    
-    if (watchlist.includes(symbol)) {
-      alert(`${symbol} is already in your watchlist.`);
-      return;
+  const M = window.IntellivestMarket;
+  const WATCH_KEY = 'intellivest_watchlist';
+
+  const watchlistBtn = document.getElementById('watchlistBtn');
+  const educationBtn = document.getElementById('educationBtn');
+  const watchlistView = document.getElementById('watchlistView');
+  const educationView = document.getElementById('educationView');
+
+  function setView(view) {
+    const isWatch = view === 'watchlist';
+    if (watchlistBtn) watchlistBtn.classList.toggle('active', isWatch);
+    if (educationBtn) educationBtn.classList.toggle('active', !isWatch);
+    if (watchlistView) watchlistView.classList.toggle('active', isWatch);
+    if (educationView) educationView.classList.toggle('active', !isWatch);
+  }
+
+  watchlistBtn?.addEventListener('click', () => setView('watchlist'));
+  educationBtn?.addEventListener('click', () => setView('education'));
+
+  function readWatchlist() {
+    try {
+      const raw = localStorage.getItem(WATCH_KEY);
+      if (raw) {
+        const arr = JSON.parse(raw);
+        if (Array.isArray(arr) && arr.length) return arr.map((s) => String(s).toUpperCase());
+      }
+    } catch (e) { /* ignore */ }
+    return M ? M.TECH_SYMBOLS.slice(0, 8) : ['AAPL', 'MSFT', 'NVDA', 'GOOGL', 'META', 'AMZN'];
+  }
+
+  function saveWatchlist(symbols) {
+    localStorage.setItem(WATCH_KEY, JSON.stringify([...new Set(symbols)]));
+  }
+
+  function formatMoney(n) {
+    if (n == null || Number.isNaN(n)) return '-';
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 }).format(n);
+  }
+
+  async function updateIndices() {
+    if (!M) return;
+    const map = [
+      ['dowPrice', 'dowChange', '^DJI'],
+      ['sp500Price', 'sp500Change', '^GSPC'],
+      ['nasdaqPrice', 'nasdaqChange', '^IXIC'],
+    ];
+    for (const [priceId, chId, sym] of map) {
+      try {
+        const q = await M.fetchQuote(sym);
+        const elP = document.getElementById(priceId);
+        const elC = document.getElementById(chId);
+        if (elP) elP.textContent = q.price >= 1000 ? q.price.toLocaleString('en-US', { maximumFractionDigits: 2 }) : formatMoney(q.price);
+        if (elC) {
+          const sign = q.changePercent >= 0 ? '+' : '';
+          elC.textContent = `${sign}${q.changePercent.toFixed(2)}%`;
+          elC.classList.remove('positive', 'negative');
+          elC.classList.add(q.changePercent >= 0 ? 'positive' : 'negative');
+        }
+      } catch (e) {
+        const elP = document.getElementById(priceId);
+        if (elP) elP.textContent = '-';
+      }
     }
-    
-    watchlist.push(symbol);
-    saveWatchlist();
-    stockSearch.value = '';
-    updateWatchlist();
   }
-  
-  if (addStockBtn) {
-    addStockBtn.addEventListener('click', addStock);
-  }
-  
-  if (stockSearch) {
-    stockSearch.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        addStock();
-      }
+
+  async function renderWatchlist() {
+    const container = document.getElementById('watchlistContainer');
+    const lastUpdate = document.getElementById('lastUpdate');
+    if (!container || !M) return;
+
+    const symbols = readWatchlist();
+    container.innerHTML = '<div class="tracker-empty">Loading…</div>';
+
+    const quotes = await Promise.all(symbols.map((s) => M.fetchQuote(s).catch(() => null)));
+    container.innerHTML = '';
+
+    quotes.forEach((q, i) => {
+      const sym = symbols[i];
+      if (!q) return;
+      const card = document.createElement('div');
+      card.className = 'stock-card';
+      const pct = q.changePercent;
+      const pos = pct >= 0;
+      card.innerHTML = `
+        <div class="stock-card-header-category">
+          <span class="stock-card-symbol">${sym}</span>
+          <span class="stock-card-change ${pos ? 'positive' : 'negative'}">${pos ? '+' : ''}${pct.toFixed(2)}%</span>
+        </div>
+        <div class="stock-card-name-category">${(q.name || sym).slice(0, 32)}</div>
+        <div class="stock-card-price-category">${formatMoney(q.price)}</div>
+        <button type="button" class="btn secondary" style="margin-top:12px;width:100%;font-size:12px;padding:8px" data-remove="${sym}">Remove</button>
+      `;
+      card.querySelector('[data-remove]')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const next = readWatchlist().filter((x) => x !== sym);
+        saveWatchlist(next);
+        renderWatchlist();
+      });
+      card.style.cursor = 'pointer';
+      card.addEventListener('click', () => {
+        window.location.href = './stocks.html?symbol=' + encodeURIComponent(sym);
+      });
+      container.appendChild(card);
     });
+
+    if (container.children.length === 0) {
+      container.innerHTML = '<div class="tracker-empty">Add tickers below to build your watchlist.</div>';
+    }
+
+    if (lastUpdate) {
+      lastUpdate.textContent = 'Updated ' + new Date().toLocaleTimeString();
+    }
   }
-  
-  // Default stock chips
-  document.querySelectorAll('.chip').forEach(chip => {
+
+  document.getElementById('addStockBtn')?.addEventListener('click', () => {
+    const input = document.getElementById('stockSearch');
+    const raw = (input?.value || '').trim().toUpperCase();
+    if (!raw || !M) return;
+    const sym = M.resolveSymbolFromSearch(raw) || raw;
+    const list = readWatchlist();
+    if (!list.includes(sym)) {
+      list.push(sym);
+      saveWatchlist(list);
+    }
+    renderWatchlist();
+    if (input) input.value = '';
+  });
+
+  document.querySelectorAll('.tracker-chips .chip').forEach((chip) => {
     chip.addEventListener('click', () => {
-      const symbol = chip.dataset.symbol;
-      if (!watchlist.includes(symbol)) {
-        watchlist.push(symbol);
-        saveWatchlist();
-        updateWatchlist();
-      }
+      const input = document.getElementById('stockSearch');
+      if (input) input.value = chip.dataset.symbol || '';
     });
   });
-  
-  // Initial updates
-  updateMarketSummary();
-  updateWatchlist();
-  
-  // Auto-update every 60 seconds
-  updateInterval = setInterval(() => {
-    updateMarketSummary();
-    updateWatchlist();
-  }, 60000);
-})();
 
+  if (M) {
+    updateIndices();
+    renderWatchlist();
+  }
+})();

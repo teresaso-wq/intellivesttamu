@@ -3,10 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <meta name="theme-color" content="#002b5c" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Intellivest" />
+  <link rel="apple-touch-icon" href="./assets/intellivest-mark.png" />
   <title>Capabilities - Intellivest @ Texas A&M</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
@@ -15,13 +22,7 @@
   <header class="site-header">
     <div class="container header-inner">
       <a href="./index.html" class="brand">
-        <img src="intellivest-logo.png" 
-             alt="IntelliVest Logo" 
-             style="height: 40px; 
-                    width: auto; 
-                    filter: invert(1) brightness(2);
-                    cursor: pointer;"
-             onclick="window.location='index.html'">
+        <img src="./assets/intellivest-mark.png" alt="Intellivest logo" class="brand-logo" />
         <div class="brand-text">
           <div class="brand-line">Intellivest</div>
           <div class="brand-sub">@ Texas A&M</div>
@@ -29,9 +30,6 @@
       </a>
 
       <nav class="primary-nav">
-        <div class="nav-dropdown">
-          <a href="./index.html" class="nav-link">Home</a>
-        </div>
         <div class="nav-dropdown">
           <a href="./about-us.html" class="nav-link">About us</a>
         </div>
@@ -46,9 +44,6 @@
         </div>
         <div class="nav-dropdown">
           <a href="./stocks.html" class="nav-link">Stocks</a>
-        </div>
-        <div class="nav-dropdown">
-          <a href="./stock-tracker.html" class="nav-link">Watchlist</a>
         </div>
         <div class="nav-dropdown">
           <a href="./education.html" class="nav-link">Education</a>
@@ -69,28 +64,132 @@
   </header>
 
   <main class="site-main">
-    <section class="page-hero">
+    <section class="page-hero page-hero--split">
       <div class="container">
-        <h1>Capabilities</h1>
-        <p class="page-subtitle">Explore what Intellivest can do for you.</p>
+        <div>
+          <h1>Capabilities</h1>
+          <p class="page-subtitle">Explore what Intellivest can do for you.</p>
+        </div>
+        <div class="page-hero-visual" data-interactive-tilt>
+          <svg class="editorial-svg" viewBox="0 0 300 240" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect class="fill-soft" x="12" y="20" width="276" height="196" rx="10"/>
+            <rect x="40" y="48" width="88" height="64" rx="6" fill="none" class="stroke-main" stroke-width="1.4" opacity="0.45"/>
+            <path class="stroke-main" stroke-width="1.5" opacity="0.3" d="M52 88h64M52 100h48M52 112h56"/>
+            <circle class="fill-gold" cx="200" cy="72" r="10"/>
+            <path class="stroke-main" stroke-width="1.8" d="M168 120c24-20 48-8 72 4s48 4 64-16"/>
+            <rect x="176" y="132" width="96" height="56" rx="6" fill="currentColor" opacity="0.08"/>
+            <path class="stroke-main" stroke-width="1.2" opacity="0.4" d="M188 152h72M188 166h56"/>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <section
+      class="editorial-gradient-band editorial-gradient-band--capabilities"
+      id="capabilitiesBanner"
+      aria-label="Market snapshot and quick links"
+    >
+      <div class="container capabilities-banner-inner">
+        <div class="capabilities-banner-marquee-wrap" aria-hidden="true">
+          <div class="capabilities-banner-marquee-track" id="capabilitiesMarqueeTrack">
+            <div class="capabilities-marquee-set" id="capabilitiesMarqueeSetA"></div>
+            <div class="capabilities-marquee-set" id="capabilitiesMarqueeSetB"></div>
+          </div>
+        </div>
+        <div class="capabilities-banner-bottom">
+          <div class="capabilities-banner-chart-wrap">
+            <canvas id="capabilitiesBannerSpark" width="360" height="88" aria-hidden="true"></canvas>
+            <span class="capabilities-chart-caption" id="capabilitiesSparkLabel">QQQ · illustrative intraday path</span>
+          </div>
+          <div class="capabilities-banner-actions">
+            <span class="capabilities-banner-actions-label">Jump in</span>
+            <div class="capabilities-banner-pills">
+              <a class="capabilities-banner-pill" href="./chatbot.html?topic=investing-basics">Ask Intellivest</a>
+              <a class="capabilities-banner-pill" href="./stocks.html">Stock lookup</a>
+              <a class="capabilities-banner-pill" href="./finance.html">Finance hub</a>
+              <a class="capabilities-banner-pill" href="./our-insights.html">Insights</a>
+            </div>
+            <p class="capabilities-banner-disclaimer">
+              Ticker-style figures are for context and learning, not trading or investment advice.
+            </p>
+          </div>
+        </div>
       </div>
     </section>
 
     <section class="page-content">
       <div class="container">
         <div class="content-grid">
-          <article class="content-card">
-            <h2>AI-Powered Chatbot</h2>
-            <p>Get instant, personalized answers to your financial questions using our advanced AI chatbot powered by Intellivest Insights.</p>
+          <article class="content-card content-card--flip" tabindex="0" aria-expanded="false" aria-label="Flip card: AI-Powered Chatbot">
+            <div class="content-card-flip-inner">
+              <div class="content-card-flip-face content-card-flip-front">
+                <div class="content-card__figure">
+                  <svg class="editorial-svg" viewBox="0 0 200 72" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <rect x="24" y="20" width="152" height="36" rx="8" fill="none" class="stroke-main" stroke-width="1.5" opacity="0.4"/>
+                    <circle cx="44" cy="38" r="6" fill="currentColor" opacity="0.35"/>
+                    <path class="stroke-main" stroke-width="1.5" d="M64 42h88"/>
+                    <circle cx="148" cy="38" r="4" fill="var(--accent-gold)"/>
+                  </svg>
+                </div>
+                <h2>AI-Powered Chatbot</h2>
+                <p>Get instant, personalized answers to your financial questions using our advanced AI chatbot powered by Intellivest Insights.</p>
+              </div>
+              <div class="content-card-flip-face content-card-flip-back">
+                <h3>Try a prompt</h3>
+                <p>Open Ask Intellivest with a concrete question, for example how to prioritize debt vs. saving, or how ETFs differ from single stocks.</p>
+                <a class="link-arrow" href="./chatbot.html?topic=investing">Launch chatbot →</a>
+              </div>
+            </div>
           </article>
-          <article class="content-card">
-            <h2>Educational Resources</h2>
-            <p>Access comprehensive guides, tutorials, and learning materials designed to build your financial literacy from the ground up.</p>
+          <article class="content-card content-card--flip" tabindex="0" aria-expanded="false" aria-label="Flip card: Educational Resources">
+            <div class="content-card-flip-inner">
+              <div class="content-card-flip-face content-card-flip-front">
+                <div class="content-card__figure">
+                  <svg class="editorial-svg" viewBox="0 0 200 72" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M28 48 L28 24 L52 36 L76 20 L100 32 L124 18 L148 28 L172 22 L172 48 Z" fill="currentColor" opacity="0.12"/>
+                    <path class="stroke-main" stroke-width="2" d="M28 48 L52 36 L76 20 L100 32 L124 18 L148 28 L172 22"/>
+                  </svg>
+                </div>
+                <h2>Educational Resources</h2>
+                <p>Access comprehensive guides, tutorials, and learning materials designed to build your financial literacy from the ground up.</p>
+              </div>
+              <div class="content-card-flip-face content-card-flip-back">
+                <h3>Learning path</h3>
+                <p>Pair articles with the Finance and Stocks areas: start with foundations, then explore live tickers to connect terms to real symbols.</p>
+                <a class="link-arrow" href="./finance.html">Browse Finance →</a>
+              </div>
+            </div>
           </article>
-          <article class="content-card">
-            <h2>Financial Tools</h2>
-            <p>Use our calculators, planners, and interactive tools to make informed financial decisions and track your progress.</p>
+          <article class="content-card content-card--flip" tabindex="0" aria-expanded="false" aria-label="Flip card: Financial Tools">
+            <div class="content-card-flip-inner">
+              <div class="content-card-flip-face content-card-flip-front">
+                <div class="content-card__figure">
+                  <svg class="editorial-svg" viewBox="0 0 200 72" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <rect x="20" y="28" width="36" height="28" rx="3" fill="currentColor" opacity="0.2"/>
+                    <rect x="64" y="20" width="36" height="36" rx="3" fill="currentColor" opacity="0.3"/>
+                    <rect x="108" y="24" width="36" height="32" rx="3" fill="currentColor" opacity="0.4"/>
+                    <rect x="152" y="16" width="28" height="40" rx="3" fill="currentColor" opacity="0.25"/>
+                  </svg>
+                </div>
+                <h2>Financial Tools</h2>
+                <p>Use our calculators, planners, and interactive tools to make informed financial decisions and track your progress.</p>
+              </div>
+              <div class="content-card-flip-face content-card-flip-back">
+                <h3>Hands-on next step</h3>
+                <p>Use the Stocks page to search tickers and view charts. Practice reading price, change, and timeframe before making real decisions.</p>
+                <a class="link-arrow" href="./stocks.html">Open Stocks →</a>
+              </div>
+            </div>
           </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="stocks-ticker-section">
+      <div class="container">
+        <h2 class="section-title">Tech Stocks</h2>
+        <div id="stocksTicker" class="stocks-ticker">
+          <!-- Stock cards will be inserted here -->
         </div>
       </div>
     </section>
@@ -99,7 +198,7 @@
   <footer class="site-footer">
     <div class="container footer-inner">
       <div class="footer-brand">
-        <div class="brand-mark small">●</div>
+        <img src="./assets/intellivest-mark.png" alt="Intellivest logo" class="footer-logo" />
         <div class="footer-text">
           <div class="footer-title">Intellivest @ Texas A&M</div>
           <div class="footer-tagline">Making financial literacy accessible to everyone, one person at a time.</div>
@@ -113,7 +212,7 @@
         </div>
         <div class="meta-block">
           <div class="meta-label">Developed by</div>
-          <div class="meta-text">Natalie Do, Denisse Aguilar, Teresa So, Monica Lin, Sahil Shah, Abhinav Chodimella, and Aiden Schreier</div>
+          <div class="meta-text">Natalie Do, Denisse Aguilar, Teresa So, Monica Lin, Sahil Shah, Abhinav Chodimella, Benjamin McCaulley, and Palak Patel</div>
         </div>
         <div class="meta-block">
           <div class="meta-text">© <span id="year"></span> Intellivest</div>
@@ -123,7 +222,15 @@
   </footer>
 
   <script src="./app.js"></script>
-  <script src="./auth-ui.js"></script>
+  <script src="./market-data.js"></script>
+  <script src="./interactive.js"></script>
+  <script src="./stocks.js"></script>
+  <script>
+    // Initialize stock ticker for this page
+    if (window.StockTicker) {
+      window.StockTicker.update();
+    }
+  </script>
 </body>
 </html>
 

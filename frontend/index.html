@@ -3,10 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <meta name="theme-color" content="#002b5c" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Intellivest" />
+  <link rel="apple-touch-icon" href="./assets/intellivest-mark.png" />
   <title>Intellivest @ Texas A&M</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
@@ -16,13 +22,7 @@
   <header class="site-header">
     <div class="container header-inner">
       <a href="./index.html" class="brand">
-        <img src="intellivest-logo.png" 
-             alt="IntelliVest Logo" 
-             style="height: 40px; 
-                    width: auto; 
-                    filter: invert(1) brightness(2);
-                    cursor: pointer;"
-             onclick="window.location='index.html'">
+        <img src="./assets/intellivest-mark.png" alt="Intellivest logo" class="brand-logo" />
         <div class="brand-text">
           <div class="brand-line">Intellivest</div>
           <div class="brand-sub">@ Texas A&M</div>
@@ -30,9 +30,6 @@
       </a>
 
       <nav class="primary-nav">
-        <div class="nav-dropdown">
-          <a href="./index.html" class="nav-link active">Home</a>
-        </div>
         <div class="nav-dropdown">
           <a href="./about-us.html" class="nav-link">About us</a>
         </div>
@@ -47,9 +44,6 @@
         </div>
         <div class="nav-dropdown">
           <a href="./stocks.html" class="nav-link">Stocks</a>
-        </div>
-        <div class="nav-dropdown">
-          <a href="./stock-tracker.html" class="nav-link">Watchlist</a>
         </div>
         <div class="nav-dropdown">
           <a href="./education.html" class="nav-link">Education</a>
@@ -71,11 +65,169 @@
 
   <main class="site-main">
     <section class="ask-hero">
-      <div class="container ask-hero-content">
-        <h1 class="ask-title">Ask Intellivest</h1>
-        <p class="ask-description">Start a conversation with our new gen AI chatbot. Get customized answers on your questions about financial literacy based on Intellivest Insights.</p>
-        <div class="ask-actions">
-          <a href="./chatbot.html" class="btn primary large">Start conversation</a>
+      <div class="ask-hero__pattern" aria-hidden="true"></div>
+      <div class="ask-hero-inner">
+        <div class="ask-hero-content">
+          <p class="eyebrow">Financial literacy for students</p>
+          <h1 class="ask-title">Ask Intellivest</h1>
+          <div class="divider-accent" aria-hidden="true"></div>
+          <p class="ask-description">Start a conversation with our AI assistant. Get clear, tailored guidance on budgeting, investing, credit, and more, grounded in Intellivest Insights.</p>
+          <div class="ask-actions">
+            <a href="./chatbot.html" class="btn primary large">Start conversation <span class="btn-arrow" aria-hidden="true">→</span></a>
+          </div>
+        </div>
+        <div class="ask-hero-visual" data-interactive-tilt>
+          <svg class="editorial-svg" viewBox="0 0 400 280" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect class="fill-soft" x="20" y="28" width="360" height="210" rx="10"/>
+            <path class="stroke-main" stroke-width="1.2" opacity="0.28" d="M44 208V52M98 208V68M152 208V84M206 208V60M260 208V92M314 208V76M368 208V100"/>
+            <path class="stroke-main" stroke-width="2" opacity="0.45" d="M52 176c64-52 120 24 196-76s76 48 108-20"/>
+            <path class="stroke-main" stroke-width="2.4" d="M52 176 C128 96, 188 188, 252 88 S 328 132, 364 64"/>
+            <circle class="fill-gold" cx="252" cy="88" r="7"/>
+            <circle class="dot" cx="52" cy="176" r="5"/>
+            <circle class="dot" cx="364" cy="64" r="5"/>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <section class="editorial-insight-band reveal" aria-labelledby="editorial-band-heading">
+      <div class="container editorial-split">
+        <div>
+          <p class="editorial-band-eyebrow">Perspective</p>
+          <h2 id="editorial-band-heading" class="editorial-band-title">Structured insight for real-world decisions</h2>
+          <p class="editorial-band-lede">We combine clear narratives with live market context, so concepts connect to what you see in the world, not just on a syllabus.</p>
+          <div class="editorial-chart-wrap">
+            <p class="editorial-chart-caption">Illustrative: confidence with practice over time</p>
+            <svg class="editorial-svg" viewBox="0 0 440 180" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <defs>
+                <linearGradient id="ivFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="currentColor" stop-opacity="0.2"/>
+                  <stop offset="100%" stop-color="currentColor" stop-opacity="0.02"/>
+                </linearGradient>
+              </defs>
+              <path fill="url(#ivFill)" d="M32 148 L32 124 C80 118 100 96 140 88 S 220 52 280 64 S 360 40 408 32 L408 148 Z"/>
+              <path class="stroke-main" stroke-width="2.5" d="M32 124 C80 118 100 96 140 88 S 220 52 280 64 S 360 40 408 32"/>
+              <circle class="dot" cx="140" cy="88" r="4"/>
+              <circle class="dot" cx="280" cy="64" r="4"/>
+              <circle class="fill-gold" cx="408" cy="32" r="5"/>
+            </svg>
+          </div>
+        </div>
+        <div class="editorial-stat-grid">
+          <div class="editorial-stat-card">
+            <svg width="120" height="36" viewBox="0 0 120 36" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <rect x="0" y="22" width="16" height="14" rx="2" fill="currentColor" opacity="0.2"/>
+              <rect x="22" y="14" width="16" height="22" rx="2" fill="currentColor" opacity="0.35"/>
+              <rect x="44" y="8" width="16" height="28" rx="2" fill="currentColor" opacity="0.5"/>
+              <rect x="66" y="4" width="16" height="32" rx="2" fill="currentColor" opacity="0.65"/>
+              <rect x="88" y="12" width="16" height="24" rx="2" fill="currentColor" opacity="0.45"/>
+            </svg>
+            <p class="editorial-stat-label">Layered learning</p>
+            <p class="editorial-stat-note">Foundations first, then tools and markets.</p>
+          </div>
+          <div class="editorial-stat-card">
+            <svg width="120" height="36" viewBox="0 0 120 36" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path class="stroke-main" stroke-width="1.5" d="M4 28 L28 18 L52 22 L76 8 L100 14 L116 4"/>
+              <circle cx="76" cy="8" r="4" fill="var(--accent-gold)"/>
+            </svg>
+            <p class="editorial-stat-label">Live context</p>
+            <p class="editorial-stat-note">Indices and movers alongside lessons.</p>
+          </div>
+          <div class="editorial-stat-card">
+            <svg width="120" height="36" viewBox="0 0 120 36" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <circle cx="22" cy="18" r="14" fill="none" stroke="currentColor" stroke-width="2" opacity="0.25"/>
+              <path d="M22 18 L22 8 A10 10 0 0 1 32 18 Z" fill="currentColor" opacity="0.5"/>
+              <circle cx="68" cy="18" r="3" fill="currentColor" opacity="0.9"/>
+              <circle cx="88" cy="12" r="3" fill="currentColor" opacity="0.6"/>
+              <circle cx="98" cy="24" r="3" fill="currentColor" opacity="0.45"/>
+              <line x1="71" y1="18" x2="85" y2="14" stroke="currentColor" stroke-width="1" opacity="0.35"/>
+              <line x1="91" y1="14" x2="95" y2="21" stroke="currentColor" stroke-width="1" opacity="0.35"/>
+            </svg>
+            <p class="editorial-stat-label">Community-built</p>
+            <p class="editorial-stat-note">Designed by Texas A&amp;M students, for peers.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="interactive-lab reveal" aria-labelledby="interactive-lab-title">
+      <div class="container">
+        <p class="editorial-band-eyebrow">Interactive</p>
+        <h2 id="interactive-lab-title" class="editorial-band-title">Explore risk, motion, and topics</h2>
+        <p class="interactive-lab-lede">Drag the slider to see how risk posture widens or narrows the range of potential outcomes, then jump into a conversation starter with one tap.</p>
+
+        <div class="interactive-lab-grid">
+          <div id="riskRewardExplorer" class="risk-reward-explorer">
+            <h3>Risk and potential outcomes</h3>
+            <p class="risk-reward-sub">Educational illustration only, not a prediction, recommendation, or projection of your portfolio.</p>
+            <div class="risk-reward-chart">
+              <svg viewBox="0 0 420 180" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <defs>
+                  <linearGradient id="homeRrGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="currentColor" stop-opacity="0.15"/>
+                    <stop offset="100%" stop-color="currentColor" stop-opacity="0.38"/>
+                  </linearGradient>
+                </defs>
+                <path class="risk-reward-band" fill="url(#homeRrGrad)" d="M 32 96 C 140 78 268 72 392 65 L 392 142 C 268 130 140 118 32 96 Z"/>
+              </svg>
+              <div class="risk-reward-axis">
+                <span>Start</span>
+                <span>Illustrative horizon</span>
+              </div>
+            </div>
+            <div class="risk-reward-meta">
+              <span class="risk-reward-label" aria-live="polite">Balanced</span>
+              <label class="visually-hidden" for="riskSlider">Adjust risk illustration</label>
+              <input class="risk-reward-slider" id="riskSlider" type="range" min="0" max="100" value="50" />
+            </div>
+            <p class="risk-reward-detail">Moderate spread between upside and downside. Many diversified portfolios sit in this range over long horizons.</p>
+          </div>
+
+          <div class="interactive-media-col">
+            <div class="ambient-canvas-wrap">
+              <canvas id="ambientMarketCanvas" width="800" height="400" aria-hidden="true"></canvas>
+              <p class="ambient-caption">Flow visualization</p>
+            </div>
+            <div>
+              <div
+                class="interactive-video-wrap interactive-video-wrap--logo"
+                data-interactive-video
+                data-interactive-logo
+                aria-describedby="logoStageHint"
+              >
+                <div class="interactive-logo-stage">
+                  <div class="interactive-logo-mesh" aria-hidden="true"></div>
+                  <canvas class="interactive-logo-chart" aria-hidden="true"></canvas>
+                  <div class="interactive-logo-orbit" aria-hidden="true"></div>
+                  <div class="interactive-logo-spark" aria-hidden="true"></div>
+                  <div class="interactive-logo-main">
+                    <img
+                      src="./assets/intellivest-mark.png"
+                      alt="Intellivest IV mark"
+                      width="512"
+                      height="512"
+                      decoding="async"
+                      class="interactive-logo-img"
+                    />
+                  </div>
+                </div>
+                <p class="visually-hidden" id="logoStageHint">
+                  Animated Intellivest IV mark: moves with your pointer; orbit, spark, and trend line run automatically. Topic chips below shift accent colors.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="topic-explorer" id="conversation-starters">
+          <p class="topic-explorer-label">Open the chatbot with a suggested question in the box; press Send when you are ready.</p>
+          <div class="topic-chip-row">
+            <a class="topic-chip" href="./chatbot.html?topic=budgeting" data-logo-accent="budgeting">Budgeting</a>
+            <a class="topic-chip" href="./chatbot.html?topic=investing-basics" data-logo-accent="investing">Investing basics</a>
+            <a class="topic-chip" href="./chatbot.html?topic=credit" data-logo-accent="credit">Credit</a>
+            <a class="topic-chip" href="./chatbot.html?topic=stocks" data-logo-accent="stocks">Stocks</a>
+            <a class="topic-chip" href="./chatbot.html?topic=emergency-fund" data-logo-accent="emergency">Emergency fund</a>
+          </div>
         </div>
       </div>
     </section>
@@ -84,7 +236,7 @@
     <section class="market-dashboard">
       <div class="container">
         <!-- Market Indices -->
-        <div class="market-section">
+        <div class="market-section reveal">
           <div class="market-header">
             <h2 class="market-title">Market Data</h2>
             <div class="market-status">
@@ -98,7 +250,7 @@
         </div>
 
         <!-- Top Gainers -->
-        <div class="market-section">
+        <div class="market-section reveal reveal-delay-1">
           <h2 class="market-title">Top gainers</h2>
           <div id="topGainers" class="movers-list">
             <!-- Top gainers will be inserted here -->
@@ -106,7 +258,7 @@
         </div>
 
         <!-- Top Losers -->
-        <div class="market-section">
+        <div class="market-section reveal reveal-delay-2">
           <h2 class="market-title">Top losers</h2>
           <div id="topLosers" class="movers-list">
             <!-- Top losers will be inserted here -->
@@ -114,7 +266,7 @@
         </div>
 
         <!-- Most Active -->
-        <div class="market-section">
+        <div class="market-section reveal reveal-delay-3">
           <h2 class="market-title">Most active</h2>
           <div id="mostActive" class="movers-list">
             <!-- Most active will be inserted here -->
@@ -127,7 +279,7 @@
   <footer class="site-footer">
     <div class="container footer-inner">
       <div class="footer-brand">
-        <div class="brand-mark small">●</div>
+        <img src="./assets/intellivest-mark.png" alt="Intellivest logo" class="footer-logo" />
         <div class="footer-text">
           <div class="footer-title">Intellivest @ Texas A&M</div>
           <div class="footer-tagline">Making financial literacy accessible to everyone, one person at a time.</div>
@@ -141,7 +293,7 @@
         </div>
         <div class="meta-block">
           <div class="meta-label">Developed by</div>
-          <div class="meta-text">Natalie Do, Denisse Aguilar, Teresa So, Monica Lin, Sahil Shah, Abhinav Chodimella, and Aiden Schreier</div>
+          <div class="meta-text">Natalie Do, Denisse Aguilar, Teresa So, Monica Lin, Sahil Shah, Abhinav Chodimella, Benjamin McCaulley, and Palak Patel</div>
         </div>
         <div class="meta-block">
           <div class="meta-text">© <span id="year"></span> Intellivest</div>
@@ -151,7 +303,7 @@
   </footer>
 
   <script src="./app.js"></script>
-  <script src="./auth-ui.js"></script>
   <script src="./market-data.js"></script>
+  <script src="./interactive.js"></script>
 </body>
 </html>

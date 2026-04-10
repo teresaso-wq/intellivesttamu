@@ -232,52 +232,43 @@
   color: var(--ink-500);
 }
 
-.watchlist-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 16px;
+/* Watchlist uses .category-stocks-grid + .stock-card-category from styles.css (same as Stocks categories). */
+.category-stocks-grid .stock-card-change.pct-na {
+  color: var(--ink-500);
+  background: rgba(0, 0, 0, 0.06);
 }
-
-.watchlist-grid .stock-card-category,
-.watchlist-grid .tracker-empty {
-  background: var(--paper);
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  border-radius: var(--radius-2);
-  padding: 20px;
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-.dark .watchlist-grid .stock-card-category,
-.dark .watchlist-grid .tracker-empty {
-  border-color: rgba(255, 255, 255, 0.08);
-}
-
-.watchlist-grid .stock-card-category:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-2);
+.dark .category-stocks-grid .stock-card-change.pct-na {
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .watchlist-remove-btn {
-  margin-top: 14px;
+  margin-top: 12px;
   width: 100%;
-  padding: 8px 0;
-  font-size: 12px;
+  padding: 8px 12px;
+  font-size: 13px;
   font-family: inherit;
   font-weight: 600;
-  color: var(--ink-500);
-  background: transparent;
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  color: var(--ink-600);
+  background: var(--paper-2);
+  border: 1px solid var(--ink-100);
   border-radius: var(--radius-1);
   cursor: pointer;
   transition: color 0.2s, border-color 0.2s, background 0.2s;
 }
 .dark .watchlist-remove-btn {
-  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.12);
   color: var(--ink-400);
 }
 .watchlist-remove-btn:hover {
   color: #ef4444;
-  border-color: #ef4444;
-  background: rgba(239, 68, 68, 0.06);
+  border-color: rgba(239, 68, 68, 0.55);
+  background: rgba(239, 68, 68, 0.08);
+}
+.dark .watchlist-remove-btn:hover {
+  color: #f87171;
+  border-color: rgba(248, 113, 113, 0.5);
+  background: rgba(239, 68, 68, 0.12);
 }
 
 .tracker-empty {

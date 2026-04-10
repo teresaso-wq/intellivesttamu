@@ -84,15 +84,25 @@
       const card = document.createElement('div');
       card.className = 'stock-card-category';
       const pct = q.changePercent;
-      const pos = pct >= 0;
+      const ch = q.change;
+      const up =
+        ch != null && !Number.isNaN(ch)
+          ? ch >= 0
+          : pct != null && !Number.isNaN(pct) && pct >= 0;
+      const pctLine =
+        pct == null || Number.isNaN(pct)
+          ? { cls: 'pct-na', html: 'N/A' }
+          : up
+            ? { cls: 'positive', html: `▲ +${pct.toFixed(2)}%` }
+            : { cls: 'negative', html: `▼ ${pct.toFixed(2)}%` };
       card.innerHTML = `
         <div class="stock-card-header-category">
-          <span class="stock-card-symbol">${sym}</span>
-          <span class="stock-card-change ${pos ? 'positive' : 'negative'}">${pos ? '▲' : '▼'} ${pos ? '+' : ''}${pct.toFixed(2)}%</span>
+          <div class="stock-card-symbol">${sym}</div>
+          <div class="stock-card-change ${pctLine.cls}">${pctLine.html}</div>
         </div>
         <div class="stock-card-name-category">${(q.name || sym).slice(0, 32)}</div>
         <div class="stock-card-price-category">${formatMoney(q.price)}</div>
-        <button type="button" class="watchlist-remove-btn" data-remove="${sym}">✕ Remove</button>
+        <button type="button" class="watchlist-remove-btn" data-remove="${sym}" aria-label="Remove ${sym} from watchlist">Remove</button>
       `;
       card.querySelector('[data-remove]')?.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -130,7 +140,7 @@
     if (input) input.value = '';
   });
 
-  document.querySelectorAll('.tracker-chips .chip').forEach((chip) => {
+  document.querySelectorAll('.default-stocks .chip, .tracker-chips .chip').forEach((chip) => {
     chip.addEventListener('click', () => {
       const input = document.getElementById('stockSearch');
       if (input) input.value = chip.dataset.symbol || '';

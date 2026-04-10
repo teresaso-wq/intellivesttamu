@@ -1,0 +1,25 @@
+{
+  "name": "Intellivest @ Texas A&M",
+  "short_name": "Intellivest",
+  "description": "Financial literacy, budgeting tools, and market education at Texas A&M.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f4f6f9",
+  "theme_color": "#002b5c",
+  "icons": [
+    {
+      "src": "./assets/intellivest-mark.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./assets/intellivest-mark.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

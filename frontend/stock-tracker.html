@@ -77,20 +77,21 @@
   <main class="stock-tracker-main">
     <div class="container">
       <div id="watchlistView" class="view-container active">
-        <div class="disclaimer-banner">
+        <div class="tracker-disclaimer">
           <strong>📚 Looking to learn?</strong> <a href="./education.html" class="link">Visit our Education Hub →</a>
         </div>
-        <section class="search-section">
+
+        <section class="tracker-search-section">
           <div class="search-container">
-            <input 
-              type="text" 
-              id="stockSearch" 
-              placeholder="Search for a stock (e.g., AAPL, TSLA, MSFT, GOOGL)" 
+            <input
+              type="text"
+              id="stockSearch"
+              placeholder="Search for a stock (e.g., AAPL, TSLA, MSFT, GOOGL)"
               autocomplete="off"
             />
             <button id="addStockBtn" class="btn primary">Add to Watchlist</button>
           </div>
-          <div class="default-stocks">
+          <div class="tracker-chips">
             <button class="chip" data-symbol="AAPL">AAPL</button>
             <button class="chip" data-symbol="MSFT">MSFT</button>
             <button class="chip" data-symbol="NVDA">NVDA</button>
@@ -100,7 +101,7 @@
           </div>
         </section>
 
-        <section class="watchlist-section">
+        <section class="tracker-watchlist-section">
           <div class="section-header">
             <h2>Your Watchlist</h2>
             <div class="last-update" id="lastUpdate">Updating...</div>

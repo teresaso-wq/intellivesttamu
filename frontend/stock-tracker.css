@@ -238,7 +238,7 @@
   gap: 16px;
 }
 
-.watchlist-grid .stock-card,
+.watchlist-grid .stock-card-category,
 .watchlist-grid .tracker-empty {
   background: var(--paper);
   border: 1px solid rgba(0, 0, 0, 0.06);
@@ -246,14 +246,38 @@
   padding: 20px;
   transition: transform 0.2s, box-shadow 0.2s;
 }
-.dark .watchlist-grid .stock-card,
+.dark .watchlist-grid .stock-card-category,
 .dark .watchlist-grid .tracker-empty {
   border-color: rgba(255, 255, 255, 0.08);
 }
 
-.watchlist-grid .stock-card:hover {
-  transform: translateY(-2px);
+.watchlist-grid .stock-card-category:hover {
+  transform: translateY(-4px);
   box-shadow: var(--shadow-2);
+}
+
+.watchlist-remove-btn {
+  margin-top: 14px;
+  width: 100%;
+  padding: 8px 0;
+  font-size: 12px;
+  font-family: inherit;
+  font-weight: 600;
+  color: var(--ink-500);
+  background: transparent;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: var(--radius-1);
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+.dark .watchlist-remove-btn {
+  border-color: rgba(255, 255, 255, 0.1);
+  color: var(--ink-400);
+}
+.watchlist-remove-btn:hover {
+  color: #ef4444;
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.06);
 }
 
 .tracker-empty {

@@ -82,17 +82,17 @@
       const sym = symbols[i];
       if (!q) return;
       const card = document.createElement('div');
-      card.className = 'stock-card';
+      card.className = 'stock-card-category';
       const pct = q.changePercent;
       const pos = pct >= 0;
       card.innerHTML = `
         <div class="stock-card-header-category">
           <span class="stock-card-symbol">${sym}</span>
-          <span class="stock-card-change ${pos ? 'positive' : 'negative'}">${pos ? '+' : ''}${pct.toFixed(2)}%</span>
+          <span class="stock-card-change ${pos ? 'positive' : 'negative'}">${pos ? '▲' : '▼'} ${pos ? '+' : ''}${pct.toFixed(2)}%</span>
         </div>
         <div class="stock-card-name-category">${(q.name || sym).slice(0, 32)}</div>
         <div class="stock-card-price-category">${formatMoney(q.price)}</div>
-        <button type="button" class="btn secondary" style="margin-top:12px;width:100%;font-size:12px;padding:8px" data-remove="${sym}">Remove</button>
+        <button type="button" class="watchlist-remove-btn" data-remove="${sym}">✕ Remove</button>
       `;
       card.querySelector('[data-remove]')?.addEventListener('click', (e) => {
         e.stopPropagation();

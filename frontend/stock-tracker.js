@@ -1,25 +1,22 @@
 /**
- * Live Tracker: indices + tech watchlist using IntellivestMarket (Yahoo / demo fallback).
+ * Live Tracker: indices + watchlist using window.MarketData (Yahoo Finance via proxies).
  */
 (function initStockTracker() {
-  const M = window.IntellivestMarket;
   const WATCH_KEY = 'intellivest_watchlist';
 
-  const watchlistBtn = document.getElementById('watchlistBtn');
-  const educationBtn = document.getElementById('educationBtn');
-  const watchlistView = document.getElementById('watchlistView');
-  const educationView = document.getElementById('educationView');
-
-  function setView(view) {
-    const isWatch = view === 'watchlist';
-    if (watchlistBtn) watchlistBtn.classList.toggle('active', isWatch);
-    if (educationBtn) educationBtn.classList.toggle('active', !isWatch);
-    if (watchlistView) watchlistView.classList.toggle('active', isWatch);
-    if (educationView) educationView.classList.toggle('active', !isWatch);
+  // Use window.MarketData which is defined in market-data.js
+  function getMarket() {
+    return window.MarketData || null;
   }
 
-  watchlistBtn?.addEventListener('click', () => setView('watchlist'));
-  educationBtn?.addEventListener('click', () => setView('education'));
+  async function fetchQuote(sym) {
+    const MD = getMarket();
+    if (MD && typeof MD.fetchDailyStockQuote === 'function') {
+      const q = await MD.fetchDailyStockQuote(sym);
+      if (q && !q.na) return q;
+    }
+    return null;
+  }
 
   function readWatchlist() {
     try {
@@ -42,7 +39,6 @@
   }
 
   async function updateIndices() {
-    if (!M) return;
     const map = [
       ['dowPrice', 'dowChange', '^DJI'],
       ['sp500Price', 'sp500Change', '^GSPC'],
@@ -50,11 +46,11 @@
     ];
     for (const [priceId, chId, sym] of map) {
       try {
-        const q = await M.fetchQuote(sym);
+        const q = await fetchQuote(sym);
         const elP = document.getElementById(priceId);
         const elC = document.getElementById(chId);
-        if (elP) elP.textContent = q.price >= 1000 ? q.price.toLocaleString('en-US', { maximumFractionDigits: 2 }) : formatMoney(q.price);
-        if (elC) {
+        if (q && elP) elP.textContent = q.price >= 1000 ? q.price.toLocaleString('en-US', { maximumFractionDigits: 2 }) : formatMoney(q.price);
+        if (q && elC) {
           const sign = q.changePercent >= 0 ? '+' : '';
           elC.textContent = `${sign}${q.changePercent.toFixed(2)}%`;
           elC.classList.remove('positive', 'negative');
@@ -70,21 +66,21 @@
   async function renderWatchlist() {
     const container = document.getElementById('watchlistContainer');
     const lastUpdate = document.getElementById('lastUpdate');
-    if (!container || !M) return;
+    if (!container) return;
 
     const symbols = readWatchlist();
     container.innerHTML = '<div class="tracker-empty">Loading…</div>';
 
-    const quotes = await Promise.all(symbols.map((s) => M.fetchQuote(s).catch(() => null)));
+    const quotes = await Promise.all(symbols.map((s) => fetchQuote(s).catch(() => null)));
     container.innerHTML = '';
 
     quotes.forEach((q, i) => {
       const sym = symbols[i];
-      if (!q) return;
       const card = document.createElement('div');
       card.className = 'stock-card-category';
-      const pct = q.changePercent;
-      const ch = q.change;
+
+      const pct = q ? q.changePercent : null;
+      const ch = q ? q.change : null;
       const up =
         ch != null && !Number.isNaN(ch)
           ? ch >= 0
@@ -95,15 +91,20 @@
           : up
             ? { cls: 'positive', html: `▲ +${pct.toFixed(2)}%` }
             : { cls: 'negative', html: `▼ ${pct.toFixed(2)}%` };
+
+      const name = q ? (q.name || sym).slice(0, 32) : sym;
+      const price = q ? formatMoney(q.price) : '--';
+
       card.innerHTML = `
         <div class="stock-card-header-category">
           <div class="stock-card-symbol">${sym}</div>
           <div class="stock-card-change ${pctLine.cls}">${pctLine.html}</div>
         </div>
-        <div class="stock-card-name-category">${(q.name || sym).slice(0, 32)}</div>
-        <div class="stock-card-price-category">${formatMoney(q.price)}</div>
+        <div class="stock-card-name-category">${name}</div>
+        <div class="stock-card-price-category">${price}</div>
         <button type="button" class="watchlist-remove-btn" data-remove="${sym}" aria-label="Remove ${sym} from watchlist">Remove</button>
       `;
+
       card.querySelector('[data-remove]')?.addEventListener('click', (e) => {
         e.stopPropagation();
         const next = readWatchlist().filter((x) => x !== sym);
@@ -111,14 +112,15 @@
         renderWatchlist();
       });
       card.style.cursor = 'pointer';
-      card.addEventListener('click', () => {
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('[data-remove]')) return;
         window.location.href = './stocks.html?symbol=' + encodeURIComponent(sym);
       });
       container.appendChild(card);
     });
 
     if (container.children.length === 0) {
-      container.innerHTML = '<div class="tracker-empty">Add tickers below to build your watchlist.</div>';
+      container.innerHTML = '<div class="tracker-empty">Your watchlist is empty. Search for a stock above to add it.</div>';
     }
 
     if (lastUpdate) {
@@ -129,26 +131,28 @@
   document.getElementById('addStockBtn')?.addEventListener('click', () => {
     const input = document.getElementById('stockSearch');
     const raw = (input?.value || '').trim().toUpperCase();
-    if (!raw || !M) return;
-    const sym = M.resolveSymbolFromSearch(raw) || raw;
+    if (!raw) return;
     const list = readWatchlist();
-    if (!list.includes(sym)) {
-      list.push(sym);
+    if (!list.includes(raw)) {
+      list.push(raw);
       saveWatchlist(list);
     }
     renderWatchlist();
     if (input) input.value = '';
   });
 
-  document.querySelectorAll('.default-stocks .chip, .tracker-chips .chip').forEach((chip) => {
+  document.getElementById('stockSearch')?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') document.getElementById('addStockBtn')?.click();
+  });
+
+  document.querySelectorAll('.tracker-chips .chip').forEach((chip) => {
     chip.addEventListener('click', () => {
       const input = document.getElementById('stockSearch');
       if (input) input.value = chip.dataset.symbol || '';
     });
   });
 
-  if (M) {
-    updateIndices();
-    renderWatchlist();
-  }
+  // Init
+  updateIndices();
+  renderWatchlist();
 })();

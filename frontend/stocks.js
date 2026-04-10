@@ -7,67 +7,30 @@ const STOCK_NAMES = {
   'TSLA': 'Tesla Inc.'
 };
 
-// Predefined category symbols (most active by sector - sorted by volume when displayed)
+// Predefined category symbols — 6 best-performing stocks per sector
 const CATEGORY_SYMBOLS = {
-  technology: [
-    'AAPL', 'MSFT', 'GOOGL', 'NVDA', 'META', 'AMD', 'AVGO', 'CRM', 'ORCL', 'ADBE', 'NFLX', 'CSCO'
+  tech: [
+    'NVDA', 'AAPL', 'MSFT', 'META', 'GOOGL', 'AMD'
   ],
-  financials: [
-    'JPM', 'BAC', 'WFC', 'C', 'GS', 'MS', 'BLK', 'SCHW', 'AXP', 'USB', 'PNC', 'BK', 'TFC', 'COF', 'AIG', 'MET'
+  finance: [
+    'JPM', 'GS', 'V', 'MA', 'BLK', 'BAC'
   ],
   energy: [
-    'XOM', 'CVX', 'COP', 'SLB', 'EOG', 'MPC', 'PSX', 'VLO', 'OXY', 'KMI', 'HAL', 'DVN', 'BKR', 'FANG', 'APA', 'PXD'
-  ],
-  industrials: [
-    'CAT', 'DE', 'UNP', 'UPS', 'RTX', 'LMT', 'GE', 'HON', 'BA', 'NOC', 'MMM', 'WM', 'ITW', 'ETN', 'PH', 'EMR'
-  ],
-  healthcare: [
-    'UNH', 'JNJ', 'LLY', 'ABBV', 'MRK', 'TMO', 'PFE', 'CVS', 'AMGN', 'GILD', 'ISRG', 'BMY'
-  ],
-  'consumer-discretionary': [
-    'AMZN', 'TSLA', 'HD', 'MCD', 'NKE', 'SBUX', 'LOW', 'BKNG', 'TGT', 'MAR', 'CMG', 'RCL', 'GM', 'F', 'ROST', 'ORLY'
-  ],
-  'consumer-staples': [
-    'WMT', 'PG', 'KO', 'PEP', 'COST', 'PM', 'MO', 'CL', 'KMB', 'MDLZ', 'GIS', 'KHC', 'KR', 'HSY', 'ADM', 'EL'
+    'XOM', 'CVX', 'COP', 'SLB', 'EOG', 'OXY'
   ],
   minerals: [
-    'BHP', 'RIO', 'VALE', 'FCX', 'NEM', 'GOLD', 'AA', 'ALB', 'MP', 'TECK',
-    'SCCO', 'HL', 'PAAS', 'AG', 'WPM', 'SBSW', 'UUUU', 'DNN', 'UEC', 'NG'
+    'FCX', 'NEM', 'BHP', 'VALE', 'GOLD', 'ALB'
+  ],
+  aerospace: [
+    'LMT', 'RTX', 'NOC', 'BA', 'GD', 'HII'
+  ],
+  retail: [
+    'WMT', 'COST', 'AMZN', 'HD', 'TGT', 'LOW'
   ]
 };
 
 function getSymbolsForFilter(filterKey) {
-  if (filterKey === 'all') {
-    const set = new Set();
-    [
-      'technology',
-      'energy',
-      'financials',
-      'healthcare',
-      'industrials',
-      'consumer-discretionary',
-      'consumer-staples',
-      'minerals'
-    ].forEach(function (k) {
-      (CATEGORY_SYMBOLS[k] || []).forEach(function (s) {
-        set.add(s);
-      });
-    });
-    return Array.from(set);
-  }
-  if (filterKey === 'finance') return CATEGORY_SYMBOLS.financials || [];
-  if (filterKey === 'consumer') {
-    const set = new Set([
-      ...(CATEGORY_SYMBOLS['consumer-discretionary'] || []),
-      ...(CATEGORY_SYMBOLS['consumer-staples'] || [])
-    ]);
-    return Array.from(set);
-  }
-  if (filterKey === 'technology') return CATEGORY_SYMBOLS.technology || [];
-  if (filterKey === 'healthcare') return CATEGORY_SYMBOLS.healthcare || [];
-  if (filterKey === 'energy') return CATEGORY_SYMBOLS.energy || [];
-  if (filterKey === 'minerals') return CATEGORY_SYMBOLS.minerals || [];
-  return [];
+  return CATEGORY_SYMBOLS[filterKey] || [];
 }
 
 let stockChart = null;

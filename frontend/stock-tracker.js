@@ -29,7 +29,7 @@
         if (Array.isArray(arr) && arr.length) return arr.map((s) => String(s).toUpperCase());
       }
     } catch (e) { /* ignore */ }
-    return M ? M.TECH_SYMBOLS.slice(0, 8) : ['AAPL', 'MSFT', 'NVDA', 'GOOGL', 'META', 'AMZN'];
+    return ['AAPL', 'MSFT', 'NVDA', 'AMZN', 'JPM', 'TSLA'];
   }
 
   function saveWatchlist(symbols) {

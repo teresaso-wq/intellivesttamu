@@ -798,6 +798,7 @@ async function loadCategoryStocks(filterKey) {
   const symbols = getSymbolsForFilter(filterKey);
   visibleCardSymbols.clear();
   pendingCardSymbols.splice(0, pendingCardSymbols.length);
+  batchIsRunning = false;
 
   if (symbols.length === 0) {
     container.innerHTML = '<div class="category-loading">No stocks available for this category right now.</div>';
@@ -805,7 +806,8 @@ async function loadCategoryStocks(filterKey) {
   }
 
   container.innerHTML = symbols.map(sym => createSkeletonCard(sym)).join('');
-  setupCardIntersectionObserver();
+  // Directly fetch all 6 stocks — no need to wait for scroll/intersection
+  fetchInBatches(symbols, CARD_BATCH_SIZE, false);
 }
 
 function openAnalysisPanel() {

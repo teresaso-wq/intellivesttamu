@@ -1235,7 +1235,7 @@ async function updateStockTicker() {
     }
   }
 
-  loadCategoryStocks('all');
+  loadCategoryStocks('tech');
   startRefresh();
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) stopRefresh();

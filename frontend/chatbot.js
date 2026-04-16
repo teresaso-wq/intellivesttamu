@@ -1,4 +1,45 @@
 // Intellivest AI Chatbot — starts after chatbot-survey.js signals readiness
+
+// ── Google Gemini AI (Free) ──────────────────────────────────────────────────
+// Get your FREE key at: https://aistudio.google.com/app/apikey
+// Paste your key below — keep this file private, do not share publicly
+const GEMINI_API_KEY = 'YOUR_GEMINI_API_KEY';
+
+async function callGeminiAPI(userMessage, profile) {
+  if (!GEMINI_API_KEY || GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY') return null;
+  try {
+    const profileCtx = profile
+      ? 'User profile — Name: ' + profile.name +
+        ', Age: ' + profile.age +
+        ', Risk tolerance: ' + profile.risk +
+        ', Savings available: ' + profile.savings +
+        ', Financial goals: ' + (profile.goals || []).join(', ') + '. '
+      : '';
+    const systemPrompt =
+      'You are Intellivest AI, a friendly and practical financial literacy assistant for college students and young adults at Texas A&M University. ' +
+      'Give clear, actionable, and encouraging advice. Keep responses under 200 words. ' +
+      'Use bullet points for lists. Never guarantee investment returns. Always add a brief disclaimer when giving investment advice. ' +
+      profileCtx;
+    const res = await fetch(
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + GEMINI_API_KEY,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: systemPrompt + '\n\nUser question: ' + userMessage }] }],
+          generationConfig: { temperature: 0.7, maxOutputTokens: 400 }
+        })
+      }
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data?.candidates?.[0]?.content?.parts?.[0]?.text || null;
+  } catch (e) {
+    return null;
+  }
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 (function () {
   function runChatbot() {
     const messagesContainer = document.getElementById('chatbotMessages');
@@ -656,11 +697,18 @@ What would you like help with?`;
           addMessage(userMessage, true);
           chatbotInput.value = '';
           showTypingIndicator();
-          await new Promise(resolve =>
-            setTimeout(resolve, Math.min(500, Math.floor(200 + Math.random() * 301)))
-          );
+          // Try Gemini AI first, fall back to built-in responses
+          const profile = getSurveyProfile();
+          const geminiReply = await callGeminiAPI(userMessage, profile);
           removeTypingIndicator();
-          addMessage(getResponse(userMessage), false);
+          if (geminiReply) {
+            addMessage(geminiReply, false);
+          } else {
+            await new Promise(resolve =>
+              setTimeout(resolve, Math.min(300, Math.floor(100 + Math.random() * 200)))
+            );
+            addMessage(getResponse(userMessage), false);
+          }
         });
       }
     }

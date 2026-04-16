@@ -293,16 +293,69 @@ async function fetchDailyStockQuoteFromBackend(ticker) {
   }
 }
 
+// ── Finnhub (fast, free, no CORS proxy needed) ──────────────────────────────
+// Get your FREE API key at: https://finnhub.io/register (takes 30 seconds)
+const FINNHUB_API_KEY = 'd7g4cehr01qqb8ria6r0d7g4cehr01qqb8ria6rg';
+
+const FINNHUB_COMPANY_NAMES = {
+  'AAPL':'Apple Inc.','MSFT':'Microsoft Corp.','NVDA':'NVIDIA Corp.',
+  'GOOGL':'Alphabet Inc.','META':'Meta Platforms','AMZN':'Amazon.com',
+  'TSLA':'Tesla Inc.','AMD':'Advanced Micro Devices','JPM':'JPMorgan Chase',
+  'GS':'Goldman Sachs','V':'Visa Inc.','MA':'Mastercard','BLK':'BlackRock',
+  'BAC':'Bank of America','XOM':'Exxon Mobil','CVX':'Chevron Corp.',
+  'COP':'ConocoPhillips','SLB':'SLB (Schlumberger)','EOG':'EOG Resources',
+  'OXY':'Occidental Petroleum','FCX':'Freeport-McMoRan','NEM':'Newmont Corp.',
+  'BHP':'BHP Group','VALE':'Vale S.A.','GOLD':'Barrick Gold','ALB':'Albemarle',
+  'LMT':'Lockheed Martin','RTX':'RTX Corp.','NOC':'Northrop Grumman',
+  'BA':'Boeing Co.','GD':'General Dynamics','HII':'HII Inc.',
+  'WMT':'Walmart Inc.','COST':'Costco Wholesale','HD':'Home Depot',
+  'TGT':'Target Corp.','LOW':'Lowe\'s Companies'
+};
+
+async function fetchFinnhubQuote(ticker) {
+  if (!FINNHUB_API_KEY || FINNHUB_API_KEY === 'YOUR_FINNHUB_API_KEY') return null;
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 5000);
+    const res = await fetch(
+      'https://finnhub.io/api/v1/quote?symbol=' + encodeURIComponent(ticker) + '&token=' + FINNHUB_API_KEY,
+      { signal: controller.signal, headers: { Accept: 'application/json' } }
+    );
+    clearTimeout(timer);
+    if (!res.ok) return null;
+    const q = await res.json();
+    const price = Number(q.c);
+    const prev = Number(q.pc);
+    if (!price || !prev) return null;
+    const change = Number(q.d) || (price - prev);
+    const changePercent = Number(q.dp) || (prev !== 0 ? ((change / prev) * 100) : 0);
+    return {
+      na: false,
+      name: FINNHUB_COMPANY_NAMES[ticker.toUpperCase()] || ticker,
+      price,
+      change,
+      changePercent,
+      volume: Number(q.v) || 0
+    };
+  } catch (e) {
+    return null;
+  }
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 /**
- * Daily quote: backend when available, else v7 quote then v8 chart via proxies. Exposed on window.MarketData ASAP.
+ * Daily quote: Finnhub first (fast), then backend, then Yahoo proxies as fallback.
  */
 async function fetchDailyStockQuote(ticker) {
-  const backend = await fetchDailyStockQuoteFromBackend(ticker);
-  if (backend && !backend.na) {
-    return backend;
-  }
+  // 1. Finnhub — fastest, direct API, no CORS proxy
+  const finnhub = await fetchFinnhubQuote(ticker);
+  if (finnhub && !finnhub.na) return finnhub;
 
-  // Primary static-host path requested: corsproxy.io + Yahoo chart v8.
+  // 2. Backend (if running locally)
+  const backend = await fetchDailyStockQuoteFromBackend(ticker);
+  if (backend && !backend.na) return backend;
+
+  // 3. Yahoo Finance via corsproxy.io
   try {
     const response = await fetch(buildCorsProxyYahooChartUrl(ticker), {
       method: 'GET',
@@ -319,15 +372,11 @@ async function fetchDailyStockQuote(ticker) {
 
   const v7 = await fetchJsonThroughProxies(buildYahooQuoteV7Url(ticker));
   let out = v7 ? parseV7Quote(v7, ticker) : null;
-  if (out && !out.na) {
-    return out;
-  }
+  if (out && !out.na) return out;
 
   const chart = await fetchJsonThroughProxies(buildYahooChartUrl(ticker));
   out = chart ? parseChartMetaToQuote(chart, ticker) : null;
-  if (out && !out.na) {
-    return out;
-  }
+  if (out && !out.na) return out;
 
   return { na: true };
 }

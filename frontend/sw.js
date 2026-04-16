@@ -1,5 +1,5 @@
 /* Intellivest service worker: installable PWA + light offline fallback */
-const CACHE_VERSION = 'intellivest-v1';
+const CACHE_VERSION = 'intellivest-v3';
 const PRECACHE_URLS = ['./index.html', './styles.css', './app.js', './manifest.webmanifest'];
 
 self.addEventListener('install', function (event) {

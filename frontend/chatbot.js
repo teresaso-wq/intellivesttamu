@@ -3,7 +3,7 @@
 // ── Google Gemini AI (Free) ──────────────────────────────────────────────────
 // Get your FREE key at: https://aistudio.google.com/app/apikey
 // Paste your key below — keep this file private, do not share publicly
-const GEMINI_API_KEY = 'YOUR_GEMINI_API_KEY';
+const GEMINI_API_KEY = 'AQ.Ab8RN6IfVe0aTFOoXeeMhUc_eywHTt_gqfsKKZ7HQjHnlL1Bpw';
 
 async function callGeminiAPI(userMessage, profile) {
   if (!GEMINI_API_KEY || GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY') return null;

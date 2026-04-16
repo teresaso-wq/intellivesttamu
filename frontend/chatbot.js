@@ -1,12 +1,27 @@
 // Intellivest AI Chatbot — starts after chatbot-survey.js signals readiness
 
 // ── Google Gemini AI (Free) ──────────────────────────────────────────────────
-// Get your FREE key at: https://aistudio.google.com/app/apikey
-// Paste your key below — keep this file private, do not share publicly
-const GEMINI_API_KEY = 'AQ.Ab8RN6IfVe0aTFOoXeeMhUc_eywHTt_gqfsKKZ7HQjHnlL1Bpw';
+// Key is stored in localStorage so it is never exposed in source code.
+// To activate: visit chatbot.html?apikey=YOUR_KEY_HERE once.
+// The page saves it to localStorage and clears it from the URL automatically.
+// Or run in browser console: setGeminiKey('YOUR_KEY_HERE')
+(function () {
+  var p = new URLSearchParams(window.location.search).get('apikey');
+  if (p) {
+    localStorage.setItem('iv_gk', p);
+    var u = new URL(window.location.href);
+    u.searchParams.delete('apikey');
+    window.history.replaceState({}, '', u.toString());
+  }
+})();
+window.setGeminiKey = function (k) {
+  localStorage.setItem('iv_gk', k);
+  console.log('[Intellivest] Gemini key saved. Refresh to activate.');
+};
 
 async function callGeminiAPI(userMessage, profile) {
-  if (!GEMINI_API_KEY || GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY') return null;
+  var key = localStorage.getItem('iv_gk');
+  if (!key) return null;
   try {
     const profileCtx = profile
       ? 'User profile — Name: ' + profile.name +
@@ -21,7 +36,7 @@ async function callGeminiAPI(userMessage, profile) {
       'Use bullet points for lists. Never guarantee investment returns. Always add a brief disclaimer when giving investment advice. ' +
       profileCtx;
     const res = await fetch(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + GEMINI_API_KEY,
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + key,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -31,10 +46,15 @@ async function callGeminiAPI(userMessage, profile) {
         })
       }
     );
-    if (!res.ok) return null;
+    if (!res.ok) {
+      var err = await res.json().catch(function () { return {}; });
+      console.warn('[Intellivest] Gemini API error ' + res.status + ':', err);
+      return null;
+    }
     const data = await res.json();
     return data?.candidates?.[0]?.content?.parts?.[0]?.text || null;
   } catch (e) {
+    console.warn('[Intellivest] Gemini fetch failed:', e);
     return null;
   }
 }

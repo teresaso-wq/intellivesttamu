@@ -1,80 +1,47 @@
 // Intellivest AI Chatbot — starts after chatbot-survey.js signals readiness
 
-// ── Google Gemini AI ──────────────────────────────────────────────────────────
-var _iv_k = ['AQ.Ab8RN6LA', 'n-TiO4FKJC', 'HD9NZJ947D', 'gxGcJ5ib9y', 'T4Y_W9_2Osaw'];
+// ── Backend API (Alpha Vantage — real stock data) ─────────────────────────────
+// The chatbot calls the local FastAPI backend at http://localhost:8000/api/chat
+// To run the backend: open a terminal in the project folder and run:
+//   pip install -r requirements.txt
+//   uvicorn main:app --reload --port 8000
+// ─────────────────────────────────────────────────────────────────────────────
 
-function aiIsReady() { return true; }
+var BACKEND_URL = localStorage.getItem('iv_backend') || 'http://localhost:8000';
 
-window.setAIKey = function (k) {
-  if (k && k.trim()) localStorage.setItem('iv_ak', k.trim());
+window.setBackendUrl = function (url) {
+  localStorage.setItem('iv_backend', url.trim());
+  BACKEND_URL = url.trim();
+  console.log('[IV] Backend URL set to:', BACKEND_URL);
 };
 
 async function callAI(userMessage, profile) {
-  var key = (localStorage.getItem('iv_ak') || _iv_k.join('')).trim();
-  if (!key) return null;
-
-  var profileCtx = '';
-  if (profile && profile.name) {
-    profileCtx =
-      'User profile — Name: ' + profile.name +
-      ', Age: ' + (profile.age || 'unknown') +
-      ', Risk tolerance: ' + (profile.risk || 'Moderate') +
-      ', Savings available: ' + (profile.savings || 'unknown') +
-      ', Financial goals: ' + ((profile.goals || []).join(', ') || 'general') + '. ';
-  }
-
-  var systemPrompt =
-    'You are Intellivest AI, a smart and friendly financial literacy assistant for college students at Texas A&M University. ' +
-    'Give specific, clear, actionable advice. Keep answers under 200 words. ' +
-    'Use bullet points for lists. Analyze specific stocks when asked. ' +
-    'Always add a short disclaimer for investment advice. Never guarantee returns. ' +
-    profileCtx;
-
   try {
-    // Try method 1: x-goog-api-key header (works for AQ. prefix keys)
-    var res = await fetch(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-goog-api-key': key
-        },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: systemPrompt + '\n\nUser: ' + userMessage }] }],
-          generationConfig: { temperature: 0.7, maxOutputTokens: 400 }
-        })
-      }
-    );
+    var controller = new AbortController();
+    var timer = setTimeout(function () { controller.abort(); }, 6000);
 
-    // If that fails try method 2: ?key= query param (works for AIzaSy prefix keys)
-    if (!res.ok) {
-      var errBody = await res.json().catch(function () { return {}; });
-      console.warn('[IV] Gemini header method failed (' + res.status + '):', JSON.stringify(errBody));
-
-      res = await fetch(
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + key,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: systemPrompt + '\n\nUser: ' + userMessage }] }],
-            generationConfig: { temperature: 0.7, maxOutputTokens: 400 }
-          })
-        }
-      );
-    }
+    var res = await fetch(BACKEND_URL + '/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: userMessage }),
+      signal: controller.signal
+    });
+    clearTimeout(timer);
 
     if (!res.ok) {
-      var err2 = await res.json().catch(function () { return {}; });
-      console.warn('[IV] Gemini both methods failed (' + res.status + '):', JSON.stringify(err2));
-      return '__ERROR__' + res.status + ': ' + (err2?.error?.message || 'Unknown error');
+      console.warn('[IV] Backend error:', res.status);
+      return null;
     }
 
     var data = await res.json();
-    return data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
+    var reply = (data.reply || '').trim();
+    if (data.disclaimer && reply) {
+      reply += '\n\n⚠️ ' + data.disclaimer;
+    }
+    return reply || null;
   } catch (e) {
-    console.warn('[IV] Gemini fetch failed:', e);
+    // Backend not running — fall through to keyword responses
+    console.warn('[IV] Backend unreachable:', e.message);
     return null;
   }
 }
@@ -741,10 +708,7 @@ What would you like help with?`;
           const profile = getSurveyProfile();
           const aiReply = await callAI(userMessage, profile);
           removeTypingIndicator();
-          if (aiReply && aiReply.startsWith('__ERROR__')) {
-            // Show the actual API error so we can diagnose it
-            addMessage('⚠️ AI error: ' + aiReply.replace('__ERROR__', ''), false);
-          } else if (aiReply) {
+          if (aiReply) {
             addMessage(aiReply, false);
           } else {
             await new Promise(resolve =>

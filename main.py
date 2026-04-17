@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
-from api import stock_routes, crypto_routes, news_routes
+from api import stock_routes, crypto_routes, news_routes, chat_routes
 
 BASE_DIR = Path(__file__).resolve().parent
 FRONTEND_DIR = BASE_DIR / "frontend"
@@ -27,6 +27,7 @@ app.add_middleware(
 app.include_router(stock_routes.router, prefix="/api/stocks", tags=["stocks"])
 app.include_router(crypto_routes.router, prefix="/api/crypto", tags=["crypto"])
 app.include_router(news_routes.router, prefix="/api/news", tags=["news"])
+app.include_router(chat_routes.router, prefix="/api", tags=["chat"])
 
 # Serve static frontend assets (for both uvicorn and standalone static servers)
 if FRONTEND_DIR.exists():

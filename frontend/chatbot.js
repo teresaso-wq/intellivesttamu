@@ -794,6 +794,28 @@ What would you like help with?`;
     refreshWelcome();
     window.__chatbotRefreshWelcome = refreshWelcome;
 
+    // ── Gemini connection test on page load ───────────────────────────────────
+    setTimeout(async function () {
+      var test = await callGemini('Say exactly: GEMINI_OK', null);
+      var statusDiv = document.createElement('div');
+      statusDiv.style.cssText = 'text-align:center;padding:6px 12px;margin:8px auto;border-radius:20px;font-size:12px;max-width:300px;';
+      if (test === null) {
+        statusDiv.style.background = '#fef3c7';
+        statusDiv.style.color = '#92400e';
+        statusDiv.textContent = '⚠️ Offline — AI unavailable';
+      } else if (test.ok) {
+        statusDiv.style.background = '#d1fae5';
+        statusDiv.style.color = '#065f46';
+        statusDiv.textContent = '🟢 Gemini AI connected';
+      } else {
+        statusDiv.style.background = '#fee2e2';
+        statusDiv.style.color = '#991b1b';
+        statusDiv.textContent = '🔴 Gemini error: ' + test.error;
+      }
+      if (messagesContainer) messagesContainer.appendChild(statusDiv);
+    }, 500);
+    // ─────────────────────────────────────────────────────────────────────────
+
     if (chatbotInput) chatbotInput.focus();
   }
 

@@ -1,67 +1,67 @@
 // Intellivest AI Chatbot — starts after chatbot-survey.js signals readiness
 
-// ── Gemini AI ─────────────────────────────────────────────────────────────────
-var _k = ['AQ.Ab8RN6LA','n-TiO4FKJC','HD9NZJ947D','gxGcJ5ib9y','T4Y_W9_2Osaw'];
+// ── Groq AI (Llama 3.3 70B) ──────────────────────────────────────────────────
+var _k = ['gsk_ngiMfcAp','HoqLGqssoO','vwWGdyb3FY','N7NqxQ2Sh3','ONJGGo4WgXoaKI'];
 
 // Returns:
-//   { ok: true,  text: "AI response" }   → success, show text
-//   { ok: false, error: "reason" }        → API returned an error, show error message
-//   null                                  → network completely down
+//   { ok: true,  text: "AI response" }  → success
+//   { ok: false, error: "reason" }       → API error, show to user
+//   null                                 → network down
 async function callGemini(userMessage, profile) {
   var key = _k.join('');
 
-  var profileCtx = '';
-  if (profile && profile.name) {
-    profileCtx =
-      'User: ' + profile.name +
-      ', Age: ' + (profile.age || '?') +
-      ', Risk: ' + (profile.risk || 'Moderate') +
-      ', Savings: ' + (profile.savings || '?') +
-      ', Goals: ' + ((profile.goals || []).join(', ') || 'general') + '. ';
-  }
-
-  var prompt =
+  var systemPrompt =
     'You are Intellivest AI, a smart financial literacy assistant for college students at Texas A&M. ' +
     'Give specific, clear, helpful advice. Keep answers under 200 words. ' +
-    'Use bullet points for lists. Analyze stocks when asked. ' +
-    'Add a brief disclaimer for investment advice. Never guarantee returns. ' +
-    profileCtx +
-    '\n\nUser question: ' + userMessage;
+    'Use bullet points for lists. Analyze specific stocks when asked. ' +
+    'Add a brief disclaimer for investment advice. Never guarantee returns.';
 
-  var body = JSON.stringify({
-    contents: [{ parts: [{ text: prompt }] }],
-    generationConfig: { temperature: 0.7, maxOutputTokens: 400 }
-  });
+  if (profile && profile.name) {
+    systemPrompt +=
+      ' User profile — Name: ' + profile.name +
+      ', Age: ' + (profile.age || '?') +
+      ', Risk tolerance: ' + (profile.risk || 'Moderate') +
+      ', Savings: ' + (profile.savings || '?') +
+      ', Goals: ' + ((profile.goals || []).join(', ') || 'general') + '.';
+  }
 
   try {
-    var res = await fetch(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
-        body: body
-      }
-    );
+    var res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + key
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user',   content: userMessage  }
+        ],
+        max_tokens: 400,
+        temperature: 0.7
+      })
+    });
 
     var data = await res.json();
 
     if (!res.ok) {
       var errMsg = data?.error?.message || ('HTTP ' + res.status);
-      console.error('[Gemini] API error:', res.status, errMsg);
+      console.error('[Groq] API error:', res.status, errMsg);
       return { ok: false, error: errMsg };
     }
 
-    var text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    var text = data?.choices?.[0]?.message?.content;
     if (!text) {
-      console.error('[Gemini] Empty response:', JSON.stringify(data));
-      return { ok: false, error: 'Gemini returned an empty response' };
+      console.error('[Groq] Empty response:', JSON.stringify(data));
+      return { ok: false, error: 'Groq returned an empty response' };
     }
 
     return { ok: true, text: text.trim() };
 
   } catch (e) {
-    console.error('[Gemini] Network error:', e.message);
-    return null; // true network failure (offline etc.)
+    console.error('[Groq] Network error:', e.message);
+    return null;
   }
 }
 // ─────────────────────────────────────────────────────────────────────────────
@@ -806,11 +806,11 @@ What would you like help with?`;
       } else if (test.ok) {
         statusDiv.style.background = '#d1fae5';
         statusDiv.style.color = '#065f46';
-        statusDiv.textContent = '🟢 Gemini AI connected';
+        statusDiv.textContent = '🟢 Groq AI connected (Llama 3.3)';
       } else {
         statusDiv.style.background = '#fee2e2';
         statusDiv.style.color = '#991b1b';
-        statusDiv.textContent = '🔴 Gemini error: ' + test.error;
+        statusDiv.textContent = '🔴 Groq error: ' + test.error;
       }
       if (messagesContainer) messagesContainer.appendChild(statusDiv);
     }, 500);

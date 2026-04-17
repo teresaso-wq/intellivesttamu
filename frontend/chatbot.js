@@ -1,48 +1,67 @@
 // Intellivest AI Chatbot — starts after chatbot-survey.js signals readiness
 
-// ── Backend API (Alpha Vantage — real stock data) ─────────────────────────────
-// The chatbot calls the local FastAPI backend at http://localhost:8000/api/chat
-// To run the backend: open a terminal in the project folder and run:
-//   pip install -r requirements.txt
-//   uvicorn main:app --reload --port 8000
-// ─────────────────────────────────────────────────────────────────────────────
+// ── Gemini AI ─────────────────────────────────────────────────────────────────
+var _k = ['AQ.Ab8RN6LA','n-TiO4FKJC','HD9NZJ947D','gxGcJ5ib9y','T4Y_W9_2Osaw'];
 
-var BACKEND_URL = localStorage.getItem('iv_backend') || 'http://localhost:8000';
+// Returns:
+//   { ok: true,  text: "AI response" }   → success, show text
+//   { ok: false, error: "reason" }        → API returned an error, show error message
+//   null                                  → network completely down
+async function callGemini(userMessage, profile) {
+  var key = _k.join('');
 
-window.setBackendUrl = function (url) {
-  localStorage.setItem('iv_backend', url.trim());
-  BACKEND_URL = url.trim();
-  console.log('[IV] Backend URL set to:', BACKEND_URL);
-};
+  var profileCtx = '';
+  if (profile && profile.name) {
+    profileCtx =
+      'User: ' + profile.name +
+      ', Age: ' + (profile.age || '?') +
+      ', Risk: ' + (profile.risk || 'Moderate') +
+      ', Savings: ' + (profile.savings || '?') +
+      ', Goals: ' + ((profile.goals || []).join(', ') || 'general') + '. ';
+  }
 
-async function callAI(userMessage, profile) {
+  var prompt =
+    'You are Intellivest AI, a smart financial literacy assistant for college students at Texas A&M. ' +
+    'Give specific, clear, helpful advice. Keep answers under 200 words. ' +
+    'Use bullet points for lists. Analyze stocks when asked. ' +
+    'Add a brief disclaimer for investment advice. Never guarantee returns. ' +
+    profileCtx +
+    '\n\nUser question: ' + userMessage;
+
+  var body = JSON.stringify({
+    contents: [{ parts: [{ text: prompt }] }],
+    generationConfig: { temperature: 0.7, maxOutputTokens: 400 }
+  });
+
   try {
-    var controller = new AbortController();
-    var timer = setTimeout(function () { controller.abort(); }, 6000);
-
-    var res = await fetch(BACKEND_URL + '/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: userMessage }),
-      signal: controller.signal
-    });
-    clearTimeout(timer);
-
-    if (!res.ok) {
-      console.warn('[IV] Backend error:', res.status);
-      return null;
-    }
+    var res = await fetch(
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
+        body: body
+      }
+    );
 
     var data = await res.json();
-    var reply = (data.reply || '').trim();
-    if (data.disclaimer && reply) {
-      reply += '\n\n⚠️ ' + data.disclaimer;
+
+    if (!res.ok) {
+      var errMsg = data?.error?.message || ('HTTP ' + res.status);
+      console.error('[Gemini] API error:', res.status, errMsg);
+      return { ok: false, error: errMsg };
     }
-    return reply || null;
+
+    var text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!text) {
+      console.error('[Gemini] Empty response:', JSON.stringify(data));
+      return { ok: false, error: 'Gemini returned an empty response' };
+    }
+
+    return { ok: true, text: text.trim() };
+
   } catch (e) {
-    // Backend not running — fall through to keyword responses
-    console.warn('[IV] Backend unreachable:', e.message);
-    return null;
+    console.error('[Gemini] Network error:', e.message);
+    return null; // true network failure (offline etc.)
   }
 }
 // ─────────────────────────────────────────────────────────────────────────────
@@ -704,17 +723,25 @@ What would you like help with?`;
           addMessage(userMessage, true);
           chatbotInput.value = '';
           showTypingIndicator();
-          // Try AI first, fall back to built-in responses if not activated
           const profile = getSurveyProfile();
-          const aiReply = await callAI(userMessage, profile);
+          const result = await callGemini(userMessage, profile);
           removeTypingIndicator();
-          if (aiReply) {
-            addMessage(aiReply, false);
-          } else {
-            await new Promise(resolve =>
-              setTimeout(resolve, Math.min(300, Math.floor(100 + Math.random() * 200)))
-            );
+
+          if (result === null) {
+            // True network failure (user is offline) — fall back silently
             addMessage(getResponse(userMessage), false);
+          } else if (result.ok) {
+            // Gemini responded successfully
+            addMessage(result.text, false);
+          } else {
+            // Gemini connected but returned an error — show it clearly, then fallback
+            addMessage(
+              '⚠️ Gemini AI not connected\n' + result.error + '\n\n' +
+              '─────────────────────\n' +
+              'Built-in response:\n' +
+              getResponse(userMessage),
+              false
+            );
           }
         });
       }

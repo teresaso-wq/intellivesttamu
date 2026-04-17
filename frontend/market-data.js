@@ -298,6 +298,10 @@ async function fetchDailyStockQuoteFromBackend(ticker) {
 const FINNHUB_API_KEY = 'd7g4cehr01qqb8ria6r0d7g4cehr01qqb8ria6rg';
 
 const FINNHUB_COMPANY_NAMES = {
+  // Index ETFs
+  'SPY':'S&P 500 ETF','DIA':'Dow Jones ETF','QQQ':'Nasdaq 100 ETF',
+  'IWM':'Russell 2000 ETF','VXX':'Volatility ETF','GLD':'Gold ETF',
+  // Stocks
   'AAPL':'Apple Inc.','MSFT':'Microsoft Corp.','NVDA':'NVIDIA Corp.',
   'GOOGL':'Alphabet Inc.','META':'Meta Platforms','AMZN':'Amazon.com',
   'TSLA':'Tesla Inc.','AMD':'Advanced Micro Devices','JPM':'JPMorgan Chase',
@@ -384,70 +388,38 @@ async function fetchDailyStockQuote(ticker) {
 window.MarketData = window.MarketData || {};
 window.MarketData.fetchDailyStockQuote = fetchDailyStockQuote;
 
+// Using ETF proxies — Finnhub supports these directly without CORS proxies
 const MARKET_INDICES = [
-  { symbol: 'ES=F', name: 'S&P Futures', type: 'futures' },
-  { symbol: 'YM=F', name: 'Dow Futures', type: 'futures' },
-  { symbol: 'NQ=F', name: 'Nasdaq Futures', type: 'futures' },
-  { symbol: 'RTY=F', name: 'Russell 2000', type: 'futures' },
-  { symbol: '^VIX', name: 'VIX', type: 'index' },
-  { symbol: 'GC=F', name: 'Gold', type: 'commodity' }
+  { symbol: 'SPY',  name: 'S&P 500',      type: 'index' },
+  { symbol: 'DIA',  name: 'Dow Jones',    type: 'index' },
+  { symbol: 'QQQ',  name: 'Nasdaq 100',   type: 'index' },
+  { symbol: 'IWM',  name: 'Russell 2000', type: 'index' },
+  { symbol: 'VXX',  name: 'Volatility',   type: 'index' },
+  { symbol: 'GLD',  name: 'Gold',         type: 'commodity' }
 ];
 
-// Fetch market data using Yahoo Finance API with CORS proxy
+// Fetch market data using Finnhub (fast, no CORS proxy needed)
 async function fetchMarketData(symbol) {
-  const methods = [
-    async () => {
-      const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=1d&includePrePost=false`;
-      const response = await fetch(url, { method: 'GET', headers: { 'Accept': 'application/json' }, mode: 'cors' });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      return await response.json();
-    },
-    async () => {
-      const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=1d&includePrePost=false`;
-      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-      const response = await fetch(proxyUrl, { method: 'GET', headers: { 'Accept': 'application/json' } });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      return await response.json();
-    }
-  ];
-
-  for (let method of methods) {
-    try {
-      const data = await method();
-      if (!data.chart || !data.chart.result || data.chart.result.length === 0) continue;
-      
-      const result = data.chart.result[0];
-      const meta = result.meta;
-      const quote = result.indicators.quote[0];
-      
-      const currentPrice = meta.regularMarketPrice || meta.previousClose || 0;
-      const previousClose = meta.previousClose || currentPrice;
-      const change = currentPrice - previousClose;
-      const changePercent = previousClose !== 0 ? (change / previousClose) * 100 : 0;
-      
-      // Get price history for mini chart
-      const closes = quote.close || [];
-      const validPrices = closes.filter(p => p !== null && p !== undefined).slice(-20); // Last 20 data points
-      
-      return {
-        symbol: symbol,
-        name: meta.longName || symbol,
-        price: currentPrice,
-        change: change,
-        changePercent: changePercent,
-        prices: validPrices
-      };
-    } catch (error) {
-      console.log(`Failed to fetch ${symbol}:`, error.message);
-    }
+  const q = await fetchFinnhubQuote(symbol);
+  if (q && !q.na) {
+    return {
+      symbol: symbol,
+      name: q.name || symbol,
+      price: q.price,
+      change: q.change,
+      changePercent: q.changePercent,
+      prices: [] // mini chart not used for index cards
+    };
   }
-  throw new Error(`Unable to fetch data for ${symbol}`);
+  throw new Error('Unable to fetch data for ' + symbol);
 }
 
-// Fetch top gainers/losers/most active
+// Fetch top gainers/losers/most active using Finnhub (fast, no CORS proxy)
 async function fetchMarketMovers(type = 'gainers') {
-  // Yahoo Finance doesn't have a direct API for this, so we'll use a curated list of popular stocks
-  const popularStocks = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'META', 'TSLA', 'NFLX', 'AMD', 'INTC', 'CRM', 'ORCL'];
+  const popularStocks = [
+    'AAPL','MSFT','NVDA','GOOGL','META','AMZN','TSLA','AMD','JPM','V',
+    'NFLX','CRM','ORCL','INTC','BAC','XOM','GS','MA','WMT','COST'
+  ];
   
   try {
     const stockDataPromises = popularStocks.map(symbol => fetchMarketData(symbol).catch(() => null));

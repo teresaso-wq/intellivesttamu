@@ -39,10 +39,12 @@
   }
 
   async function updateIndices() {
+    // Use ETF proxies — Finnhub supports these reliably without CORS issues
+    // DIA ≈ Dow Jones, SPY ≈ S&P 500, QQQ ≈ Nasdaq 100
     const map = [
-      ['dowPrice', 'dowChange', '^DJI'],
-      ['sp500Price', 'sp500Change', '^GSPC'],
-      ['nasdaqPrice', 'nasdaqChange', '^IXIC'],
+      ['dowPrice', 'dowChange', 'DIA'],
+      ['sp500Price', 'sp500Change', 'SPY'],
+      ['nasdaqPrice', 'nasdaqChange', 'QQQ'],
     ];
     for (const [priceId, chId, sym] of map) {
       try {

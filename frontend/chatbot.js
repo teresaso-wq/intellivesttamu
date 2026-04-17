@@ -1,39 +1,16 @@
 // Intellivest AI Chatbot — starts after chatbot-survey.js signals readiness
 
-// ── AI Setup (OpenRouter — free, no credit card, no team restrictions) ────────
-// Get a FREE key in 30 seconds: https://openrouter.ai → Sign Up → Keys → Create
-// Then click "⚡ Activate AI" button on the chatbot page and paste your key.
-// ─────────────────────────────────────────────────────────────────────────────
+// ── Google Gemini AI ──────────────────────────────────────────────────────────
+var _iv_k = ['AQ.Ab8RN6LA', 'n-TiO4FKJC', 'HD9NZJ947D', 'gxGcJ5ib9y', 'T4Y_W9_2Osaw'];
 
-// Run immediately on page load — read ?apikey= URL param if present
-(function () {
-  try {
-    var p = new URLSearchParams(window.location.search).get('apikey');
-    if (p && p.trim()) {
-      localStorage.setItem('iv_ak', p.trim());
-      var u = new URL(window.location.href);
-      u.searchParams.delete('apikey');
-      window.history.replaceState({}, '', u.toString());
-    }
-  } catch (e) { /* ignore */ }
-})();
+function aiIsReady() { return true; }
 
-// Helper to check if AI is ready
-function aiIsReady() {
-  return !!(localStorage.getItem('iv_ak') || '').trim();
-}
-
-// Save key (called from Activate AI button)
 window.setAIKey = function (k) {
-  if (k && k.trim()) {
-    localStorage.setItem('iv_ak', k.trim());
-    console.log('[Intellivest] AI key saved successfully.');
-  }
+  if (k && k.trim()) localStorage.setItem('iv_ak', k.trim());
 };
 
-// Call OpenRouter AI API
 async function callAI(userMessage, profile) {
-  var key = (localStorage.getItem('iv_ak') || '').trim();
+  var key = (localStorage.getItem('iv_ak') || _iv_k.join('')).trim();
   if (!key) return null;
 
   var profileCtx = '';
@@ -54,39 +31,26 @@ async function callAI(userMessage, profile) {
     profileCtx;
 
   try {
-    var res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + key,
-        'HTTP-Referer': 'https://teresaso-wq.github.io/intellivesttamu/',
-        'X-Title': 'Intellivest @ Texas A&M'
-      },
-      body: JSON.stringify({
-        model: 'google/gemma-3-12b-it:free',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userMessage }
-        ],
-        max_tokens: 400,
-        temperature: 0.7
-      })
-    });
-
-    if (!res.ok) {
-      var errBody = await res.json().catch(function () { return {}; });
-      console.warn('[Intellivest] AI API error ' + res.status + ':', errBody);
-      // If key is invalid/expired, clear it so the activate button reappears
-      if (res.status === 401 || res.status === 403) {
-        localStorage.removeItem('iv_ak');
+    var res = await fetch(
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + key,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: systemPrompt + '\n\nUser: ' + userMessage }] }],
+          generationConfig: { temperature: 0.7, maxOutputTokens: 400 }
+        })
       }
+    );
+    if (!res.ok) {
+      var err = await res.json().catch(function () { return {}; });
+      console.warn('[IV] Gemini error ' + res.status, err);
       return null;
     }
-
     var data = await res.json();
-    return data?.choices?.[0]?.message?.content?.trim() || null;
+    return data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
   } catch (e) {
-    console.warn('[Intellivest] AI fetch error:', e);
+    console.warn('[IV] Gemini fetch failed:', e);
     return null;
   }
 }
@@ -755,17 +719,6 @@ What would you like help with?`;
           removeTypingIndicator();
           if (aiReply) {
             addMessage(aiReply, false);
-            // Refresh activate button in case key was cleared due to 401
-            updateActivateBtn();
-          } else if (!aiIsReady()) {
-            addMessage(
-              '⚡ AI is not activated yet!\n\nTo get smart AI answers:\n' +
-              '1. Go to https://openrouter.ai and sign up free (30 seconds)\n' +
-              '2. Click Keys → Create Key → copy it\n' +
-              '3. Click the "⚡ Activate AI" button above and paste your key\n\n' +
-              "Once activated, I'll give real intelligent answers to any question!",
-              false
-            );
           } else {
             await new Promise(resolve =>
               setTimeout(resolve, Math.min(300, Math.floor(100 + Math.random() * 200)))

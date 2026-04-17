@@ -1,54 +1,69 @@
 // Intellivest AI Chatbot — starts after chatbot-survey.js signals readiness
 
-// ── Groq AI (Free — Llama 3.3 70B) ──────────────────────────────────────────
-// Key stored in localStorage — never in source code so GitHub cannot revoke it.
-// To activate: click the "Activate AI" button in the chatbot toolbar and paste
-// your free Groq key from https://console.groq.com/keys
+// ── AI Setup (OpenRouter — free, no credit card, no team restrictions) ────────
+// Get a FREE key in 30 seconds: https://openrouter.ai → Sign Up → Keys → Create
+// Then click "⚡ Activate AI" button on the chatbot page and paste your key.
 // ─────────────────────────────────────────────────────────────────────────────
 
-function getAIKey() {
-  var p = new URLSearchParams(window.location.search).get('apikey');
-  if (p) {
-    localStorage.setItem('iv_ak', p);
-    var u = new URL(window.location.href);
-    u.searchParams.delete('apikey');
-    window.history.replaceState({}, '', u.toString());
-    return p;
-  }
-  return localStorage.getItem('iv_ak') || '';
+// Run immediately on page load — read ?apikey= URL param if present
+(function () {
+  try {
+    var p = new URLSearchParams(window.location.search).get('apikey');
+    if (p && p.trim()) {
+      localStorage.setItem('iv_ak', p.trim());
+      var u = new URL(window.location.href);
+      u.searchParams.delete('apikey');
+      window.history.replaceState({}, '', u.toString());
+    }
+  } catch (e) { /* ignore */ }
+})();
+
+// Helper to check if AI is ready
+function aiIsReady() {
+  return !!(localStorage.getItem('iv_ak') || '').trim();
 }
 
-window.setGroqKey = function (k) {
-  localStorage.setItem('iv_ak', k.trim());
-  console.log('[Intellivest] Groq key saved!');
+// Save key (called from Activate AI button)
+window.setAIKey = function (k) {
+  if (k && k.trim()) {
+    localStorage.setItem('iv_ak', k.trim());
+    console.log('[Intellivest] AI key saved successfully.');
+  }
 };
 
-async function callGroqAPI(userMessage, profile) {
-  var key = localStorage.getItem('iv_ak');
+// Call OpenRouter AI API
+async function callAI(userMessage, profile) {
+  var key = (localStorage.getItem('iv_ak') || '').trim();
   if (!key) return null;
+
+  var profileCtx = '';
+  if (profile && profile.name) {
+    profileCtx =
+      'User profile — Name: ' + profile.name +
+      ', Age: ' + (profile.age || 'unknown') +
+      ', Risk tolerance: ' + (profile.risk || 'Moderate') +
+      ', Savings available: ' + (profile.savings || 'unknown') +
+      ', Financial goals: ' + ((profile.goals || []).join(', ') || 'general') + '. ';
+  }
+
+  var systemPrompt =
+    'You are Intellivest AI, a smart and friendly financial literacy assistant for college students at Texas A&M University. ' +
+    'Give specific, clear, actionable advice. Keep answers under 200 words. ' +
+    'Use bullet points for lists. Analyze specific stocks when asked. ' +
+    'Always add a short disclaimer for investment advice. Never guarantee returns. ' +
+    profileCtx;
+
   try {
-    const profileCtx = profile
-      ? 'User profile — Name: ' + profile.name +
-        ', Age: ' + profile.age +
-        ', Risk tolerance: ' + profile.risk +
-        ', Savings available: ' + profile.savings +
-        ', Financial goals: ' + (profile.goals || []).join(', ') + '. '
-      : '';
-    const systemPrompt =
-      'You are Intellivest AI, a friendly and knowledgeable financial literacy assistant for college students and young adults at Texas A&M University. ' +
-      'Give specific, actionable, and encouraging advice tailored to their situation. Keep responses under 200 words. ' +
-      'Use bullet points for lists. Never guarantee investment returns. ' +
-      'When asked about specific stocks or current events, give your best analysis. ' +
-      'Always add a brief disclaimer when giving investment advice. ' +
-      profileCtx;
-    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    var res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + key
+        'Authorization': 'Bearer ' + key,
+        'HTTP-Referer': 'https://teresaso-wq.github.io/intellivesttamu/',
+        'X-Title': 'Intellivest @ Texas A&M'
       },
       body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
+        model: 'google/gemma-3-12b-it:free',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userMessage }
@@ -57,15 +72,21 @@ async function callGroqAPI(userMessage, profile) {
         temperature: 0.7
       })
     });
+
     if (!res.ok) {
       var errBody = await res.json().catch(function () { return {}; });
-      console.warn('[Intellivest] Groq API error ' + res.status + ':', errBody);
+      console.warn('[Intellivest] AI API error ' + res.status + ':', errBody);
+      // If key is invalid/expired, clear it so the activate button reappears
+      if (res.status === 401 || res.status === 403) {
+        localStorage.removeItem('iv_ak');
+      }
       return null;
     }
-    const data = await res.json();
-    return data?.choices?.[0]?.message?.content || null;
+
+    var data = await res.json();
+    return data?.choices?.[0]?.message?.content?.trim() || null;
   } catch (e) {
-    console.warn('[Intellivest] Groq fetch failed:', e);
+    console.warn('[Intellivest] AI fetch error:', e);
     return null;
   }
 }
@@ -728,12 +749,23 @@ What would you like help with?`;
           addMessage(userMessage, true);
           chatbotInput.value = '';
           showTypingIndicator();
-          // Try Groq AI first, fall back to built-in responses
+          // Try AI first, fall back to built-in responses if not activated
           const profile = getSurveyProfile();
-          const aiReply = await callGroqAPI(userMessage, profile);
+          const aiReply = await callAI(userMessage, profile);
           removeTypingIndicator();
           if (aiReply) {
             addMessage(aiReply, false);
+            // Refresh activate button in case key was cleared due to 401
+            updateActivateBtn();
+          } else if (!aiIsReady()) {
+            addMessage(
+              '⚡ AI is not activated yet!\n\nTo get smart AI answers:\n' +
+              '1. Go to https://openrouter.ai and sign up free (30 seconds)\n' +
+              '2. Click Keys → Create Key → copy it\n' +
+              '3. Click the "⚡ Activate AI" button above and paste your key\n\n' +
+              "Once activated, I'll give real intelligent answers to any question!",
+              false
+            );
           } else {
             await new Promise(resolve =>
               setTimeout(resolve, Math.min(300, Math.floor(100 + Math.random() * 200)))
@@ -746,22 +778,43 @@ What would you like help with?`;
 
     // ── Activate AI button ───────────────────────────────────────────────────
     const activateBtn = document.getElementById('chatbotActivateAI');
+
     function updateActivateBtn() {
       if (!activateBtn) return;
-      activateBtn.style.display = localStorage.getItem('iv_ak') ? 'none' : 'inline-flex';
+      if (aiIsReady()) {
+        activateBtn.textContent = '✅ AI Active';
+        activateBtn.style.opacity = '0.6';
+        activateBtn.style.cursor = 'default';
+      } else {
+        activateBtn.textContent = '⚡ Activate AI';
+        activateBtn.style.display = 'inline-flex';
+        activateBtn.style.opacity = '1';
+        activateBtn.style.cursor = 'pointer';
+      }
     }
+
+    // Always show the button
+    if (activateBtn) activateBtn.style.display = 'inline-flex';
     updateActivateBtn();
+
     if (activateBtn) {
       activateBtn.addEventListener('click', function () {
+        if (aiIsReady()) return; // already active
         var key = prompt(
-          'Paste your free Groq API key below.\n\n' +
-          'Get one FREE at: https://console.groq.com/keys\n' +
-          '(Sign up takes 30 seconds, no credit card needed)'
+          '🤖 Activate Intellivest AI\n\n' +
+          'Step 1: Go to https://openrouter.ai\n' +
+          'Step 2: Sign up FREE (no credit card)\n' +
+          'Step 3: Click Keys → Create Key → Copy it\n' +
+          'Step 4: Paste it below and click OK\n\n' +
+          'Your key:'
         );
         if (key && key.trim()) {
-          localStorage.setItem('iv_ak', key.trim());
-          activateBtn.style.display = 'none';
-          addMessage('✅ AI activated! I\'m now powered by Llama 3.3 — ask me anything!', false);
+          window.setAIKey(key);
+          updateActivateBtn();
+          addMessage(
+            '✅ AI activated! I\'m now powered by Google Gemma AI.\n\nAsk me anything — specific stocks, market questions, budgeting tips, anything!',
+            false
+          );
         }
       });
     }

@@ -31,22 +31,46 @@ async function callAI(userMessage, profile) {
     profileCtx;
 
   try {
+    // Try method 1: x-goog-api-key header (works for AQ. prefix keys)
     var res = await fetch(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + key,
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
       {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-goog-api-key': key
+        },
         body: JSON.stringify({
           contents: [{ parts: [{ text: systemPrompt + '\n\nUser: ' + userMessage }] }],
           generationConfig: { temperature: 0.7, maxOutputTokens: 400 }
         })
       }
     );
+
+    // If that fails try method 2: ?key= query param (works for AIzaSy prefix keys)
     if (!res.ok) {
-      var err = await res.json().catch(function () { return {}; });
-      console.warn('[IV] Gemini error ' + res.status, err);
-      return null;
+      var errBody = await res.json().catch(function () { return {}; });
+      console.warn('[IV] Gemini header method failed (' + res.status + '):', JSON.stringify(errBody));
+
+      res = await fetch(
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + key,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: systemPrompt + '\n\nUser: ' + userMessage }] }],
+            generationConfig: { temperature: 0.7, maxOutputTokens: 400 }
+          })
+        }
+      );
     }
+
+    if (!res.ok) {
+      var err2 = await res.json().catch(function () { return {}; });
+      console.warn('[IV] Gemini both methods failed (' + res.status + '):', JSON.stringify(err2));
+      return '__ERROR__' + res.status + ': ' + (err2?.error?.message || 'Unknown error');
+    }
+
     var data = await res.json();
     return data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
   } catch (e) {
@@ -717,7 +741,10 @@ What would you like help with?`;
           const profile = getSurveyProfile();
           const aiReply = await callAI(userMessage, profile);
           removeTypingIndicator();
-          if (aiReply) {
+          if (aiReply && aiReply.startsWith('__ERROR__')) {
+            // Show the actual API error so we can diagnose it
+            addMessage('⚠️ AI error: ' + aiReply.replace('__ERROR__', ''), false);
+          } else if (aiReply) {
             addMessage(aiReply, false);
           } else {
             await new Promise(resolve =>

@@ -414,30 +414,37 @@ async function fetchMarketData(symbol) {
   throw new Error('Unable to fetch data for ' + symbol);
 }
 
-// Fetch top gainers/losers/most active using Finnhub (fast, no CORS proxy)
+// Single shared fetch — all 3 sections (gainers, losers, active) reuse one batch
+const MOVER_SYMBOLS = [
+  'AAPL','MSFT','NVDA','GOOGL','META','AMZN','TSLA','AMD','JPM','V',
+  'NFLX','CRM','ORCL','INTC','BAC','XOM','GS','MA','WMT','COST'
+];
+
+let _moverCache = null;      // cached results
+let _moverCacheTime = 0;     // timestamp
+const MOVER_CACHE_MS = 60000; // 60 seconds
+
+async function fetchAllMovers() {
+  const now = Date.now();
+  if (_moverCache && now - _moverCacheTime < MOVER_CACHE_MS) return _moverCache;
+
+  const results = await Promise.all(
+    MOVER_SYMBOLS.map(sym => fetchMarketData(sym).catch(() => null))
+  );
+  _moverCache = results.filter(r => r !== null);
+  _moverCacheTime = now;
+  return _moverCache;
+}
+
 async function fetchMarketMovers(type = 'gainers') {
-  const popularStocks = [
-    'AAPL','MSFT','NVDA','GOOGL','META','AMZN','TSLA','AMD','JPM','V',
-    'NFLX','CRM','ORCL','INTC','BAC','XOM','GS','MA','WMT','COST'
-  ];
-  
   try {
-    const stockDataPromises = popularStocks.map(symbol => fetchMarketData(symbol).catch(() => null));
-    const results = await Promise.all(stockDataPromises);
-    const validStocks = results.filter(r => r !== null);
-    
-    // Sort by change percent
-    if (type === 'gainers') {
-      return validStocks.sort((a, b) => b.changePercent - a.changePercent).slice(0, 5);
-    } else if (type === 'losers') {
-      return validStocks.sort((a, b) => a.changePercent - b.changePercent).slice(0, 5);
-    } else if (type === 'active') {
-      // Sort by absolute change (volume proxy)
-      return validStocks.sort((a, b) => Math.abs(b.change) - Math.abs(a.change)).slice(0, 5);
-    }
-    return validStocks.slice(0, 5);
-  } catch (error) {
-    console.error('Error fetching market movers:', error);
+    const stocks = await fetchAllMovers();
+    if (type === 'gainers') return [...stocks].sort((a, b) => b.changePercent - a.changePercent).slice(0, 5);
+    if (type === 'losers')  return [...stocks].sort((a, b) => a.changePercent - b.changePercent).slice(0, 5);
+    if (type === 'active')  return [...stocks].sort((a, b) => Math.abs(b.changePercent) - Math.abs(a.changePercent)).slice(0, 5);
+    return stocks.slice(0, 5);
+  } catch (e) {
+    console.error('Error fetching market movers:', e);
     return [];
   }
 }
@@ -611,21 +618,20 @@ async function updateMostActive() {
   }
 }
 
-// Initialize market dashboard
+// Initialize market dashboard — pre-fetch movers once, then render all 4 sections in parallel
 (function initMarketDashboard() {
-  // Update all sections
-  updateMarketIndices();
-  updateTopGainers();
-  updateTopLosers();
-  updateMostActive();
-  
-  // Refresh every 60 seconds (aligned with stock card updates)
-  setInterval(() => {
-    updateMarketIndices();
-    updateTopGainers();
-    updateTopLosers();
-    updateMostActive();
-  }, 60000);
+  function refreshAll() {
+    _moverCache = null; // clear cache so fresh data is fetched
+    Promise.all([
+      updateMarketIndices(),
+      updateTopGainers(),
+      updateTopLosers(),
+      updateMostActive()
+    ]);
+  }
+
+  refreshAll();
+  setInterval(refreshAll, 60000);
 })();
 
 // Export for use in other pages (fetchDailyStockQuote was set earlier)

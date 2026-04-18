@@ -1,29 +1,110 @@
 // Intellivest AI Chatbot — starts after chatbot-survey.js signals readiness
 
-// ── Groq AI (Llama 3.3 70B) ──────────────────────────────────────────────────
+// ── Groq AI + Finnhub live data ───────────────────────────────────────────────
 var _k = ['gsk_ngiMfcAp','HoqLGqssoO','vwWGdyb3FY','N7NqxQ2Sh3','ONJGGo4WgXoaKI'];
+var _fk = 'd7g4cehr01qqb8ria6r0d7g4cehr01qqb8ria6rg'; // Finnhub
 
+// ── Step 1: detect ticker symbols in the user message ────────────────────────
+var TICKER_STOPWORDS = new Set([
+  'A','AN','AND','ARE','AS','AT','BE','BUY','DO','FOR','FROM','HAS','HAVE',
+  'HELP','HOW','I','IN','IS','IT','ME','MY','OF','ON','OR','SELL','THE',
+  'THIS','TO','TODAY','UP','WAS','WE','WHAT','WHEN','WHERE','WHY','WITH',
+  'YOU','YOUR','AI','API','ETF','IPO','CEO','CFO','USA','NOW','GET','CAN',
+  'GOOD','BEST','TOP','NEW','OLD','ALL','ANY','ITS','MORE','MUCH','SOME',
+  'THEM','THEY','WILL','WOULD','COULD','SHOULD','ABOUT','ALSO','JUST','LIKE'
+]);
+
+function extractTickers(text) {
+  var found = [];
+  // Match $AAPL or plain uppercase 1-5 letter words
+  var matches = text.toUpperCase().match(/\$[A-Z]{1,5}|\b[A-Z]{1,5}\b/g) || [];
+  matches.forEach(function(m) {
+    var sym = m.replace('$', '');
+    if (!TICKER_STOPWORDS.has(sym) && sym.length >= 2 && !found.includes(sym)) {
+      found.push(sym);
+    }
+  });
+  return found.slice(0, 3); // max 3 tickers per message
+}
+
+// ── Step 2: fetch live quote from Finnhub ────────────────────────────────────
+async function fetchLiveQuote(ticker) {
+  try {
+    var res = await fetch(
+      'https://finnhub.io/api/v1/quote?symbol=' + ticker + '&token=' + _fk,
+      { headers: { Accept: 'application/json' } }
+    );
+    if (!res.ok) return null;
+    var q = await res.json();
+    if (!q.c || q.c === 0) return null;
+    var change = q.c - q.pc;
+    var changePct = q.pc ? ((change / q.pc) * 100).toFixed(2) : '0';
+    return {
+      ticker: ticker,
+      price:  q.c.toFixed(2),
+      open:   q.o.toFixed(2),
+      high:   q.h.toFixed(2),
+      low:    q.l.toFixed(2),
+      prev:   q.pc.toFixed(2),
+      change: (change >= 0 ? '+' : '') + change.toFixed(2),
+      changePct: (change >= 0 ? '+' : '') + changePct + '%'
+    };
+  } catch(e) {
+    return null;
+  }
+}
+
+// ── Step 3: build market context string from live data ───────────────────────
+async function buildMarketContext(userMessage) {
+  var tickers = extractTickers(userMessage);
+  if (tickers.length === 0) return '';
+
+  var quotes = await Promise.all(tickers.map(fetchLiveQuote));
+  var lines = [];
+  quotes.forEach(function(q) {
+    if (q) {
+      lines.push(
+        q.ticker + ': $' + q.price + ' (' + q.changePct + ' today)' +
+        ' | Open $' + q.open + ' | High $' + q.high + ' | Low $' + q.low +
+        ' | Prev close $' + q.prev
+      );
+    }
+  });
+
+  if (lines.length === 0) return '';
+  return '\n\nLIVE MARKET DATA (real-time from Finnhub):\n' + lines.join('\n') +
+    '\nUse this real data in your analysis. Today is ' + new Date().toDateString() + '.';
+}
+
+// ── Step 4: call Groq with live data injected into the prompt ─────────────────
 // Returns:
 //   { ok: true,  text: "AI response" }  → success
-//   { ok: false, error: "reason" }       → API error, show to user
+//   { ok: false, error: "reason" }       → API error
 //   null                                 → network down
 async function callGemini(userMessage, profile) {
   var key = _k.join('');
 
+  // Fetch live market data for any tickers mentioned
+  var marketCtx = await buildMarketContext(userMessage);
+
   var systemPrompt =
-    'You are Intellivest AI, a smart financial literacy assistant for college students at Texas A&M. ' +
-    'Give specific, clear, helpful advice. Keep answers under 200 words. ' +
-    'Use bullet points for lists. Analyze specific stocks when asked. ' +
-    'Add a brief disclaimer for investment advice. Never guarantee returns.';
+    'You are Intellivest AI, a precise financial advisor for young adults and first-time investors. ' +
+    'When live market data is provided, use the exact numbers in your analysis — price, change %, highs, lows. ' +
+    'Give specific, data-driven advice. Keep answers under 250 words. ' +
+    'Use bullet points. When analyzing a stock, always mention the current price and whether it is up or down today. ' +
+    'Give a clear buy/hold/watch recommendation based on the data and user profile. ' +
+    'Add a one-line disclaimer at the end. Never guarantee returns.';
 
   if (profile && profile.name) {
     systemPrompt +=
-      ' User profile — Name: ' + profile.name +
-      ', Age: ' + (profile.age || '?') +
+      '\n\nUser profile — Name: ' + profile.name +
+      ', Age: ' + (profile.age || 'unknown') +
       ', Risk tolerance: ' + (profile.risk || 'Moderate') +
-      ', Savings: ' + (profile.savings || '?') +
-      ', Goals: ' + ((profile.goals || []).join(', ') || 'general') + '.';
+      ', Available to invest: ' + (profile.savings || 'unknown') +
+      ', Goals: ' + ((profile.goals || []).join(', ') || 'general investing') + '.';
   }
+
+  var userContent = userMessage + marketCtx;
 
   try {
     var res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -36,10 +117,10 @@ async function callGemini(userMessage, profile) {
         model: 'llama-3.3-70b-versatile',
         messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user',   content: userMessage  }
+          { role: 'user',   content: userContent  }
         ],
-        max_tokens: 400,
-        temperature: 0.7
+        max_tokens: 500,
+        temperature: 0.6
       })
     });
 
@@ -47,15 +128,12 @@ async function callGemini(userMessage, profile) {
 
     if (!res.ok) {
       var errMsg = data?.error?.message || ('HTTP ' + res.status);
-      console.error('[Groq] API error:', res.status, errMsg);
+      console.error('[Groq] error:', res.status, errMsg);
       return { ok: false, error: errMsg };
     }
 
     var text = data?.choices?.[0]?.message?.content;
-    if (!text) {
-      console.error('[Groq] Empty response:', JSON.stringify(data));
-      return { ok: false, error: 'Groq returned an empty response' };
-    }
+    if (!text) return { ok: false, error: 'Empty response from Groq' };
 
     return { ok: true, text: text.trim() };
 

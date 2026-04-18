@@ -1,5 +1,18 @@
 // Intellivest AI Chatbot — starts after chatbot-survey.js signals readiness
 
+// ── Conversation memory ───────────────────────────────────────────────────────
+var HISTORY_KEY = 'iv_chat_history';
+var MAX_HISTORY = 20; // keep last 20 messages (10 exchanges)
+
+function loadHistory() {
+  try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); } catch(e) { return []; }
+}
+function saveHistory(h) {
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(h.slice(-MAX_HISTORY)));
+}
+window.clearChatHistory = function() { localStorage.removeItem(HISTORY_KEY); };
+// ─────────────────────────────────────────────────────────────────────────────
+
 // ── Groq AI + Finnhub live data ───────────────────────────────────────────────
 var _k = ['gsk_ngiMfcAp','HoqLGqssoO','vwWGdyb3FY','N7NqxQ2Sh3','ONJGGo4WgXoaKI'];
 var _fk = 'd7g4cehr01qqb8ria6r0d7g4cehr01qqb8ria6rg'; // Finnhub
@@ -81,7 +94,7 @@ async function buildMarketContext(userMessage) {
 //   { ok: true,  text: "AI response" }  → success
 //   { ok: false, error: "reason" }       → API error
 //   null                                 → network down
-async function callGemini(userMessage, profile) {
+async function callGemini(userMessage, profile, history) {
   var key = _k.join('');
 
   // Fetch live market data for any tickers mentioned
@@ -89,6 +102,7 @@ async function callGemini(userMessage, profile) {
 
   var systemPrompt =
     'You are Intellivest AI, a precise financial advisor for young adults and first-time investors. ' +
+    'You remember everything said earlier in this conversation — refer back to it naturally. ' +
     'When live market data is provided, use the exact numbers in your analysis — price, change %, highs, lows. ' +
     'Give specific, data-driven advice. Keep answers under 250 words. ' +
     'Use bullet points. When analyzing a stock, always mention the current price and whether it is up or down today. ' +
@@ -104,7 +118,10 @@ async function callGemini(userMessage, profile) {
       ', Goals: ' + ((profile.goals || []).join(', ') || 'general investing') + '.';
   }
 
-  var userContent = userMessage + marketCtx;
+  // Build messages array: system + full history + new user message
+  var messages = [{ role: 'system', content: systemPrompt }];
+  (history || []).forEach(function(m) { messages.push(m); });
+  messages.push({ role: 'user', content: userMessage + marketCtx });
 
   try {
     var res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -115,10 +132,7 @@ async function callGemini(userMessage, profile) {
       },
       body: JSON.stringify({
         model: 'llama-3.3-70b-versatile',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user',   content: userContent  }
-        ],
+        messages: messages,
         max_tokens: 500,
         temperature: 0.6
       })
@@ -788,6 +802,15 @@ What would you like help with?`;
       } else {
         addMessage(defaultWelcome(), false);
       }
+      // Restore previous conversation from memory
+      const history = loadHistory();
+      if (history.length > 0) {
+        addMessage('💬 Continuing from where we left off...', false);
+        history.forEach(function(m) {
+          if (m.role === 'user') addMessage(m.content, true);
+          else if (m.role === 'assistant') addMessage(m.content, false);
+        });
+      }
     }
 
     if (!window.__chatbotUiStarted) {
@@ -802,22 +825,22 @@ What would you like help with?`;
           chatbotInput.value = '';
           showTypingIndicator();
           const profile = getSurveyProfile();
-          const result = await callGemini(userMessage, profile);
+          const history = loadHistory();
+          const result = await callGemini(userMessage, profile, history);
           removeTypingIndicator();
 
           if (result === null) {
-            // True network failure (user is offline) — fall back silently
             addMessage(getResponse(userMessage), false);
           } else if (result.ok) {
-            // Gemini responded successfully
             addMessage(result.text, false);
+            // Save exchange to persistent memory
+            history.push({ role: 'user', content: userMessage });
+            history.push({ role: 'assistant', content: result.text });
+            saveHistory(history);
           } else {
-            // Gemini connected but returned an error — show it clearly, then fallback
             addMessage(
-              '⚠️ Gemini AI not connected\n' + result.error + '\n\n' +
-              '─────────────────────\n' +
-              'Built-in response:\n' +
-              getResponse(userMessage),
+              '⚠️ Groq AI not connected: ' + result.error + '\n\n' +
+              'Built-in response:\n' + getResponse(userMessage),
               false
             );
           }
@@ -865,6 +888,17 @@ What would you like help with?`;
             false
           );
         }
+      });
+    }
+    // ─────────────────────────────────────────────────────────────────────────
+
+    // ── Clear Memory button ───────────────────────────────────────────────────
+    const clearBtn = document.getElementById('chatbotClearHistory');
+    if (clearBtn) {
+      clearBtn.addEventListener('click', function () {
+        clearChatHistory();
+        refreshWelcome();
+        addMessage('🗑️ Chat memory cleared! I\'ve forgotten our previous conversations. What would you like to talk about?', false);
       });
     }
     // ─────────────────────────────────────────────────────────────────────────

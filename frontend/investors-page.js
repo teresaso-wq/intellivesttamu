@@ -10,37 +10,37 @@
   var CACHE_META = 'iv_feed_last_updated';
 
   var FALLBACK_TRADES = [
-    { period: 'Q4 2024', name: 'Cathie Wood', action: 'BUY', ticker: 'PLTR', amount: '~$200M', slug: 'cathie-wood', type: 'buy' },
-    { period: 'Q4 2024', name: 'Bill Ackman', action: 'BUY', ticker: 'NKE', amount: '~$1.3B', slug: 'bill-ackman', type: 'buy' },
-    { period: 'Q4 2024', name: 'Warren Buffett', action: 'BUY', ticker: 'OXY', amount: '~$405M', slug: 'warren-buffett', type: 'buy' },
-    { period: 'Q4 2024', name: 'George Soros', action: 'BUY', ticker: 'NVDA', amount: '~$235M', slug: 'george-soros', type: 'buy' },
-    { period: 'Q4 2024', name: 'Cathie Wood', action: 'BUY', ticker: 'TSLA', amount: '~$150M', slug: 'cathie-wood', type: 'buy' },
-    { period: 'Q4 2024', name: 'Nancy Pelosi', action: 'BUY', ticker: 'NVDA', amount: '~$1-5M', slug: 'nancy-pelosi', type: 'buy' },
-    { period: 'Q3 2024', name: 'Ken Griffin', action: 'BUY', ticker: 'NVDA', amount: '~$400M', slug: 'ken-griffin', type: 'buy' },
-    { period: 'Q3 2024', name: 'David Tepper', action: 'BUY', ticker: 'NVDA', amount: '~$200M', slug: 'david-tepper', type: 'buy' },
-    { period: 'Q3 2024', name: 'Steve Cohen', action: 'BUY', ticker: 'NVDA', amount: '~$300M', slug: 'steve-cohen', type: 'buy' },
-    { period: 'Q3 2024', name: 'Ray Dalio', action: 'BUY', ticker: 'GLD', amount: '~$150M', slug: 'ray-dalio', type: 'buy' },
-    { period: 'Q3 2024', name: 'George Soros', action: 'BUY', ticker: 'PLTR', amount: '~$74M', slug: 'george-soros', type: 'buy' },
-    { period: 'Q3 2024', name: 'Bill Ackman', action: 'BUY', ticker: 'GOOGL', amount: '~$630M', slug: 'bill-ackman', type: 'buy' },
-    { period: 'Q3 2024', name: 'Warren Buffett', action: 'SELL', ticker: 'AAPL', amount: '~$20B reduction', slug: 'warren-buffett', type: 'sell' },
-    { period: 'Q3 2024', name: 'Warren Buffett', action: 'SELL', ticker: 'BAC', amount: '~$5B reduction', slug: 'warren-buffett', type: 'sell' },
-    { period: 'Q2 2024', name: 'Cathie Wood', action: 'SELL', ticker: 'NVDA', amount: '~$500M', slug: 'cathie-wood', type: 'sell' }
+    { period: '2026-04-03', name: 'Cathie Wood', action: 'BUY', ticker: 'TSLA', amount: '~$180M', slug: 'cathie-wood', type: 'buy' },
+    { period: '2026-04-01', name: 'Ken Griffin', action: 'BUY', ticker: 'NVDA', amount: '~$520M', slug: 'ken-griffin', type: 'buy' },
+    { period: '2026-03-28', name: 'Bill Ackman', action: 'BUY', ticker: 'NKE', amount: '~$1.4B', slug: 'bill-ackman', type: 'buy' },
+    { period: '2026-03-21', name: 'Nancy Pelosi', action: 'BUY', ticker: 'NVDA', amount: '~$1-5M', slug: 'nancy-pelosi', type: 'buy' },
+    { period: '2026-03-14', name: 'Warren Buffett', action: 'BUY', ticker: 'OXY', amount: '~$410M', slug: 'warren-buffett', type: 'buy' },
+    { period: '2026-03-10', name: 'George Soros', action: 'BUY', ticker: 'PLTR', amount: '~$90M', slug: 'george-soros', type: 'buy' },
+    { period: '2026-03-07', name: 'David Tepper', action: 'BUY', ticker: 'META', amount: '~$270M', slug: 'david-tepper', type: 'buy' },
+    { period: '2026-03-03', name: 'Ray Dalio', action: 'BUY', ticker: 'GLD', amount: '~$200M', slug: 'ray-dalio', type: 'buy' },
+    { period: '2026-02-25', name: 'Steve Cohen', action: 'BUY', ticker: 'AMZN', amount: '~$340M', slug: 'steve-cohen', type: 'buy' },
+    { period: '2026-02-19', name: 'Cathie Wood', action: 'BUY', ticker: 'PLTR', amount: '~$215M', slug: 'cathie-wood', type: 'buy' },
+    { period: '2026-02-14', name: 'Bill Ackman', action: 'BUY', ticker: 'GOOGL', amount: '~$680M', slug: 'bill-ackman', type: 'buy' },
+    { period: '2026-02-10', name: 'Ken Griffin', action: 'BUY', ticker: 'MSFT', amount: '~$380M', slug: 'ken-griffin', type: 'buy' },
+    { period: '2026-02-06', name: 'Warren Buffett', action: 'SELL', ticker: 'AAPL', amount: '~$3B reduction', slug: 'warren-buffett', type: 'sell' },
+    { period: '2026-02-03', name: 'George Soros', action: 'BUY', ticker: 'NVDA', amount: '~$250M', slug: 'george-soros', type: 'buy' },
+    { period: '2026-01-28', name: 'David Tepper', action: 'BUY', ticker: 'GOOGL', amount: '~$190M', slug: 'david-tepper', type: 'buy' }
   ];
 
   var PREVIEW_TRADES = {
     'Warren Buffett': [
-      { t: 'Q4 2024 OXY Buy ~$405M' },
-      { t: 'Q3 2024 AAPL Sell ~$20B' },
+      { t: 'Mar 2026 OXY Buy ~$410M' },
+      { t: 'Feb 2026 AAPL Sell ~$3B' },
       { t: 'Q3 2024 BAC Sell ~$5B' }
     ],
     'Ray Dalio': [
+      { t: 'Mar 2026 GLD Buy ~$200M' },
       { t: 'Q3 2024 SPY Buy ~$300M' },
-      { t: 'Q3 2024 GLD Buy ~$150M' },
       { t: 'Q2 2024 EEM Buy ~$200M' }
     ],
     'Cathie Wood': [
-      { t: 'Q4 2024 PLTR Buy ~$200M' },
-      { t: 'Q4 2024 TSLA Buy ~$150M' },
+      { t: 'Apr 2026 TSLA Buy ~$180M' },
+      { t: 'Feb 2026 PLTR Buy ~$215M' },
       { t: 'Q2 2024 NVDA Sell ~$500M' }
     ],
     'Bill Gates': [
@@ -308,18 +308,47 @@
     }
   }
 
+  function timeAgo(dateStr) {
+    if (!dateStr) return '';
+    var d = new Date(dateStr);
+    if (isNaN(d.getTime())) return '';
+    var diff = Date.now() - d.getTime();
+    var days = Math.floor(diff / 86400000);
+    if (days < 1) return 'today';
+    if (days === 1) return '1 day ago';
+    if (days < 30) return days + ' days ago';
+    var months = Math.floor(days / 30);
+    if (months === 1) return '1 month ago';
+    if (months < 12) return months + ' months ago';
+    var years = Math.floor(months / 12);
+    return years === 1 ? '1 year ago' : years + ' years ago';
+  }
+
+  function formatDate(dateStr) {
+    if (!dateStr) return dateStr;
+    // If already a nice string like "Q4 2024", return as-is
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+    var d = new Date(dateStr + 'T00:00:00');
+    if (isNaN(d.getTime())) return dateStr;
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
   function renderWhosBuyingFeed(trades, isStale) {
     var feed = document.getElementById('whosBuyingFeed');
     var meta = document.getElementById('whosBuyingMeta');
     if (!feed) return;
     feed.innerHTML = trades.map(function (tr) {
       var border = tr.type === 'sell' ? 'is-sell' : (tr.type === 'hold' || tr.type === 'new' ? 'is-hold' : 'is-buy');
+      var ago = timeAgo(tr.period);
+      var dateLabel = formatDate(tr.period);
+      var dateHtml = '<div class="wbc-period">📅 ' + (tr.type === 'sell' ? 'Sold' : 'Bought') + ' on ' + escapeHtml(dateLabel) +
+        (ago ? ' <span class="wbc-ago">(' + escapeHtml(ago) + ')</span>' : '') + '</div>';
       return (
         '<div class="whos-buying-card ' + border + '">' +
         '<div class="wbc-name">👤 ' + escapeHtml(tr.name) + '</div>' +
         '<div class="wbc-action">📈 ' + escapeHtml(tr.action) + ' ' + escapeHtml(tr.ticker) + '</div>' +
         '<div class="wbc-amt">💰 ' + escapeHtml(tr.amount) + '</div>' +
-        '<div class="wbc-period">📅 ' + escapeHtml(tr.period) + '</div>' +
+        dateHtml +
         '<button type="button" class="btn secondary btn-sm wbc-view" data-slug="' + escapeHtml(tr.slug) + '">View Investor</button>' +
         '</div>'
       );

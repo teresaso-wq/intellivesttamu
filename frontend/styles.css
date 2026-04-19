@@ -4920,6 +4920,7 @@ body.stock-compare-modal-active {
 .wbc-action { font-size: 0.92rem; font-weight: 700; color: var(--ink-900); }
 .wbc-amt    { font-size: 0.78rem; color: var(--ink-400); }
 .wbc-period { font-size: 0.72rem; color: var(--ink-300); margin-bottom: 0.25rem; }
+.wbc-ago    { font-size: 0.68rem; color: var(--ink-400); font-style: italic; }
 .wbc-view   { margin-top: auto; }
 
 /* Performance bar */

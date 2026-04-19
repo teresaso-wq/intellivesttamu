@@ -10,7 +10,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Intellivest" />
   <link rel="apple-touch-icon" href="./assets/intellivest-mark.png" />
-  <title>Finance - Intellivest @ Texas A&M</title>
+  <title>Finance &amp; Budgeting - Intellivest @ Texas A&M</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&display=swap" rel="stylesheet">
@@ -67,8 +67,8 @@
     <section class="page-hero page-hero--split">
       <div class="container">
         <div data-glossary-auto>
-          <h1>Finance</h1>
-          <p class="page-subtitle">Explore fundamentals, investing, budgeting, and more.</p>
+          <h1>Finance &amp; Budgeting</h1>
+          <p class="page-subtitle">Explore fundamentals, investing, budgeting tools for every stage of life, and more.</p>
         </div>
         <div class="page-hero-visual" data-interactive-tilt>
           <svg class="editorial-svg" viewBox="0 0 300 240" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -157,219 +157,118 @@
     <section class="student-budgeting-section" id="studentBudgeting" aria-labelledby="studentBudgetingHeading">
       <div class="container">
         <header class="student-budgeting-header">
-          <h2 id="studentBudgetingHeading" class="section-title student-budgeting-title">Student Budgeting</h2>
+          <h2 id="studentBudgetingHeading" class="section-title student-budgeting-title">Budgeting for Everyone</h2>
           <p class="student-budgeting-lead">
-            Quick planning tools for side income, loans, and typical College Station costs (illustrative only, not financial advice).
+            Interactive planning tools for every stage of life — students, working adults, families, and more. Illustrative only, not financial advice.
           </p>
         </header>
 
-        <div class="student-budgeting-grid">
+        <div class="category-tabs budget-audience-tabs" id="budgetAudienceTabs" role="tablist">
+          <button class="category-tab active" data-budget-tab="students" role="tab" aria-selected="true">🎓 Students</button>
+          <button class="category-tab" data-budget-tab="adults" role="tab" aria-selected="false">💼 Working Adults</button>
+          <button class="category-tab" data-budget-tab="families" role="tab" aria-selected="false">👨‍👩‍👧 Families</button>
+          <button class="category-tab" data-budget-tab="savings" role="tab" aria-selected="false">🏦 Savings Goals</button>
+          <button class="category-tab" data-budget-tab="vacation" role="tab" aria-selected="false">✈️ Vacation</button>
+        </div>
+
+        <!-- STUDENTS TAB -->
+        <div class="student-budgeting-grid budget-tab-panel" id="budgetTab-students">
           <article class="student-budgeting-card">
-            <h3 class="student-budgeting-card-title">Gamer / gig worker income</h3>
-            <p class="student-budgeting-card-desc">
-              Estimate part-time gig pay plus any steady extras (streaming, tournaments, resale). Taxes not deducted.
-            </p>
+            <h3 class="student-budgeting-card-title">Gig / part-time income</h3>
+            <p class="student-budgeting-card-desc">Estimate gig pay plus any steady extras. Taxes not deducted.</p>
             <div class="budget-field">
               <label class="budget-field-label" for="budgetGigHours">Gig hours per week</label>
               <div class="search-container-large budget-input-track">
                 <span class="search-icon" aria-hidden="true">⏱</span>
-                <input
-                  type="number"
-                  id="budgetGigHours"
-                  class="stock-search-input"
-                  min="0"
-                  max="80"
-                  step="0.5"
-                  value="12"
-                  inputmode="decimal"
-                />
+                <input type="number" id="budgetGigHours" class="stock-search-input" min="0" max="80" step="0.5" value="12" inputmode="decimal" />
               </div>
             </div>
             <div class="budget-field">
               <label class="budget-field-label" for="budgetGigRate">Hourly pay ($)</label>
               <div class="search-container-large budget-input-track">
                 <span class="search-icon" aria-hidden="true">$</span>
-                <input
-                  type="number"
-                  id="budgetGigRate"
-                  class="stock-search-input"
-                  min="0"
-                  step="0.25"
-                  value="15"
-                  inputmode="decimal"
-                />
+                <input type="number" id="budgetGigRate" class="stock-search-input" min="0" step="0.25" value="15" inputmode="decimal" />
               </div>
             </div>
             <div class="budget-field">
               <label class="budget-field-label" for="budgetGigExtra">Extra monthly ($)</label>
               <div class="search-container-large budget-input-track">
                 <span class="search-icon" aria-hidden="true">＋</span>
-                <input
-                  type="number"
-                  id="budgetGigExtra"
-                  class="stock-search-input"
-                  min="0"
-                  step="1"
-                  value="0"
-                  placeholder="Streaming, prizes, resale…"
-                  inputmode="decimal"
-                />
+                <input type="number" id="budgetGigExtra" class="stock-search-input" min="0" step="1" value="0" placeholder="Streaming, prizes, resale…" inputmode="decimal" />
               </div>
             </div>
             <dl class="budget-results">
-              <div class="budget-result-row">
-                <dt>Gig income (weekly)</dt>
-                <dd id="budgetGigOutWeekly">--</dd>
-              </div>
-              <div class="budget-result-row budget-result-row--emphasis">
-                <dt>Total (monthly)</dt>
-                <dd id="budgetGigOutMonthly">--</dd>
-              </div>
+              <div class="budget-result-row"><dt>Gig income (weekly)</dt><dd id="budgetGigOutWeekly">--</dd></div>
+              <div class="budget-result-row budget-result-row--emphasis"><dt>Total (monthly)</dt><dd id="budgetGigOutMonthly">--</dd></div>
             </dl>
           </article>
 
           <article class="student-budgeting-card">
-            <h3 class="student-budgeting-card-title">Student loan interest</h3>
-            <p class="student-budgeting-card-desc">
-              Standard payment estimate on a fixed-rate loan; your servicer’s rules and plans (IBR, etc.) may differ.
-            </p>
+            <h3 class="student-budgeting-card-title">Student loan calculator</h3>
+            <p class="student-budgeting-card-desc">Standard payment estimate on a fixed-rate loan; repayment plans may vary.</p>
             <div class="budget-field">
               <label class="budget-field-label" for="budgetLoanPrincipal">Loan balance ($)</label>
               <div class="search-container-large budget-input-track">
                 <span class="search-icon" aria-hidden="true">$</span>
-                <input
-                  type="number"
-                  id="budgetLoanPrincipal"
-                  class="stock-search-input"
-                  min="0"
-                  step="100"
-                  value="28000"
-                  inputmode="numeric"
-                />
+                <input type="number" id="budgetLoanPrincipal" class="stock-search-input" min="0" step="100" value="28000" inputmode="numeric" />
               </div>
             </div>
             <div class="budget-field">
               <label class="budget-field-label" for="budgetLoanApr">Interest rate (APR %)</label>
               <div class="search-container-large budget-input-track">
                 <span class="search-icon" aria-hidden="true">%</span>
-                <input
-                  type="number"
-                  id="budgetLoanApr"
-                  class="stock-search-input"
-                  min="0"
-                  max="30"
-                  step="0.125"
-                  value="5.5"
-                  inputmode="decimal"
-                />
+                <input type="number" id="budgetLoanApr" class="stock-search-input" min="0" max="30" step="0.125" value="5.5" inputmode="decimal" />
               </div>
             </div>
             <div class="budget-field">
               <label class="budget-field-label" for="budgetLoanYears">Repayment term (years)</label>
               <div class="search-container-large budget-input-track">
                 <span class="search-icon" aria-hidden="true">⑆</span>
-                <input
-                  type="number"
-                  id="budgetLoanYears"
-                  class="stock-search-input"
-                  min="1"
-                  max="40"
-                  step="1"
-                  value="10"
-                  inputmode="numeric"
-                />
+                <input type="number" id="budgetLoanYears" class="stock-search-input" min="1" max="40" step="1" value="10" inputmode="numeric" />
               </div>
             </div>
             <dl class="budget-results">
-              <div class="budget-result-row">
-                <dt>Est. monthly payment</dt>
-                <dd id="budgetLoanPayment">--</dd>
-              </div>
-              <div class="budget-result-row budget-result-row--emphasis">
-                <dt>Total interest (approx.)</dt>
-                <dd id="budgetLoanInterest">--</dd>
-              </div>
+              <div class="budget-result-row"><dt>Est. monthly payment</dt><dd id="budgetLoanPayment">--</dd></div>
+              <div class="budget-result-row budget-result-row--emphasis"><dt>Total interest (approx.)</dt><dd id="budgetLoanInterest">--</dd></div>
             </dl>
           </article>
 
           <article class="student-budgeting-card">
-            <h3 class="student-budgeting-card-title">Cost of living · College Station</h3>
-            <p class="student-budgeting-card-desc">
-              Editable sample monthly amounts for planning near campus; adjust every line to match your situation.
-            </p>
+            <h3 class="student-budgeting-card-title">Monthly cost of living</h3>
+            <p class="student-budgeting-card-desc">Editable sample monthly amounts — adjust every line to match your city and situation.</p>
             <div class="budget-field">
               <label class="budget-field-label" for="budgetColRent">Rent (your share)</label>
               <div class="search-container-large budget-input-track">
                 <span class="search-icon" aria-hidden="true">⌂</span>
-                <input
-                  type="number"
-                  id="budgetColRent"
-                  class="stock-search-input"
-                  min="0"
-                  step="25"
-                  value="650"
-                  inputmode="numeric"
-                />
+                <input type="number" id="budgetColRent" class="stock-search-input" min="0" step="25" value="650" inputmode="numeric" />
               </div>
             </div>
             <div class="budget-field">
               <label class="budget-field-label" for="budgetColUtilities">Utilities &amp; internet</label>
               <div class="search-container-large budget-input-track">
                 <span class="search-icon" aria-hidden="true">◇</span>
-                <input
-                  type="number"
-                  id="budgetColUtilities"
-                  class="stock-search-input"
-                  min="0"
-                  step="5"
-                  value="85"
-                  inputmode="numeric"
-                />
+                <input type="number" id="budgetColUtilities" class="stock-search-input" min="0" step="5" value="85" inputmode="numeric" />
               </div>
             </div>
             <div class="budget-field">
               <label class="budget-field-label" for="budgetColFood">Food &amp; dining</label>
               <div class="search-container-large budget-input-track">
                 <span class="search-icon" aria-hidden="true">◆</span>
-                <input
-                  type="number"
-                  id="budgetColFood"
-                  class="stock-search-input"
-                  min="0"
-                  step="10"
-                  value="360"
-                  inputmode="numeric"
-                />
+                <input type="number" id="budgetColFood" class="stock-search-input" min="0" step="10" value="360" inputmode="numeric" />
               </div>
             </div>
             <div class="budget-field">
               <label class="budget-field-label" for="budgetColTransport">Transport &amp; parking</label>
               <div class="search-container-large budget-input-track">
                 <span class="search-icon" aria-hidden="true">→</span>
-                <input
-                  type="number"
-                  id="budgetColTransport"
-                  class="stock-search-input"
-                  min="0"
-                  step="5"
-                  value="110"
-                  inputmode="numeric"
-                />
+                <input type="number" id="budgetColTransport" class="stock-search-input" min="0" step="5" value="110" inputmode="numeric" />
               </div>
             </div>
             <div class="budget-field">
               <label class="budget-field-label" for="budgetColOther">Books, fees, personal</label>
               <div class="search-container-large budget-input-track">
                 <span class="search-icon" aria-hidden="true">☰</span>
-                <input
-                  type="number"
-                  id="budgetColOther"
-                  class="stock-search-input"
-                  min="0"
-                  step="10"
-                  value="120"
-                  inputmode="numeric"
-                />
+                <input type="number" id="budgetColOther" class="stock-search-input" min="0" step="10" value="120" inputmode="numeric" />
               </div>
             </div>
             <div class="budget-col-chart" aria-hidden="true">
@@ -382,13 +281,430 @@
               </div>
             </div>
             <dl class="budget-results">
-              <div class="budget-result-row budget-result-row--emphasis">
-                <dt>Monthly total</dt>
-                <dd id="budgetColTotal">--</dd>
-              </div>
+              <div class="budget-result-row budget-result-row--emphasis"><dt>Monthly total</dt><dd id="budgetColTotal">--</dd></div>
             </dl>
           </article>
         </div>
+
+        <!-- WORKING ADULTS TAB -->
+        <div class="student-budgeting-grid budget-tab-panel" id="budgetTab-adults" hidden>
+          <article class="student-budgeting-card">
+            <h3 class="student-budgeting-card-title">Monthly take-home planner</h3>
+            <p class="student-budgeting-card-desc">Estimate how your gross salary breaks down after taxes and mandatory deductions.</p>
+            <div class="budget-field">
+              <label class="budget-field-label" for="adultSalary">Annual salary ($)</label>
+              <div class="search-container-large budget-input-track">
+                <span class="search-icon" aria-hidden="true">$</span>
+                <input type="number" id="adultSalary" class="stock-search-input" min="0" step="1000" value="60000" inputmode="numeric" />
+              </div>
+            </div>
+            <div class="budget-field">
+              <label class="budget-field-label" for="adultTaxRate">Effective tax rate (%)</label>
+              <div class="search-container-large budget-input-track">
+                <span class="search-icon" aria-hidden="true">%</span>
+                <input type="number" id="adultTaxRate" class="stock-search-input" min="0" max="50" step="0.5" value="22" inputmode="decimal" />
+              </div>
+            </div>
+            <div class="budget-field">
+              <label class="budget-field-label" for="adultDeductions">Monthly deductions (401k, health, etc. $)</label>
+              <div class="search-container-large budget-input-track">
+                <span class="search-icon" aria-hidden="true">−</span>
+                <input type="number" id="adultDeductions" class="stock-search-input" min="0" step="25" value="300" inputmode="numeric" />
+              </div>
+            </div>
+            <dl class="budget-results">
+              <div class="budget-result-row"><dt>Gross monthly</dt><dd id="adultGrossMonthly">--</dd></div>
+              <div class="budget-result-row"><dt>After taxes</dt><dd id="adultAfterTax">--</dd></div>
+              <div class="budget-result-row budget-result-row--emphasis"><dt>Est. take-home</dt><dd id="adultTakeHome">--</dd></div>
+            </dl>
+          </article>
+
+          <article class="student-budgeting-card">
+            <h3 class="student-budgeting-card-title">Work expenses tracker</h3>
+            <p class="student-budgeting-card-desc">See how much of your paycheck goes toward the cost of working each month.</p>
+            <div class="budget-field">
+              <label class="budget-field-label" for="workCommute">Commute (gas / transit $)</label>
+              <div class="search-container-large budget-input-track">
+                <span class="search-icon" aria-hidden="true">🚗</span>
+                <input type="number" id="workCommute" class="stock-search-input" min="0" step="10" value="150" inputmode="numeric" />
+              </div>
+            </div>
+            <div class="budget-field">
+              <label class="budget-field-label" for="workLunch">Work lunches / coffee ($)</label>
+              <div class="search-container-large budget-input-track">
+                <span class="search-icon" aria-hidden="true">☕</span>
+                <input type="number" id="workLunch" class="stock-search-input" min="0" step="5" value="120" inputmode="numeric" />
+              </div>
+            </div>
+            <div class="budget-field">
+              <label class="budget-field-label" for="workClothing">Work clothing / dry cleaning ($)</label>
+              <div class="search-container-large budget-input-track">
+                <span class="search-icon" aria-hidden="true">👔</span>
+                <input type="number" id="workClothing" class="stock-search-input" min="0" step="10" value="50" inputmode="numeric" />
+              </div>
+            </div>
+            <div class="budget-field">
+              <label class="budget-field-label" for="workSubs">Work-related subscriptions ($)</label>
+              <div class="search-container-large budget-input-track">
+                <span class="search-icon" aria-hidden="true">📱</span>
+                <input type="number" id="workSubs" class="stock-search-input" min="0" step="5" value="30" inputmode="numeric" />
+              </div>
+            </div>
+            <dl class="budget-results">
+              <div class="budget-result-row budget-result-row--emphasis"><dt>Monthly cost of working</dt><dd id="workExpensesTotal">--</dd></div>
+            </dl>
+          </article>
+
+          <article class="student-budgeting-card">
+            <h3 class="student-budgeting-card-title">401k match calculator</h3>
+            <p class="student-budgeting-card-desc">See how much free money you leave on the table by not maxing your employer match.</p>
+            <div class="budget-field">
+              <label class="budget-field-label" for="k401Salary">Annual salary ($)</label>
+              <div class="search-container-large budget-input-track">
+                <span class="search-icon" aria-hidden="true">$</span>
+                <input type="number" id="k401Salary" class="stock-search-input" min="0" step="1000" value="60000" inputmode="numeric" />
+              </div>
+            </div>
+            <div class="budget-field">
+              <label class="budget-field-label" for="k401YourPct">Your contribution (%)</label>
+              <div class="search-container-large budget-input-track">
+                <span class="search-icon" aria-hidden="true">%</span>
+                <input type="number" id="k401YourPct" class="stock-search-input" min="0" max="100" step="0.5" value="4" inputmode="decimal" />
+              </div>
+            </div>
+            <div class="budget-field">
+              <label class="budget-field-label" for="k401MatchPct">Employer match (% up to)</label>
+              <div class="search-container-large budget-input-track">
+                <span class="search-icon" aria-hidden="true">🏦</span>
+                <input type="number" id="k401MatchPct" class="stock-search-input" min="0" max="100" step="0.5" value="4" inputmode="decimal" />
+              </div>
+            </div>
+            <dl class="budget-results">
+              <div class="budget-result-row"><dt>Your annual contribution</dt><dd id="k401YourAmt">--</dd></div>
+              <div class="budget-result-row"><dt>Employer match (annual)</dt><dd id="k401MatchAmt">--</dd></div>
+              <div class="budget-result-row budget-result-row--emphasis"><dt>Total going to 401k</dt><dd id="k401Total">--</dd></div>
+            </dl>
+          </article>
+        </div>
+
+        <!-- FAMILIES TAB -->
+        <div class="student-budgeting-grid budget-tab-panel" id="budgetTab-families" hidden>
+          <article class="student-budgeting-card">
+            <h3 class="student-budgeting-card-title">Household monthly budget</h3>
+            <p class="student-budgeting-card-desc">Full picture of a typical household — edit every line to fit your family.</p>
+            <div class="budget-field">
+              <label class="budget-field-label" for="hhMortgage">Mortgage / rent ($)</label>
+              <div class="search-container-large budget-input-track">
+                <span class="search-icon" aria-hidden="true">⌂</span>
+                <input type="number" id="hhMortgage" class="stock-search-input" min="0" step="50" value="1800" inputmode="numeric" />
+              </div>
+            </div>
+            <div class="budget-field">
+              <label class="budget-field-label" for="hhGroceries">Groceries ($)</label>
+              <div class="search-container-large budget-input-track">
+                <span class="search-icon" aria-hidden="true">🛒</span>
+                <input type="number" id="hhGroceries" class="stock-search-input" min="0" step="25" value="700" inputmode="numeric" />
+              </div>
+            </div>
+            <div class="budget-field">
+              <label class="budget-field-label" for="hhChildcare">Childcare / school ($)</label>
+              <div class="search-container-large budget-input-track">
+                <span class="search-icon" aria-hidden="true">👧</span>
+                <input type="number" id="hhChildcare" class="stock-search-input" min="0" step="50" value="1200" inputmode="numeric" />
+              </div>
+            </div>
+            <div class="budget-field">
+              <label class="budget-field-label" for="hhTransport">Transport ($)</label>
+              <div class="search-container-large budget-input-track">
+                <span class="search-icon" aria-hidden="true">🚗</span>
+                <input type="number" id="hhTransport" class="stock-search-input" min="0" step="25" value="400" inputmode="numeric" />
+              </div>
+            </div>
+            <div class="budget-field">
+              <label class="budget-field-label" for="hhInsurance">Insurance (health, auto, home $)</label>
+              <div class="search-container-large budget-input-track">
+                <span class="search-icon" aria-hidden="true">🛡</span>
+                <input type="number" id="hhInsurance" class="stock-search-input" min="0" step="25" value="450" inputmode="numeric" />
+              </div>
+            </div>
+            <div class="budget-field">
+              <label class="budget-field-label" for="hhOther">Utilities, subscriptions, other ($)</label>
+              <div class="search-container-large budget-input-track">
+                <span class="search-icon" aria-hidden="true">☰</span>
+                <input type="number" id="hhOther" class="stock-search-input" min="0" step="25" value="300" inputmode="numeric" />
+              </div>
+            </div>
+            <dl class="budget-results">
+              <div class="budget-result-row budget-result-row--emphasis"><dt>Monthly household total</dt><dd id="hhTotal">--</dd></div>
+            </dl>
+          </article>
+
+          <article class="student-budgeting-card">
+            <h3 class="student-budgeting-card-title">Grocery budget planner</h3>
+            <p class="student-budgeting-card-desc">Estimate your weekly grocery spend based on household size and habits.</p>
+            <div class="budget-field">
+              <label class="budget-field-label" for="grocPeople">Number of people</label>
+              <div class="search-container-large budget-input-track">
+                <span class="search-icon" aria-hidden="true">👥</span>
+                <input type="number" id="grocPeople" class="stock-search-input" min="1" max="10" step="1" value="3" inputmode="numeric" />
+              </div>
+            </div>
+            <div class="budget-field">
+              <label class="budget-field-label" for="grocPerPerson">Budget per person per week ($)</label>
+              <div class="search-container-large budget-input-track">
+                <span class="search-icon" aria-hidden="true">$</span>
+                <input type="number" id="grocPerPerson" class="stock-search-input" min="0" step="5" value="75" inputmode="numeric" />
+              </div>
+            </div>
+            <div class="budget-field">
+              <label class="budget-field-label" for="grocDineOut">Dining out / takeout per week ($)</label>
+              <div class="search-container-large budget-input-track">
+                <span class="search-icon" aria-hidden="true">🍔</span>
+                <input type="number" id="grocDineOut" class="stock-search-input" min="0" step="10" value="80" inputmode="numeric" />
+              </div>
+            </div>
+            <dl class="budget-results">
+              <div class="budget-result-row"><dt>Weekly food total</dt><dd id="grocWeekly">--</dd></div>
+              <div class="budget-result-row budget-result-row--emphasis"><dt>Monthly food total</dt><dd id="grocMonthly">--</dd></div>
+            </dl>
+          </article>
+
+          <article class="student-budgeting-card">
+            <h3 class="student-budgeting-card-title">College fund calculator</h3>
+            <p class="student-budgeting-card-desc">How much do you need to save each month to reach your college savings goal?</p>
+            <div class="budget-field">
+              <label class="budget-field-label" for="cfGoal">Target amount ($)</label>
+              <div class="search-container-large budget-input-track">
+                <span class="search-icon" aria-hidden="true">🎓</span>
+                <input type="number" id="cfGoal" class="stock-search-input" min="0" step="1000" value="100000" inputmode="numeric" />
+              </div>
+            </div>
+            <div class="budget-field">
+              <label class="budget-field-label" for="cfYears">Years until college</label>
+              <div class="search-container-large budget-input-track">
+                <span class="search-icon" aria-hidden="true">📅</span>
+                <input type="number" id="cfYears" class="stock-search-input" min="1" max="18" step="1" value="10" inputmode="numeric" />
+              </div>
+            </div>
+            <div class="budget-field">
+              <label class="budget-field-label" for="cfReturn">Expected annual return (%)</label>
+              <div class="search-container-large budget-input-track">
+                <span class="search-icon" aria-hidden="true">%</span>
+                <input type="number" id="cfReturn" class="stock-search-input" min="0" max="20" step="0.5" value="6" inputmode="decimal" />
+              </div>
+            </div>
+            <div class="budget-field">
+              <label class="budget-field-label" for="cfAlready">Already saved ($)</label>
+              <div class="search-container-large budget-input-track">
+                <span class="search-icon" aria-hidden="true">$</span>
+                <input type="number" id="cfAlready" class="stock-search-input" min="0" step="500" value="0" inputmode="numeric" />
+              </div>
+            </div>
+            <dl class="budget-results">
+              <div class="budget-result-row budget-result-row--emphasis"><dt>Monthly savings needed</dt><dd id="cfMonthly">--</dd></div>
+            </dl>
+          </article>
+        </div>
+
+        <!-- SAVINGS GOALS TAB -->
+        <div class="student-budgeting-grid budget-tab-panel" id="budgetTab-savings" hidden>
+          <article class="student-budgeting-card">
+            <h3 class="student-budgeting-card-title">Emergency fund countdown</h3>
+            <p class="student-budgeting-card-desc">How long until you hit your 3–6 month emergency fund target?</p>
+            <div class="budget-field">
+              <label class="budget-field-label" for="efMonthlyExpenses">Monthly expenses ($)</label>
+              <div class="search-container-large budget-input-track">
+                <span class="search-icon" aria-hidden="true">$</span>
+                <input type="number" id="efMonthlyExpenses" class="stock-search-input" min="0" step="100" value="3000" inputmode="numeric" />
+              </div>
+            </div>
+            <div class="budget-field">
+              <label class="budget-field-label" for="efCurrentSaved">Already saved ($)</label>
+              <div class="search-container-large budget-input-track">
+                <span class="search-icon" aria-hidden="true">🏦</span>
+                <input type="number" id="efCurrentSaved" class="stock-search-input" min="0" step="100" value="1000" inputmode="numeric" />
+              </div>
+            </div>
+            <div class="budget-field">
+              <label class="budget-field-label" for="efMonthlySave">Monthly amount you can save ($)</label>
+              <div class="search-container-large budget-input-track">
+                <span class="search-icon" aria-hidden="true">＋</span>
+                <input type="number" id="efMonthlySave" class="stock-search-input" min="0" step="50" value="300" inputmode="numeric" />
+              </div>
+            </div>
+            <dl class="budget-results">
+              <div class="budget-result-row"><dt>3-month target</dt><dd id="efTarget3">--</dd></div>
+              <div class="budget-result-row"><dt>6-month target</dt><dd id="efTarget6">--</dd></div>
+              <div class="budget-result-row budget-result-row--emphasis"><dt>Months to reach 3-mo fund</dt><dd id="efMonthsTo3">--</dd></div>
+            </dl>
+          </article>
+
+          <article class="student-budgeting-card">
+            <h3 class="student-budgeting-card-title">Down payment saver</h3>
+            <p class="student-budgeting-card-desc">Planning to buy a home or car? Find out how much to set aside each month.</p>
+            <div class="budget-field">
+              <label class="budget-field-label" for="dpGoal">Down payment goal ($)</label>
+              <div class="search-container-large budget-input-track">
+                <span class="search-icon" aria-hidden="true">🏠</span>
+                <input type="number" id="dpGoal" class="stock-search-input" min="0" step="1000" value="50000" inputmode="numeric" />
+              </div>
+            </div>
+            <div class="budget-field">
+              <label class="budget-field-label" for="dpAlready">Already saved ($)</label>
+              <div class="search-container-large budget-input-track">
+                <span class="search-icon" aria-hidden="true">$</span>
+                <input type="number" id="dpAlready" class="stock-search-input" min="0" step="500" value="5000" inputmode="numeric" />
+              </div>
+            </div>
+            <div class="budget-field">
+              <label class="budget-field-label" for="dpMonths">Months to save</label>
+              <div class="search-container-large budget-input-track">
+                <span class="search-icon" aria-hidden="true">📅</span>
+                <input type="number" id="dpMonths" class="stock-search-input" min="1" step="1" value="36" inputmode="numeric" />
+              </div>
+            </div>
+            <dl class="budget-results">
+              <div class="budget-result-row"><dt>Remaining to save</dt><dd id="dpRemaining">--</dd></div>
+              <div class="budget-result-row budget-result-row--emphasis"><dt>Monthly savings needed</dt><dd id="dpMonthlyNeeded">--</dd></div>
+            </dl>
+          </article>
+
+          <article class="student-budgeting-card">
+            <h3 class="student-budgeting-card-title">General savings goal</h3>
+            <p class="student-budgeting-card-desc">Set any goal — new car, wedding, moving fund — and find your monthly target.</p>
+            <div class="budget-field">
+              <label class="budget-field-label" for="sgGoal">Goal amount ($)</label>
+              <div class="search-container-large budget-input-track">
+                <span class="search-icon" aria-hidden="true">🎯</span>
+                <input type="number" id="sgGoal" class="stock-search-input" min="0" step="100" value="10000" inputmode="numeric" />
+              </div>
+            </div>
+            <div class="budget-field">
+              <label class="budget-field-label" for="sgAlready">Already saved ($)</label>
+              <div class="search-container-large budget-input-track">
+                <span class="search-icon" aria-hidden="true">$</span>
+                <input type="number" id="sgAlready" class="stock-search-input" min="0" step="100" value="0" inputmode="numeric" />
+              </div>
+            </div>
+            <div class="budget-field">
+              <label class="budget-field-label" for="sgMonths">Months to reach goal</label>
+              <div class="search-container-large budget-input-track">
+                <span class="search-icon" aria-hidden="true">📅</span>
+                <input type="number" id="sgMonths" class="stock-search-input" min="1" step="1" value="12" inputmode="numeric" />
+              </div>
+            </div>
+            <dl class="budget-results">
+              <div class="budget-result-row budget-result-row--emphasis"><dt>Monthly savings needed</dt><dd id="sgMonthlyNeeded">--</dd></div>
+            </dl>
+          </article>
+        </div>
+
+        <!-- VACATION TAB -->
+        <div class="student-budgeting-grid budget-tab-panel" id="budgetTab-vacation" hidden>
+          <article class="student-budgeting-card">
+            <h3 class="student-budgeting-card-title">Trip budget planner</h3>
+            <p class="student-budgeting-card-desc">Add up all your travel costs to see the full picture before you book.</p>
+            <div class="budget-field">
+              <label class="budget-field-label" for="tripFlights">Flights / transport ($)</label>
+              <div class="search-container-large budget-input-track">
+                <span class="search-icon" aria-hidden="true">✈️</span>
+                <input type="number" id="tripFlights" class="stock-search-input" min="0" step="25" value="600" inputmode="numeric" />
+              </div>
+            </div>
+            <div class="budget-field">
+              <label class="budget-field-label" for="tripHotel">Hotel / lodging ($)</label>
+              <div class="search-container-large budget-input-track">
+                <span class="search-icon" aria-hidden="true">🏨</span>
+                <input type="number" id="tripHotel" class="stock-search-input" min="0" step="25" value="800" inputmode="numeric" />
+              </div>
+            </div>
+            <div class="budget-field">
+              <label class="budget-field-label" for="tripFood">Food &amp; dining ($)</label>
+              <div class="search-container-large budget-input-track">
+                <span class="search-icon" aria-hidden="true">🍽</span>
+                <input type="number" id="tripFood" class="stock-search-input" min="0" step="25" value="400" inputmode="numeric" />
+              </div>
+            </div>
+            <div class="budget-field">
+              <label class="budget-field-label" for="tripActivities">Activities &amp; tours ($)</label>
+              <div class="search-container-large budget-input-track">
+                <span class="search-icon" aria-hidden="true">🎡</span>
+                <input type="number" id="tripActivities" class="stock-search-input" min="0" step="25" value="300" inputmode="numeric" />
+              </div>
+            </div>
+            <div class="budget-field">
+              <label class="budget-field-label" for="tripMisc">Souvenirs &amp; misc ($)</label>
+              <div class="search-container-large budget-input-track">
+                <span class="search-icon" aria-hidden="true">🛍</span>
+                <input type="number" id="tripMisc" class="stock-search-input" min="0" step="25" value="150" inputmode="numeric" />
+              </div>
+            </div>
+            <dl class="budget-results">
+              <div class="budget-result-row budget-result-row--emphasis"><dt>Total trip cost</dt><dd id="tripTotal">--</dd></div>
+            </dl>
+          </article>
+
+          <article class="student-budgeting-card">
+            <h3 class="student-budgeting-card-title">Vacation savings countdown</h3>
+            <p class="student-budgeting-card-desc">How much do you need to put away each month to afford your trip?</p>
+            <div class="budget-field">
+              <label class="budget-field-label" for="vacGoal">Trip cost goal ($)</label>
+              <div class="search-container-large budget-input-track">
+                <span class="search-icon" aria-hidden="true">🎯</span>
+                <input type="number" id="vacGoal" class="stock-search-input" min="0" step="100" value="2500" inputmode="numeric" />
+              </div>
+            </div>
+            <div class="budget-field">
+              <label class="budget-field-label" for="vacAlready">Already saved ($)</label>
+              <div class="search-container-large budget-input-track">
+                <span class="search-icon" aria-hidden="true">$</span>
+                <input type="number" id="vacAlready" class="stock-search-input" min="0" step="100" value="0" inputmode="numeric" />
+              </div>
+            </div>
+            <div class="budget-field">
+              <label class="budget-field-label" for="vacMonths">Months until trip</label>
+              <div class="search-container-large budget-input-track">
+                <span class="search-icon" aria-hidden="true">📅</span>
+                <input type="number" id="vacMonths" class="stock-search-input" min="1" step="1" value="6" inputmode="numeric" />
+              </div>
+            </div>
+            <dl class="budget-results">
+              <div class="budget-result-row"><dt>Still need</dt><dd id="vacRemaining">--</dd></div>
+              <div class="budget-result-row budget-result-row--emphasis"><dt>Monthly savings needed</dt><dd id="vacMonthlyNeeded">--</dd></div>
+            </dl>
+          </article>
+
+          <article class="student-budgeting-card">
+            <h3 class="student-budgeting-card-title">Daily spending budget</h3>
+            <p class="student-budgeting-card-desc">Set a total trip spend and number of days to get your daily allowance.</p>
+            <div class="budget-field">
+              <label class="budget-field-label" for="dsbTotal">Total trip budget ($)</label>
+              <div class="search-container-large budget-input-track">
+                <span class="search-icon" aria-hidden="true">$</span>
+                <input type="number" id="dsbTotal" class="stock-search-input" min="0" step="100" value="2000" inputmode="numeric" />
+              </div>
+            </div>
+            <div class="budget-field">
+              <label class="budget-field-label" for="dsbFixed">Fixed costs already covered ($)</label>
+              <div class="search-container-large budget-input-track">
+                <span class="search-icon" aria-hidden="true">−</span>
+                <input type="number" id="dsbFixed" class="stock-search-input" min="0" step="100" value="1400" placeholder="Flights, hotel…" inputmode="numeric" />
+              </div>
+            </div>
+            <div class="budget-field">
+              <label class="budget-field-label" for="dsbDays">Number of days</label>
+              <div class="search-container-large budget-input-track">
+                <span class="search-icon" aria-hidden="true">🌅</span>
+                <input type="number" id="dsbDays" class="stock-search-input" min="1" step="1" value="7" inputmode="numeric" />
+              </div>
+            </div>
+            <dl class="budget-results">
+              <div class="budget-result-row"><dt>Spending money left</dt><dd id="dsbSpending">--</dd></div>
+              <div class="budget-result-row budget-result-row--emphasis"><dt>Daily allowance</dt><dd id="dsbDaily">--</dd></div>
+            </dl>
+          </article>
+        </div>
+
       </div>
     </section>
 

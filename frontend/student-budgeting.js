@@ -1,309 +1,195 @@
 /**
- * Finance page: Budgeting calculators for all audiences + tab switching.
+ * Finance page: Budgeting calculators for all life stages + tab switching.
  */
 (function () {
-  var money = function (n) {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(isFinite(n) ? n : 0);
+  var fmt = function (n) {
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(isFinite(n) && n >= 0 ? n : 0);
   };
-  var moneyCents = function (n) {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(isFinite(n) ? n : 0);
-  };
-  function parseNum(el, fallback) {
-    if (fallback === undefined) fallback = 0;
-    var v = parseFloat(String(el ? el.value : '').replace(/,/g, ''));
-    return isFinite(v) ? v : fallback;
+
+  function g(id) { return document.getElementById(id); }
+  function val(id, def) {
+    var el = g(id);
+    if (!el) return (def !== undefined ? def : 0);
+    var v = parseFloat(String(el.value).replace(/,/g, ''));
+    return isFinite(v) ? v : (def !== undefined ? def : 0);
   }
-  function q(id) { return document.getElementById(id); }
   function bind(ids, fn) {
     ids.forEach(function (id) {
-      var el = q(id);
+      var el = g(id);
       if (el) el.addEventListener('input', fn);
     });
   }
+  function setNet(statId, valueId, net) {
+    var stat = g(statId);
+    var value = g(valueId);
+    if (!value) return;
+    if (net >= 0) {
+      value.textContent = fmt(net) + ' ✅';
+      if (stat) { stat.classList.remove('is-negative'); stat.classList.add('is-positive'); }
+    } else {
+      value.textContent = fmt(Math.abs(net)) + ' deficit ⚠️';
+      if (stat) { stat.classList.remove('is-positive'); stat.classList.add('is-negative'); }
+    }
+  }
 
-  /* ── Tab switching ── */
+  /* ── Tabs ── */
   function initTabs() {
     var tabs = document.querySelectorAll('[data-budget-tab]');
     if (!tabs.length) return;
     tabs.forEach(function (tab) {
       tab.addEventListener('click', function () {
         var key = tab.getAttribute('data-budget-tab');
-        tabs.forEach(function (t) {
-          t.classList.remove('active');
-          t.setAttribute('aria-selected', 'false');
-        });
+        tabs.forEach(function (t) { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); });
         tab.classList.add('active');
         tab.setAttribute('aria-selected', 'true');
-        document.querySelectorAll('.budget-tab-panel').forEach(function (panel) {
-          panel.hidden = panel.id !== 'budgetTab-' + key;
+        document.querySelectorAll('.budget-tab-panel').forEach(function (p) {
+          p.hidden = p.id !== 'budgetTab-' + key;
         });
       });
     });
   }
 
-  /* ── STUDENTS ── */
-  function initGigCalculator() {
+  /* ── Students ── */
+  function initStudents() {
     function update() {
-      var h = Math.max(0, parseNum(q('budgetGigHours')));
-      var r = Math.max(0, parseNum(q('budgetGigRate')));
-      var ex = Math.max(0, parseNum(q('budgetGigExtra')));
-      var weekly = h * r;
-      var monthly = (weekly * 52) / 12 + ex;
-      if (q('budgetGigOutWeekly')) q('budgetGigOutWeekly').textContent = money(weekly);
-      if (q('budgetGigOutMonthly')) q('budgetGigOutMonthly').textContent = money(monthly);
+      var gigMonthly = (Math.max(0, val('sGigHours')) * Math.max(0, val('sGigRate')) * 52) / 12;
+      var income = gigMonthly + Math.max(0, val('sOtherIncome'));
+      var expenses = ['sRent','sUtilities','sFood','sTransport','sLoan','sOther']
+        .reduce(function (s, id) { return s + Math.max(0, val(id)); }, 0);
+      var net = income - expenses;
+      if (g('sTotalIncome')) g('sTotalIncome').textContent = fmt(income);
+      if (g('sTotalExpenses')) g('sTotalExpenses').textContent = fmt(expenses);
+      setNet('sNetStat', 'sNet', net);
     }
-    bind(['budgetGigHours', 'budgetGigRate', 'budgetGigExtra'], update);
+    bind(['sGigHours','sGigRate','sOtherIncome','sRent','sUtilities','sFood','sTransport','sLoan','sOther'], update);
     update();
   }
 
-  function loanPayment(principal, apr, years) {
-    var n = Math.round(Math.max(0, years) * 12);
-    if (principal <= 0 || n <= 0) return 0;
-    var r = apr / 100 / 12;
-    if (r === 0) return principal / n;
-    var pow = Math.pow(1 + r, n);
-    return (principal * r * pow) / (pow - 1);
-  }
-
-  function initLoanEstimator() {
+  /* ── Working Adults ── */
+  function initAdults() {
     function update() {
-      var P = Math.max(0, parseNum(q('budgetLoanPrincipal')));
-      var a = Math.max(0, parseNum(q('budgetLoanApr')));
-      var y = Math.max(0.25, parseNum(q('budgetLoanYears'), 10));
-      var pay = loanPayment(P, a, y);
-      var interest = Math.max(0, pay * Math.round(y * 12) - P);
-      if (q('budgetLoanPayment')) q('budgetLoanPayment').textContent = moneyCents(pay);
-      if (q('budgetLoanInterest')) q('budgetLoanInterest').textContent = moneyCents(interest);
+      var gross = Math.max(0, val('aAnnualSalary')) / 12;
+      var taxRate = Math.min(100, Math.max(0, val('aTaxRate', 22)));
+      var deductions = Math.max(0, val('aDeductions'));
+      var other = Math.max(0, val('aOtherIncome'));
+      var takeHome = gross * (1 - taxRate / 100) - deductions + other;
+      var expenses = ['aRent','aGroceries','aTransport','aInsurance','aUtilities','aPersonal']
+        .reduce(function (s, id) { return s + Math.max(0, val(id)); }, 0);
+      var net = takeHome - expenses;
+      if (g('aGross')) g('aGross').textContent = fmt(gross);
+      if (g('aTotalIncome')) g('aTotalIncome').textContent = fmt(Math.max(0, takeHome));
+      if (g('aTotalExpenses')) g('aTotalExpenses').textContent = fmt(expenses);
+      setNet('aNetStat', 'aNet', net);
     }
-    bind(['budgetLoanPrincipal', 'budgetLoanApr', 'budgetLoanYears'], update);
+    bind(['aAnnualSalary','aTaxRate','aDeductions','aOtherIncome','aRent','aGroceries','aTransport','aInsurance','aUtilities','aPersonal'], update);
     update();
   }
 
-  function initColBreakdown() {
-    var fields = [
-      { id: 'budgetColRent', bar: 'budgetColBarRent' },
-      { id: 'budgetColUtilities', bar: 'budgetColBarUtilities' },
-      { id: 'budgetColFood', bar: 'budgetColBarFood' },
-      { id: 'budgetColTransport', bar: 'budgetColBarTransport' },
-      { id: 'budgetColOther', bar: 'budgetColBarOther' },
-    ];
+  /* ── Families ── */
+  function initFamilies() {
     function update() {
-      var sum = 0;
-      var amounts = fields.map(function (f) {
-        var v = Math.max(0, parseNum(q(f.id)));
-        sum += v;
-        return v;
-      });
-      if (q('budgetColTotal')) q('budgetColTotal').textContent = money(sum);
-      fields.forEach(function (f, i) {
-        var seg = q(f.bar);
-        if (!seg) return;
-        var pct = sum > 0 ? (amounts[i] / sum) * 100 : 0;
-        seg.style.flexBasis = pct + '%';
-        seg.style.minWidth = amounts[i] > 0 ? '4px' : '0';
-      });
+      var income = Math.max(0, val('fIncome1')) + Math.max(0, val('fIncome2'));
+      var expenses = ['fMortgage','fGroceries','fChildcare','fKidsActivities','fTransport','fInsurance','fCollegeSavings','fOther']
+        .reduce(function (s, id) { return s + Math.max(0, val(id)); }, 0);
+      var net = income - expenses;
+      if (g('fTotalIncome')) g('fTotalIncome').textContent = fmt(income);
+      if (g('fTotalExpenses')) g('fTotalExpenses').textContent = fmt(expenses);
+      setNet('fNetStat', 'fNet', net);
     }
-    bind(fields.map(function (f) { return f.id; }), update);
+    bind(['fIncome1','fIncome2','fMortgage','fGroceries','fChildcare','fKidsActivities','fTransport','fInsurance','fCollegeSavings','fOther'], update);
     update();
   }
 
-  /* ── WORKING ADULTS ── */
-  function initAdultPlanner() {
-    function update() {
-      var salary = Math.max(0, parseNum(q('adultSalary')));
-      var taxRate = Math.max(0, parseNum(q('adultTaxRate')));
-      var deductions = Math.max(0, parseNum(q('adultDeductions')));
-      var gross = salary / 12;
-      var afterTax = gross * (1 - taxRate / 100);
-      var takeHome = afterTax - deductions;
-      if (q('adultGrossMonthly')) q('adultGrossMonthly').textContent = money(gross);
-      if (q('adultAfterTax')) q('adultAfterTax').textContent = money(afterTax);
-      if (q('adultTakeHome')) q('adultTakeHome').textContent = money(Math.max(0, takeHome));
-    }
-    bind(['adultSalary', 'adultTaxRate', 'adultDeductions'], update);
-    update();
-  }
-
-  function initWorkExpenses() {
-    function update() {
-      var total = ['workCommute', 'workLunch', 'workClothing', 'workSubs'].reduce(function (s, id) {
-        return s + Math.max(0, parseNum(q(id)));
-      }, 0);
-      if (q('workExpensesTotal')) q('workExpensesTotal').textContent = money(total);
-    }
-    bind(['workCommute', 'workLunch', 'workClothing', 'workSubs'], update);
-    update();
-  }
-
-  function init401k() {
-    function update() {
-      var salary = Math.max(0, parseNum(q('k401Salary')));
-      var yourPct = Math.max(0, parseNum(q('k401YourPct')));
-      var matchPct = Math.max(0, parseNum(q('k401MatchPct')));
-      var yourAmt = salary * (yourPct / 100);
-      var effectiveMatch = Math.min(yourPct, matchPct);
-      var matchAmt = salary * (effectiveMatch / 100);
-      if (q('k401YourAmt')) q('k401YourAmt').textContent = money(yourAmt);
-      if (q('k401MatchAmt')) q('k401MatchAmt').textContent = money(matchAmt);
-      if (q('k401Total')) q('k401Total').textContent = money(yourAmt + matchAmt);
-    }
-    bind(['k401Salary', 'k401YourPct', 'k401MatchPct'], update);
-    update();
-  }
-
-  /* ── FAMILIES ── */
-  function initHousehold() {
-    var ids = ['hhMortgage', 'hhGroceries', 'hhChildcare', 'hhTransport', 'hhInsurance', 'hhOther'];
-    function update() {
-      var total = ids.reduce(function (s, id) { return s + Math.max(0, parseNum(q(id))); }, 0);
-      if (q('hhTotal')) q('hhTotal').textContent = money(total);
-    }
-    bind(ids, update);
-    update();
-  }
-
-  function initGroceries() {
-    function update() {
-      var people = Math.max(1, parseNum(q('grocPeople'), 1));
-      var perPerson = Math.max(0, parseNum(q('grocPerPerson')));
-      var dineOut = Math.max(0, parseNum(q('grocDineOut')));
-      var weekly = people * perPerson + dineOut;
-      var monthly = weekly * 52 / 12;
-      if (q('grocWeekly')) q('grocWeekly').textContent = money(weekly);
-      if (q('grocMonthly')) q('grocMonthly').textContent = money(monthly);
-    }
-    bind(['grocPeople', 'grocPerPerson', 'grocDineOut'], update);
-    update();
-  }
-
-  function initCollegeFund() {
-    function update() {
-      var goal = Math.max(0, parseNum(q('cfGoal')));
-      var years = Math.max(1, parseNum(q('cfYears'), 1));
-      var returnPct = Math.max(0, parseNum(q('cfReturn')));
-      var already = Math.max(0, parseNum(q('cfAlready')));
-      var n = years * 12;
-      var r = returnPct / 100 / 12;
-      var fvAlready = already * Math.pow(1 + r, n);
-      var remaining = Math.max(0, goal - fvAlready);
-      var monthly;
-      if (r === 0) {
-        monthly = remaining / n;
-      } else {
-        monthly = remaining * r / (Math.pow(1 + r, n) - 1);
-      }
-      if (q('cfMonthly')) q('cfMonthly').textContent = money(Math.max(0, monthly));
-    }
-    bind(['cfGoal', 'cfYears', 'cfReturn', 'cfAlready'], update);
-    update();
-  }
-
-  /* ── SAVINGS GOALS ── */
-  function initEmergencyFund() {
-    function update() {
-      var expenses = Math.max(0, parseNum(q('efMonthlyExpenses')));
-      var saved = Math.max(0, parseNum(q('efCurrentSaved')));
-      var monthlySave = Math.max(0, parseNum(q('efMonthlySave')));
+  /* ── Savings Goals ── */
+  function initSavings() {
+    // Emergency fund
+    function updateEF() {
+      var expenses = Math.max(0, val('efExpenses'));
+      var saved = Math.max(0, val('efSaved'));
+      var monthly = Math.max(0, val('efMonthlySave'));
       var t3 = expenses * 3;
       var t6 = expenses * 6;
-      var remaining3 = Math.max(0, t3 - saved);
-      var months = monthlySave > 0 ? Math.ceil(remaining3 / monthlySave) : '∞';
-      if (q('efTarget3')) q('efTarget3').textContent = money(t3);
-      if (q('efTarget6')) q('efTarget6').textContent = money(t6);
-      if (q('efMonthsTo3')) q('efMonthsTo3').textContent = remaining3 <= 0 ? '✅ Done!' : months + ' months';
+      var rem3 = Math.max(0, t3 - saved);
+      var months = monthly > 0 ? Math.ceil(rem3 / monthly) : '∞';
+      if (g('efTarget3')) g('efTarget3').textContent = fmt(t3);
+      if (g('efTarget6')) g('efTarget6').textContent = fmt(t6);
+      if (g('efMonthsTo3')) g('efMonthsTo3').textContent = rem3 <= 0 ? '✅ Already there!' : months + ' months';
     }
-    bind(['efMonthlyExpenses', 'efCurrentSaved', 'efMonthlySave'], update);
-    update();
-  }
+    bind(['efExpenses','efSaved','efMonthlySave'], updateEF);
+    updateEF();
 
-  function initDownPayment() {
-    function update() {
-      var goal = Math.max(0, parseNum(q('dpGoal')));
-      var already = Math.max(0, parseNum(q('dpAlready')));
-      var months = Math.max(1, parseNum(q('dpMonths'), 1));
+    // Savings goal
+    function updateSG() {
+      var goal = Math.max(0, val('sgGoal'));
+      var already = Math.max(0, val('sgAlready'));
+      var months = Math.max(1, val('sgMonths', 1));
       var remaining = Math.max(0, goal - already);
-      var monthly = remaining / months;
-      if (q('dpRemaining')) q('dpRemaining').textContent = money(remaining);
-      if (q('dpMonthlyNeeded')) q('dpMonthlyNeeded').textContent = money(monthly);
+      if (g('sgRemaining')) g('sgRemaining').textContent = fmt(remaining);
+      if (g('sgMonthlyNeeded')) g('sgMonthlyNeeded').textContent = fmt(remaining / months);
     }
-    bind(['dpGoal', 'dpAlready', 'dpMonths'], update);
-    update();
+    bind(['sgGoal','sgAlready','sgMonths'], updateSG);
+    updateSG();
+
+    // College fund
+    function updateCF() {
+      var goal = Math.max(0, val('cfGoal'));
+      var years = Math.max(1, val('cfYears', 1));
+      var r = Math.max(0, val('cfReturn')) / 100 / 12;
+      var already = Math.max(0, val('cfAlready'));
+      var n = years * 12;
+      var fvAlready = already * Math.pow(1 + r, n);
+      var remaining = Math.max(0, goal - fvAlready);
+      var monthly = r === 0 ? remaining / n : remaining * r / (Math.pow(1 + r, n) - 1);
+      if (g('cfMonthly')) g('cfMonthly').textContent = fmt(Math.max(0, monthly));
+    }
+    bind(['cfGoal','cfYears','cfReturn','cfAlready'], updateCF);
+    updateCF();
   }
 
-  function initSavingsGoal() {
-    function update() {
-      var goal = Math.max(0, parseNum(q('sgGoal')));
-      var already = Math.max(0, parseNum(q('sgAlready')));
-      var months = Math.max(1, parseNum(q('sgMonths'), 1));
-      var monthly = Math.max(0, goal - already) / months;
-      if (q('sgMonthlyNeeded')) q('sgMonthlyNeeded').textContent = money(monthly);
+  /* ── Vacation ── */
+  function initVacation() {
+    // Trip total
+    function updateTrip() {
+      var total = ['tripFlights','tripHotel','tripFood','tripActivities','tripMisc']
+        .reduce(function (s, id) { return s + Math.max(0, val(id)); }, 0);
+      if (g('tripTotal')) g('tripTotal').textContent = fmt(total);
     }
-    bind(['sgGoal', 'sgAlready', 'sgMonths'], update);
-    update();
-  }
+    bind(['tripFlights','tripHotel','tripFood','tripActivities','tripMisc'], updateTrip);
+    updateTrip();
 
-  /* ── VACATION ── */
-  function initTripBudget() {
-    var ids = ['tripFlights', 'tripHotel', 'tripFood', 'tripActivities', 'tripMisc'];
-    function update() {
-      var total = ids.reduce(function (s, id) { return s + Math.max(0, parseNum(q(id))); }, 0);
-      if (q('tripTotal')) q('tripTotal').textContent = money(total);
-    }
-    bind(ids, update);
-    update();
-  }
-
-  function initVacationSavings() {
-    function update() {
-      var goal = Math.max(0, parseNum(q('vacGoal')));
-      var already = Math.max(0, parseNum(q('vacAlready')));
-      var months = Math.max(1, parseNum(q('vacMonths'), 1));
+    // Vacation savings
+    function updateVac() {
+      var goal = Math.max(0, val('vacGoal'));
+      var already = Math.max(0, val('vacAlready'));
+      var months = Math.max(1, val('vacMonths', 1));
       var remaining = Math.max(0, goal - already);
-      var monthly = remaining / months;
-      if (q('vacRemaining')) q('vacRemaining').textContent = money(remaining);
-      if (q('vacMonthlyNeeded')) q('vacMonthlyNeeded').textContent = money(monthly);
+      if (g('vacRemaining')) g('vacRemaining').textContent = fmt(remaining);
+      if (g('vacMonthlyNeeded')) g('vacMonthlyNeeded').textContent = fmt(remaining / months);
     }
-    bind(['vacGoal', 'vacAlready', 'vacMonths'], update);
-    update();
-  }
+    bind(['vacGoal','vacAlready','vacMonths'], updateVac);
+    updateVac();
 
-  function initDailyBudget() {
-    function update() {
-      var total = Math.max(0, parseNum(q('dsbTotal')));
-      var fixed = Math.max(0, parseNum(q('dsbFixed')));
-      var days = Math.max(1, parseNum(q('dsbDays'), 1));
+    // Daily budget
+    function updateDSB() {
+      var total = Math.max(0, val('dsbTotal'));
+      var fixed = Math.max(0, val('dsbFixed'));
+      var days = Math.max(1, val('dsbDays', 1));
       var spending = Math.max(0, total - fixed);
-      var daily = spending / days;
-      if (q('dsbSpending')) q('dsbSpending').textContent = money(spending);
-      if (q('dsbDaily')) q('dsbDaily').textContent = money(daily);
+      if (g('dsbSpending')) g('dsbSpending').textContent = fmt(spending);
+      if (g('dsbDaily')) g('dsbDaily').textContent = fmt(spending / days);
     }
-    bind(['dsbTotal', 'dsbFixed', 'dsbDays'], update);
-    update();
+    bind(['dsbTotal','dsbFixed','dsbDays'], updateDSB);
+    updateDSB();
   }
 
   function init() {
     if (!document.getElementById('studentBudgeting')) return;
     initTabs();
-    // Students
-    initGigCalculator();
-    initLoanEstimator();
-    initColBreakdown();
-    // Working Adults
-    initAdultPlanner();
-    initWorkExpenses();
-    init401k();
-    // Families
-    initHousehold();
-    initGroceries();
-    initCollegeFund();
-    // Savings Goals
-    initEmergencyFund();
-    initDownPayment();
-    initSavingsGoal();
-    // Vacation
-    initTripBudget();
-    initVacationSavings();
-    initDailyBudget();
+    initStudents();
+    initAdults();
+    initFamilies();
+    initSavings();
+    initVacation();
   }
 
   if (document.readyState === 'loading') {

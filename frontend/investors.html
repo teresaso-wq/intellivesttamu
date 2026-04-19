@@ -1465,5 +1465,38 @@
   <script src="./app.js"></script>
   <script src="./auth-ui.js"></script>
   <script src="./investors-page.js"></script>
+  <script>
+  (function () {
+    // Convert "Q4 2024" → approximate date → "X months ago"
+    var QUARTER_MONTH = { 'Q1': 1, 'Q2': 4, 'Q3': 7, 'Q4': 10 };
+
+    function quarterToDate(str) {
+      var m = str.trim().match(/^(Q[1-4])\s*(\d{4})$/);
+      if (!m) return null;
+      return new Date(parseInt(m[2]), QUARTER_MONTH[m[1]] - 1, 1);
+    }
+
+    function timeAgo(date) {
+      var now = new Date();
+      var months = (now.getFullYear() - date.getFullYear()) * 12 + (now.getMonth() - date.getMonth());
+      if (months < 1)  return 'this quarter';
+      if (months === 1) return '1 month ago';
+      if (months < 12) return months + ' months ago';
+      var years = Math.floor(months / 12);
+      var rem   = months % 12;
+      if (rem === 0) return years === 1 ? '1 year ago' : years + ' years ago';
+      return years + 'y ' + rem + 'm ago';
+    }
+
+    // Label all Period cells in Recent Trades tables
+    document.querySelectorAll('.investor-data-table td:first-child').forEach(function (td) {
+      var d = quarterToDate(td.textContent);
+      if (!d) return;
+      var ago = timeAgo(d);
+      td.innerHTML = td.textContent.trim() +
+        '<br><span style="font-size:11px;color:var(--color-accent,#7c9cbf);font-weight:500;">' + ago + '</span>';
+    });
+  })();
+  </script>
 </body>
 </html>

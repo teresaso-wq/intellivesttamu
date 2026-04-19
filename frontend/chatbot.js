@@ -67,26 +67,117 @@ async function fetchLiveQuote(ticker) {
   }
 }
 
-// ── Step 3: build market context string from live data ───────────────────────
+// ── Step 3a: fetch fundamentals (P/E, 52w range, EPS, beta) ─────────────────
+async function fetchFundamentals(ticker) {
+  try {
+    var res = await fetch(
+      'https://finnhub.io/api/v1/stock/metric?symbol=' + ticker + '&metric=all&token=' + _fk,
+      { headers: { Accept: 'application/json' } }
+    );
+    if (!res.ok) return null;
+    var data = await res.json();
+    var m = data.metric || {};
+    return {
+      pe:        m['peNormalizedAnnual']   || m['peTTM']            || null,
+      eps:       m['epsTTM']               || null,
+      beta:      m['beta']                 || null,
+      high52:    m['52WeekHigh']           || null,
+      low52:     m['52WeekLow']            || null,
+      revenueGrowth: m['revenueGrowthTTMYoy'] || null,
+      roe:       m['roeTTM']               || null,
+      debtEquity: m['totalDebt/totalEquityAnnual'] || null
+    };
+  } catch(e) { return null; }
+}
+
+// ── Step 3b: fetch recent news headlines ─────────────────────────────────────
+async function fetchNews(ticker) {
+  try {
+    var to   = new Date().toISOString().slice(0, 10);
+    var from = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    var res = await fetch(
+      'https://finnhub.io/api/v1/company-news?symbol=' + ticker +
+      '&from=' + from + '&to=' + to + '&token=' + _fk,
+      { headers: { Accept: 'application/json' } }
+    );
+    if (!res.ok) return [];
+    var articles = await res.json();
+    // Return top 4 headlines
+    return (Array.isArray(articles) ? articles : [])
+      .slice(0, 4)
+      .map(function(a) { return a.headline; })
+      .filter(Boolean);
+  } catch(e) { return []; }
+}
+
+// ── Step 3c: build full enriched context string ───────────────────────────────
 async function buildMarketContext(userMessage) {
   var tickers = extractTickers(userMessage);
   if (tickers.length === 0) return '';
 
-  var quotes = await Promise.all(tickers.map(fetchLiveQuote));
-  var lines = [];
-  quotes.forEach(function(q) {
-    if (q) {
-      lines.push(
-        q.ticker + ': $' + q.price + ' (' + q.changePct + ' today)' +
-        ' | Open $' + q.open + ' | High $' + q.high + ' | Low $' + q.low +
-        ' | Prev close $' + q.prev
-      );
+  // Fetch quote + fundamentals + news for each ticker in parallel
+  var enriched = await Promise.all(tickers.map(async function(ticker) {
+    var [quote, fundamentals, news] = await Promise.all([
+      fetchLiveQuote(ticker),
+      fetchFundamentals(ticker),
+      fetchNews(ticker)
+    ]);
+    return { ticker, quote, fundamentals, news };
+  }));
+
+  var sections = [];
+  enriched.forEach(function(d) {
+    if (!d.quote) return;
+    var q = d.quote;
+    var f = d.fundamentals;
+    var lines = [];
+
+    // Price data
+    lines.push('PRICE: $' + q.price + ' (' + q.changePct + ' today) | Open $' + q.open + ' | High $' + q.high + ' | Low $' + q.low + ' | Prev close $' + q.prev);
+
+    // Fundamentals
+    if (f) {
+      var fundParts = [];
+      if (f.pe)           fundParts.push('P/E ratio: ' + Number(f.pe).toFixed(1));
+      if (f.eps)          fundParts.push('EPS: $' + Number(f.eps).toFixed(2));
+      if (f.beta)         fundParts.push('Beta: ' + Number(f.beta).toFixed(2));
+      if (f.high52)       fundParts.push('52w high: $' + Number(f.high52).toFixed(2));
+      if (f.low52)        fundParts.push('52w low: $' + Number(f.low52).toFixed(2));
+      if (f.revenueGrowth) fundParts.push('Revenue growth YoY: ' + (Number(f.revenueGrowth)*100).toFixed(1) + '%');
+      if (f.roe)          fundParts.push('ROE: ' + Number(f.roe).toFixed(1) + '%');
+      if (fundParts.length) lines.push('FUNDAMENTALS: ' + fundParts.join(' | '));
+
+      // Over/undervalued signal
+      if (f.pe) {
+        var pe = Number(f.pe);
+        var signal = pe < 15 ? 'potentially UNDERVALUED (P/E below 15)' :
+                     pe > 35 ? 'potentially OVERVALUED (P/E above 35)' :
+                     'fairly valued range (P/E 15-35)';
+        lines.push('VALUATION SIGNAL: ' + signal);
+      }
+
+      // Distance from 52w high/low
+      if (f.high52 && f.low52) {
+        var price = parseFloat(q.price);
+        var pctFromHigh = (((price - f.high52) / f.high52) * 100).toFixed(1);
+        var pctFromLow  = (((price - f.low52)  / f.low52)  * 100).toFixed(1);
+        lines.push('RANGE POSITION: ' + pctFromHigh + '% from 52w high | +' + pctFromLow + '% from 52w low');
+      }
     }
+
+    // News
+    if (d.news && d.news.length > 0) {
+      lines.push('RECENT NEWS (last 7 days):');
+      d.news.forEach(function(h, i) { lines.push('  ' + (i+1) + '. ' + h); });
+    }
+
+    sections.push('--- ' + d.ticker + ' ---\n' + lines.join('\n'));
   });
 
-  if (lines.length === 0) return '';
-  return '\n\nLIVE MARKET DATA (real-time from Finnhub):\n' + lines.join('\n') +
-    '\nUse this real data in your analysis. Today is ' + new Date().toDateString() + '.';
+  if (sections.length === 0) return '';
+  return '\n\nLIVE MARKET INTELLIGENCE (Finnhub, real-time):\n' +
+    sections.join('\n\n') +
+    '\n\nToday is ' + new Date().toDateString() + '. Use ALL of this data in your analysis.';
 }
 
 // ── Step 4: call Groq with live data injected into the prompt ─────────────────
@@ -101,13 +192,13 @@ async function callGemini(userMessage, profile, history) {
   var marketCtx = await buildMarketContext(userMessage);
 
   var systemPrompt =
-    'You are Intellivest AI, a precise financial advisor for young adults and first-time investors. ' +
+    'You are Intellivest AI, a precise AI financial advisor for young adults and first-time investors. ' +
     'You remember everything said earlier in this conversation — refer back to it naturally. ' +
-    'When live market data is provided, use the exact numbers in your analysis — price, change %, highs, lows. ' +
-    'Give specific, data-driven advice. Keep answers under 250 words. ' +
-    'Use bullet points. When analyzing a stock, always mention the current price and whether it is up or down today. ' +
-    'Give a clear buy/hold/watch recommendation based on the data and user profile. ' +
-    'Add a one-line disclaimer at the end. Never guarantee returns.';
+    'When live market intelligence is provided, use ALL the data: price, change %, P/E ratio, EPS, beta, 52-week range, revenue growth, valuation signal, and recent news headlines. ' +
+    'Structure stock analysis as: 1) What is happening today (price + news), 2) Fundamentals (P/E, over/undervalued, growth), 3) Risk assessment (beta, 52w range position), 4) Clear BUY / HOLD / WATCH recommendation with reasoning. ' +
+    'Be specific — cite the actual numbers (e.g. "P/E of 28 suggests fairly valued", "down 18% from 52w high — potential entry point"). ' +
+    'Estimated growth potential: use revenue growth % and P/E vs industry average (tech avg P/E ~25, finance ~12, energy ~10) to give a growth outlook. ' +
+    'Keep answers under 300 words. Add a one-line disclaimer at the end. Never guarantee returns.';
 
   if (profile && profile.name) {
     systemPrompt +=

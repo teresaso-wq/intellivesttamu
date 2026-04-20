@@ -36,17 +36,26 @@
   function initTabs() {
     var tabs = document.querySelectorAll('[data-budget-tab]');
     if (!tabs.length) return;
+    function setActiveTab(key) {
+      tabs.forEach(function (t) {
+        var isActive = t.getAttribute('data-budget-tab') === key;
+        t.classList.toggle('active', isActive);
+        t.setAttribute('aria-selected', isActive ? 'true' : 'false');
+      });
+      document.querySelectorAll('.budget-tab-panel').forEach(function (p) {
+        p.hidden = p.id !== 'budgetTab-' + key;
+      });
+    }
+
     tabs.forEach(function (tab) {
       tab.addEventListener('click', function () {
         var key = tab.getAttribute('data-budget-tab');
-        tabs.forEach(function (t) { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); });
-        tab.classList.add('active');
-        tab.setAttribute('aria-selected', 'true');
-        document.querySelectorAll('.budget-tab-panel').forEach(function (p) {
-          p.hidden = p.id !== 'budgetTab-' + key;
-        });
+        setActiveTab(key);
       });
     });
+
+    var active = document.querySelector('[data-budget-tab].active');
+    setActiveTab(active ? active.getAttribute('data-budget-tab') : 'students');
   }
 
   /* ── Students ── */
@@ -89,14 +98,14 @@
   function initFamilies() {
     function update() {
       var income = Math.max(0, val('fIncome1')) + Math.max(0, val('fIncome2'));
-      var expenses = ['fMortgage','fGroceries','fChildcare','fKidsActivities','fTransport','fInsurance','fCollegeSavings','fOther']
+      var expenses = ['fMortgage','fGroceries','fChildcare','fKidsActivities','fTransport','fInsurance','fOther']
         .reduce(function (s, id) { return s + Math.max(0, val(id)); }, 0);
       var net = income - expenses;
       if (g('fTotalIncome')) g('fTotalIncome').textContent = fmt(income);
       if (g('fTotalExpenses')) g('fTotalExpenses').textContent = fmt(expenses);
       setNet('fNetStat', 'fNet', net);
     }
-    bind(['fIncome1','fIncome2','fMortgage','fGroceries','fChildcare','fKidsActivities','fTransport','fInsurance','fCollegeSavings','fOther'], update);
+    bind(['fIncome1','fIncome2','fMortgage','fGroceries','fChildcare','fKidsActivities','fTransport','fInsurance','fOther'], update);
     update();
   }
 
@@ -144,11 +153,8 @@
     }
     bind(['cfGoal','cfYears','cfReturn','cfAlready'], updateCF);
     updateCF();
-  }
 
-  /* ── Vacation ── */
-  function initVacation() {
-    // Trip total
+    // Trip budget (savings tab only)
     function updateTrip() {
       var total = ['tripFlights','tripHotel','tripFood','tripActivities','tripMisc']
         .reduce(function (s, id) { return s + Math.max(0, val(id)); }, 0);
@@ -157,7 +163,7 @@
     bind(['tripFlights','tripHotel','tripFood','tripActivities','tripMisc'], updateTrip);
     updateTrip();
 
-    // Vacation savings
+    // Vacation savings countdown (savings tab only — no separate vacation tab)
     function updateVac() {
       var goal = Math.max(0, val('vacGoal'));
       var already = Math.max(0, val('vacAlready'));
@@ -169,7 +175,7 @@
     bind(['vacGoal','vacAlready','vacMonths'], updateVac);
     updateVac();
 
-    // Daily budget
+    // Daily spending budget (savings tab only)
     function updateDSB() {
       var total = Math.max(0, val('dsbTotal'));
       var fixed = Math.max(0, val('dsbFixed'));
@@ -189,7 +195,6 @@
     initAdults();
     initFamilies();
     initSavings();
-    initVacation();
   }
 
   if (document.readyState === 'loading') {

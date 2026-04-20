@@ -251,9 +251,9 @@ async function callGemini(userMessage, profile, history) {
 
 (function () {
   function runChatbot() {
-    const messagesContainer = document.getElementById('chatbotMessages');
-    const chatbotForm = document.getElementById('chatbotForm');
-    const chatbotInput = document.getElementById('chatbotInput');
+  const messagesContainer = document.getElementById('chatbotMessages');
+  const chatbotForm = document.getElementById('chatbotForm');
+  const chatbotInput = document.getElementById('chatbotInput');
 
     function surveyDone() {
       return localStorage.getItem('intellivest_survey_complete') === 'true';
@@ -275,6 +275,8 @@ async function callGemini(userMessage, profile, history) {
         name: localStorage.getItem('intellivest_user_name') || '',
         age: localStorage.getItem('intellivest_user_age') || '',
         savings: localStorage.getItem('intellivest_user_savings') || '',
+        amount: localStorage.getItem('intellivest_user_amount') || '',
+        timeline: localStorage.getItem('intellivest_user_timeline') || '',
         risk: localStorage.getItem('intellivest_user_risk') || '',
         goals
       };
@@ -289,10 +291,32 @@ async function callGemini(userMessage, profile, history) {
       const goals = normalizeGoals(profile.goals);
       const risk = (profile.risk || '').toLowerCase();
       const savings = profile.savings || '';
+      const age = (profile.age || '').toLowerCase();
+      const timeline = (profile.timeline || '').toLowerCase();
+      const amountRaw = String(profile.amount || '').replace(/,/g, '').trim();
+      const amountNum = Number(amountRaw);
       const sections = [];
 
       function addSection(title, lines) {
         sections.push({ title, lines });
+      }
+
+      if (age === 'under 18' || age === '18–24' || age === '25–34') {
+        const starterAmountLine =
+          Number.isFinite(amountNum) && amountNum > 0
+            ? 'Starter allocation for your amount ($' + amountNum.toLocaleString('en-US') + '): 60% broad index ETF, 20% international ETF, 20% bonds/cash until your emergency fund is complete.'
+            : 'Starter allocation example (first $2,000): 70% broad index ETF, 20% short-term bonds/HYSA, 10% learning bucket (individual stocks only if researched).';
+        addSection('Young Investor Starter Plan', [
+          'Step 1: Build an emergency fund (3-6 months) and pay high-interest debt before taking big market risk.',
+          'Step 2: Start with low-cost diversified ETFs/index funds; avoid concentrating in one stock early.',
+          'Step 3: Use tax-advantaged accounts first (401(k) match, then Roth IRA if eligible).',
+          'Step 4: Automate monthly investing and increase contributions over time.',
+          timeline
+            ? ('Timeline set: ' + profile.timeline + '. If under 3 years, prefer cash/CDs/short bonds for most funds.')
+            : 'If your timeline is under 3 years, keep most money in HYSA/CDs/short bonds instead of heavy stock exposure.',
+          starterAmountLine,
+          'If you are 13-17, consider supervised teen investing accounts with parent visibility and education tools.'
+        ]);
       }
 
       if (goals.some(g => g.includes('house'))) {
@@ -373,6 +397,12 @@ async function callGemini(userMessage, profile, history) {
         addSection('Retirement Plan', [
           'Priority order: 401(k) match first, then Roth IRA, then Traditional IRA/HSA as relevant.',
           'Roth IRA is often strong for young earners due to tax-free growth potential.',
+          'As retirement nears, estimate monthly spending needs and target replacing roughly 70-80% of pre-retirement income.',
+          'In the last 5 years before retirement, rebalance toward a diversified mix you can actually hold through volatility.',
+          'Build a 1-2 year cash buffer for planned withdrawals to reduce sequence-of-returns risk at retirement start.',
+          'Plan tax-efficient withdrawals (often taxable first, then tax-deferred, with Roth used strategically).',
+          'Evaluate Social Security timing; delaying from full retirement age up to 70 can increase benefits by about 8% per year.',
+          'Model healthcare costs and Medicare gaps early; use HSA strategically if eligible.',
           'Milestones: by 30 save ~1x salary, by 40 ~3x, by 50 ~6x, by 60 ~8x.',
           'Compound-interest reminder: starting 10 years earlier can roughly double outcomes at retirement.'
         ]);
@@ -409,7 +439,8 @@ async function callGemini(userMessage, profile, history) {
         '! 👋\n\n' +
         'Based on your profile:\n' +
         '📊 Risk Level: ' + (p?.risk || 'Not set') + '\n' +
-        '💰 Available to invest: ' + (p?.savings || 'Not set') + '\n' +
+        '💰 Available to invest: ' + ((p?.amount && p.amount.trim()) ? ('$' + p.amount.trim()) : (p?.savings || 'Not set')) + '\n' +
+        '⏳ Timeline: ' + (p?.timeline || 'Not set') + '\n' +
         '🎯 Your goals: ' + goalsText + '\n\n' +
         "Here's your personalized plan:\n" +
         planText +
@@ -430,6 +461,7 @@ async function callGemini(userMessage, profile, history) {
       const name = localStorage.getItem('intellivest_user_name') || 'there';
       const risk = localStorage.getItem('intellivest_user_risk') || 'Moderate';
       const savings = localStorage.getItem('intellivest_user_savings') || 'Unknown';
+      const timeline = localStorage.getItem('intellivest_user_timeline') || '';
 
       const houseResponse = () => {
         let savingsAdvice = '';
@@ -469,6 +501,20 @@ The market could drop right when you need the cash.`;
       };
 
       const stockResponse = () => {
+        const shortTimeline = timeline.includes('Under 1 year') || timeline.includes('1–3 years');
+        if (shortTimeline) {
+          return `Based on your timeline (${timeline}), prioritize capital protection first ${name}.
+
+BEST FIT FOR SHORT TIMELINES:
+• 50-80% in high-yield savings / money market / short-term Treasuries
+• 20-50% in short-term bond ETFs (like SGOV/BIL/SHY range)
+• Keep stock exposure small unless you can tolerate volatility
+
+WHY:
+Stocks can drop sharply over short windows. For money needed soon, return of principal matters more than chasing upside.
+
+If you still want stock exposure, keep it modest and diversified (broad ETF over single-name picks).`;
+        }
         if (risk === 'Aggressive' || risk === 'Very Aggressive') {
           return `Based on your aggressive risk profile, here are
 my top stock picks for you ${name}! 📈
@@ -562,6 +608,10 @@ HOW TO BUY AN ETF:
 3. Buy fractional shares — you don't need $400
    for one share, you can buy $50 worth
 4. Set up automatic monthly investing
+
+TIMELINE CHECK:
+${timeline ? `• Your timeline: ${timeline}` : '• Add your timeline in profile for tighter stock vs bond guidance.'}
+${timeline.includes('Under 1 year') || timeline.includes('1–3 years') ? '• For this horizon, favor cash/short-term bonds over heavy stock exposure.' : '• For 5+ years, broad stock ETFs usually make more sense than concentrated bets.'}
 
 LOWEST FEE ETFs (fees eat your returns):
 • VOO — 0.03% per year (cheapest)
@@ -678,7 +728,7 @@ On $10,000 invested over 30 years:
 Always pick the lowest fee option available.
 FXAIX at Fidelity is the gold standard for beginners.`;
 
-      const retirementResponse = () => `Here is your retirement roadmap ${name}! 🏖️
+      const retirementResponse = () => `Here is your retirement roadmap ${name}!
 
 OPEN THESE ACCOUNTS IN THIS ORDER:
 1. 401k up to your employer match — this is FREE money
@@ -688,6 +738,25 @@ OPEN THESE ACCOUNTS IN THIS ORDER:
 3. Back to 401k — contribute more after maxing Roth IRA
 4. HSA — only if you have a high-deductible health plan
    Triple tax advantage — the best account that exists
+
+RETIREMENT INCOME PLANNING (IMPORTANT):
+• Estimate your retirement expenses first and stress-test for inflation
+• Starting target: replace ~70-80% of your pre-retirement income
+• Revisit your withdrawal rate at least annually
+• Keep a diversified portfolio in retirement — too conservative can lose to inflation
+• Build a withdrawal order plan (taxable, tax-deferred, Roth strategy)
+
+IF YOU ARE ~5 YEARS FROM RETIREMENT:
+• Shift from “max growth” to “durable income + risk control”
+• Rebalance to your real risk tolerance (not your best-case tolerance)
+• Keep 12-24 months of spending in cash/short-term bonds
+• Review debt, housing, and fixed-expense decisions now (before income drops)
+• Consider part-time/bridge income for flexibility in the first retirement years
+
+SOCIAL SECURITY + HEALTHCARE:
+• Claiming later can raise benefits; from full retirement age to 70 adds about 8%/year
+• Healthcare is a major retirement expense — plan Medicare + out-of-pocket costs
+• Use HSA funds for qualified costs if you are eligible
 
 THE POWER OF STARTING EARLY:
 $200 per month starting at age 22 → about $1,000,000 at 65
@@ -701,6 +770,44 @@ By age 30 → Have 1x your annual salary saved
 By age 40 → Have 3x your annual salary saved
 By age 50 → Have 6x your annual salary saved
 By age 60 → Have 8x your annual salary saved`;
+
+      const youngInvestingResponse = () => {
+        const amountRaw = (localStorage.getItem('intellivest_user_amount') || '').replace(/,/g, '').trim();
+        const amountNum = Number(amountRaw);
+        const amountLine = Number.isFinite(amountNum) && amountNum > 0
+          ? `You entered $${amountNum.toLocaleString('en-US')} — sample starting split:
+• 60% broad US index ETF (VOO or VTI)
+• 20% international ETF (VXUS)
+• 20% HYSA / short-term bonds (or keep here until emergency fund is complete)`
+          : `Sample first-$2,000 split:
+• 70% broad index ETF (VOO/VTI)
+• 20% HYSA or short-term bonds
+• 10% learning sleeve for researched individual stocks`;
+
+        return `Great topic ${name} — here is a practical young-investor roadmap:
+
+1) Foundation first
+• Build a 3-6 month emergency fund
+• Pay off high-interest debt before taking more stock risk
+
+2) Accounts to use
+• First: 401(k) up to employer match
+• Next: Roth IRA (if eligible)
+• Then: taxable brokerage for extra investing
+
+3) What to buy first
+• Start with low-cost diversified ETFs/index funds
+• Add individual stocks only after you understand valuation/risk
+• Keep short-term goals in HYSA/CDs, not volatile stocks
+
+4) Teen-specific path (13-17)
+• Parent-supervised youth/teen brokerage accounts can help build habits
+• Focus on education + small automatic contributions, not fast trading
+
+${amountLine}
+
+Rule of thumb: consistency beats timing — automate contributions monthly and increase as income grows.`;
+      };
 
       const defaultResponse = () => `I want to make sure I give you the best answer ${name}!
 Could you ask me about one of these topics?
@@ -802,6 +909,16 @@ What would you like help with?`;
         msg.includes('old age') ||
         msg.includes('when i am older');
 
+      const isYoungInvesting = msg.includes('teen') ||
+        msg.includes('teenager') ||
+        msg.includes('young') ||
+        msg.includes('20s') ||
+        msg.includes('in my 20') ||
+        msg.includes('beginner investor') ||
+        msg.includes('first time investing') ||
+        msg.includes('first-time investing') ||
+        msg.includes('start investing');
+
       if (isHouse) { return houseResponse(); }
       if (isETF) { return etfResponse(); }
       if (isStock) { return stockResponse(); }
@@ -810,63 +927,63 @@ What would you like help with?`;
       if (isSaving) { return savingResponse(); }
       if (isMutual) { return mutualResponse(); }
       if (isRetirement) { return retirementResponse(); }
+      if (isYoungInvesting) { return youngInvestingResponse(); }
 
       return defaultResponse();
     }
 
-    function addMessage(text, isUser = false) {
-      const messageDiv = document.createElement('div');
-      messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
-      const formattedText = formatMessage(text);
-      if (isUser) {
-        messageDiv.innerHTML = `
+  function addMessage(text, isUser = false) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+    const formattedText = formatMessage(text);
+    if (isUser) {
+      messageDiv.innerHTML = `
         <div class="message-content">
           <div class="message-text">${escapeHtml(text)}</div>
         </div>
       `;
-      } else {
-        messageDiv.innerHTML = `
+    } else {
+      messageDiv.innerHTML = `
         <div class="message-avatar">IV</div>
         <div class="message-content">
           <div class="message-text">${formattedText}</div>
         </div>
       `;
-      }
-      messagesContainer.appendChild(messageDiv);
-      messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
+    messagesContainer.appendChild(messageDiv);
+  }
 
-    function formatMessage(text) {
-      let formatted = escapeHtml(text);
+  function formatMessage(text) {
+    let formatted = escapeHtml(text);
       formatted = formatted.replace(/(\d+\.\s+[^\n]+(?:\n(?:\d+\.\s+[^\n]+))*)/g, match => {
-        const items = match.split(/\d+\.\s+/).filter(item => item.trim());
-        if (items.length > 1) {
-          return '<ol>' + items.map(item => `<li>${item.trim()}</li>`).join('') + '</ol>';
-        }
-        return match;
-      });
+      const items = match.split(/\d+\.\s+/).filter(item => item.trim());
+      if (items.length > 1) {
+        return '<ol>' + items.map(item => `<li>${item.trim()}</li>`).join('') + '</ol>';
+      }
+      return match;
+    });
       formatted = formatted.replace(/(•\s+[^\n]+(?:\n(?:•\s+[^\n]+))*)/g, match => {
-        const items = match.split(/•\s+/).filter(item => item.trim());
-        if (items.length > 1) {
-          return '<ul>' + items.map(item => `<li>${item.trim()}</li>`).join('') + '</ul>';
-        }
-        return match;
-      });
-      formatted = formatted.replace(/\n/g, '<br>');
-      return formatted;
-    }
+      const items = match.split(/•\s+/).filter(item => item.trim());
+      if (items.length > 1) {
+        return '<ul>' + items.map(item => `<li>${item.trim()}</li>`).join('') + '</ul>';
+      }
+      return match;
+    });
+    formatted = formatted.replace(/\n/g, '<br>');
+    return formatted;
+  }
 
-    function escapeHtml(text) {
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
-    }
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
 
-    function showTypingIndicator() {
-      const typingDiv = document.createElement('div');
-      typingDiv.className = 'message bot-message typing-indicator';
-      typingDiv.id = 'typingIndicator';
-      typingDiv.innerHTML = `
+  function showTypingIndicator() {
+    const typingDiv = document.createElement('div');
+    typingDiv.className = 'message bot-message typing-indicator';
+    typingDiv.id = 'typingIndicator';
+    typingDiv.innerHTML = `
       <div class="message-avatar">IV</div>
       <div class="message-content">
         <div class="typing-dots">
@@ -876,12 +993,11 @@ What would you like help with?`;
         </div>
       </div>
     `;
-      messagesContainer.appendChild(typingDiv);
-      messagesContainer.scrollTop = messagesContainer.scrollHeight;
-    }
+    messagesContainer.appendChild(typingDiv);
+  }
 
-    function removeTypingIndicator() {
-      const indicator = document.getElementById('typingIndicator');
+  function removeTypingIndicator() {
+    const indicator = document.getElementById('typingIndicator');
       if (indicator) indicator.remove();
     }
 
@@ -909,16 +1025,16 @@ What would you like help with?`;
 
       if (chatbotForm) {
         chatbotForm.addEventListener('submit', async e => {
-          e.preventDefault();
-          const userMessage = chatbotInput.value.trim();
-          if (!userMessage) return;
-          addMessage(userMessage, true);
-          chatbotInput.value = '';
-          showTypingIndicator();
+    e.preventDefault();
+    const userMessage = chatbotInput.value.trim();
+    if (!userMessage) return;
+    addMessage(userMessage, true);
+    chatbotInput.value = '';
+    showTypingIndicator();
           const profile = getSurveyProfile();
           const history = loadHistory();
           const result = await callGemini(userMessage, profile, history);
-          removeTypingIndicator();
+    removeTypingIndicator();
 
           if (result === null) {
             addMessage(getResponse(userMessage), false);
@@ -1019,7 +1135,13 @@ What would you like help with?`;
     }, 500);
     // ─────────────────────────────────────────────────────────────────────────
 
-    if (chatbotInput) chatbotInput.focus();
+    if (chatbotInput) {
+      try {
+        chatbotInput.focus({ preventScroll: true });
+      } catch (e) {
+        chatbotInput.focus();
+      }
+    }
   }
 
   document.addEventListener('chatbot-survey-ready', runChatbot);

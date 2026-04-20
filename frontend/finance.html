@@ -10,11 +10,12 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Intellivest" />
   <link rel="apple-touch-icon" href="./assets/intellivest-mark.png" />
-  <title>Finance &amp; Budgeting - Intellivest @ Texas A&M</title>
+  <title>Budgeting - Intellivest @ Texas A&M</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./styles.css" />
+  <script>if('serviceWorker'in navigator){navigator.serviceWorker.getRegistrations().then(function(r){r.forEach(function(s){s.unregister();});});}</script>
 </head>
 <body>
   <div id="cursor"></div>
@@ -30,27 +31,13 @@
       </a>
 
       <nav class="primary-nav">
-        <div class="nav-dropdown">
-          <a href="./about-us.html" class="nav-link">About us</a>
-        </div>
-        <div class="nav-dropdown">
-          <a href="./capabilities.html" class="nav-link">Capabilities</a>
-        </div>
-        <div class="nav-dropdown">
-          <a href="./our-insights.html" class="nav-link">Our Insights</a>
-        </div>
-        <div class="nav-dropdown">
-          <a href="./finance.html" class="nav-link active">Finance &amp; Budgeting</a>
-        </div>
-        <div class="nav-dropdown">
-          <a href="./stocks.html" class="nav-link">Stocks</a>
-        </div>
-        <div class="nav-dropdown">
-          <a href="./education.html" class="nav-link">Education</a>
-        </div>
-        <div class="nav-dropdown">
-          <a href="./investors.html" class="nav-link">Investors</a>
-        </div>
+        <div class="nav-dropdown"><a href="./about-us.html" class="nav-link">About us</a></div>
+        <div class="nav-dropdown"><a href="./capabilities.html" class="nav-link">Capabilities</a></div>
+        <div class="nav-dropdown"><a href="./our-insights.html" class="nav-link">Our Insights</a></div>
+        <div class="nav-dropdown"><a href="./finance.html" class="nav-link active">Budgeting</a></div>
+        <div class="nav-dropdown"><a href="./stocks.html" class="nav-link">Stocks</a></div>
+        <div class="nav-dropdown"><a href="./education.html" class="nav-link">Education</a></div>
+        <div class="nav-dropdown"><a href="./investors.html" class="nav-link">Investors</a></div>
       </nav>
 
       <div class="header-actions">
@@ -64,109 +51,21 @@
   </header>
 
   <main class="site-main">
-    <section class="page-hero page-hero--split">
+    <section class="page-hero">
       <div class="container">
-        <div data-glossary-auto>
-          <h1>Finance &amp; Budgeting</h1>
-          <p class="page-subtitle">Explore fundamentals, investing, budgeting tools for every stage of life, and more.</p>
-        </div>
-        <div class="page-hero-visual" data-interactive-tilt>
-          <svg class="editorial-svg" viewBox="0 0 300 240" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <rect class="fill-soft" x="12" y="20" width="276" height="196" rx="10"/>
-            <path d="M40 160 L40 100 L80 120 L120 72 L160 96 L200 56 L240 80 L260 64 L260 160 Z" fill="currentColor" opacity="0.1"/>
-            <path class="stroke-main" stroke-width="2" d="M40 100 L80 120 L120 72 L160 96 L200 56 L240 80 L260 64"/>
-            <line class="stroke-main" stroke-width="1.2" opacity="0.35" x1="40" y1="100" x2="40" y2="160"/>
-            <circle class="fill-gold" cx="200" cy="56" r="6"/>
-          </svg>
-        </div>
-      </div>
-    </section>
-
-    <section
-      class="editorial-gradient-band editorial-gradient-band--capabilities"
-      id="capabilitiesBanner"
-      aria-label="Market snapshot and quick links"
-    >
-      <div class="container capabilities-banner-inner">
-        <div class="capabilities-banner-marquee-wrap" aria-hidden="true">
-          <div class="capabilities-banner-marquee-track" id="capabilitiesMarqueeTrack">
-            <div class="capabilities-marquee-set" id="capabilitiesMarqueeSetA"></div>
-            <div class="capabilities-marquee-set" id="capabilitiesMarqueeSetB"></div>
-          </div>
-        </div>
-        <div class="capabilities-banner-bottom">
-          <div class="capabilities-banner-chart-wrap">
-            <canvas id="capabilitiesBannerSpark" width="360" height="88" aria-hidden="true"></canvas>
-            <span class="capabilities-chart-caption" id="capabilitiesSparkLabel">QQQ · illustrative intraday path</span>
-          </div>
-          <div class="capabilities-banner-actions">
-            <span class="capabilities-banner-actions-label">Jump in</span>
-            <div class="capabilities-banner-pills">
-              <a class="capabilities-banner-pill" href="./chatbot.html?topic=investing-basics">Ask Intellivest</a>
-              <a class="capabilities-banner-pill" href="./stocks.html">Stock lookup</a>
-              <a class="capabilities-banner-pill" href="./finance.html">Finance hub</a>
-              <a class="capabilities-banner-pill" href="./our-insights.html">Insights</a>
-            </div>
-            <p class="capabilities-banner-disclaimer">
-              Ticker-style figures are for context and learning, not trading or investment advice.
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="page-content">
-      <div class="container">
-        <div class="content-grid" data-glossary-auto>
-          <article class="content-card">
-            <div class="content-card__figure">
-              <svg class="editorial-svg" viewBox="0 0 200 72" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <rect x="28" y="28" width="144" height="20" rx="4" fill="none" class="stroke-main" stroke-width="1.5" opacity="0.4"/>
-                <rect x="36" y="34" width="48" height="8" rx="2" fill="currentColor" opacity="0.35"/>
-                <circle cx="152" cy="38" r="6" fill="var(--accent-gold)"/>
-              </svg>
-            </div>
-            <h2>Foundations</h2>
-            <p>Learn the basics of budgeting, saving, credit management, and APR on loans while building emergency funds: core habits for financial stability, including when a 401(k) is available at work.</p>
-          </article>
-          <article class="content-card">
-            <div class="content-card__figure">
-              <svg class="editorial-svg" viewBox="0 0 200 72" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <path class="stroke-main" stroke-width="1.5" d="M32 52 L56 28 L80 40 L104 20 L128 36 L152 24 L168 44"/>
-                <path fill="currentColor" opacity="0.15" d="M32 52 L56 28 L80 40 L104 20 L128 36 L152 24 L168 44 L168 52 Z"/>
-              </svg>
-            </div>
-            <h2>Investing</h2>
-            <p>Understand risk vs. return, diversification, ETF and index fund basics, and long-term investment planning while seeing how volatility and liquidity shape real portfolios.</p>
-          </article>
-          <article class="content-card">
-            <div class="content-card__figure">
-              <svg class="editorial-svg" viewBox="0 0 200 72" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <rect x="24" y="18" width="40" height="40" rx="6" fill="currentColor" opacity="0.2"/>
-                <text x="44" y="46" text-anchor="middle" font-size="20" font-weight="700" fill="currentColor" opacity="0.5">%</text>
-                <path class="stroke-main" stroke-width="1.5" d="M84 28h88M84 40h72M84 52h96"/>
-              </svg>
-            </div>
-            <h2>Tools &amp; Calculators</h2>
-            <p>Use our interactive calculators for loan amortization and simple NPV comparisons, plus templates and checklists to support informed financial decisions.</p>
-          </article>
-        </div>
+        <h1>Budgeting</h1>
+        <p class="page-subtitle">Pick your life stage, fill in your numbers, and see your monthly picture instantly.</p>
       </div>
     </section>
 
     <section class="student-budgeting-section" id="studentBudgeting" aria-labelledby="budgetHeading">
       <div class="container">
-        <header class="student-budgeting-header">
-          <h2 id="budgetHeading" class="section-title student-budgeting-title">Budgeting for Everyone</h2>
-          <p class="student-budgeting-lead">Pick your life stage, fill in your numbers, and see your monthly picture instantly. Illustrative only — not financial advice.</p>
-        </header>
 
         <div class="category-tabs" id="budgetAudienceTabs" role="tablist">
           <button class="category-tab active" data-budget-tab="students" role="tab" aria-selected="true">🎓 Students</button>
           <button class="category-tab" data-budget-tab="adults" role="tab" aria-selected="false">💼 Working Adults</button>
           <button class="category-tab" data-budget-tab="families" role="tab" aria-selected="false">👨‍👩‍👧 Families</button>
-          <button class="category-tab" data-budget-tab="savings" role="tab" aria-selected="false">🏦 Savings Goals</button>
-          <button class="category-tab" data-budget-tab="vacation" role="tab" aria-selected="false">✈️ Vacation</button>
+          <button class="category-tab" data-budget-tab="savings" role="tab" aria-selected="false">Savings</button>
         </div>
 
         <!-- STUDENTS -->
@@ -232,7 +131,7 @@
               </div>
               <div class="budget-summary-divider"></div>
               <div class="budget-summary-stat budget-summary-stat--net" id="sNetStat">
-                <span class="bss-label">Saved This Month</span>
+                <span class="bss-label">Monthly Balance</span>
                 <span class="bss-value" id="sNet">--</span>
               </div>
               <p class="budget-planner__disclaimer">Gig income shown pre-tax. Set aside ~25% for self-employment taxes.</p>
@@ -311,7 +210,7 @@
               </div>
               <div class="budget-summary-divider"></div>
               <div class="budget-summary-stat budget-summary-stat--net" id="aNetStat">
-                <span class="bss-label">Saved This Month</span>
+                <span class="bss-label">Monthly Balance</span>
                 <span class="bss-value" id="aNet">--</span>
               </div>
               <p class="budget-planner__disclaimer">Take-home = gross minus taxes and pre-tax deductions. Estimates only.</p>
@@ -364,10 +263,6 @@
                     <input type="number" id="fInsurance" class="budget-planner__input" min="0" step="25" value="500" inputmode="numeric" />
                   </div>
                   <div class="budget-field">
-                    <label class="budget-field-label" for="fCollegeSavings">College fund savings</label>
-                    <input type="number" id="fCollegeSavings" class="budget-planner__input" min="0" step="25" value="300" inputmode="numeric" />
-                  </div>
-                  <div class="budget-field">
                     <label class="budget-field-label" for="fOther">Utilities &amp; other</label>
                     <input type="number" id="fOther" class="budget-planner__input" min="0" step="25" value="350" inputmode="numeric" />
                   </div>
@@ -386,7 +281,7 @@
               </div>
               <div class="budget-summary-divider"></div>
               <div class="budget-summary-stat budget-summary-stat--net" id="fNetStat">
-                <span class="bss-label">Saved This Month</span>
+                <span class="bss-label">Monthly Balance</span>
                 <span class="bss-value" id="fNet">--</span>
               </div>
               <p class="budget-planner__disclaimer">Income entered as post-tax take-home. Adjust to match your situation.</p>
@@ -394,8 +289,8 @@
           </div>
         </div>
 
-        <!-- SAVINGS GOALS -->
-        <div class="student-budgeting-grid budget-tab-panel" id="budgetTab-savings" hidden>
+        <!-- Savings calculators (trip, vacation countdown, daily budget live here only — not other tabs) -->
+        <div class="student-budgeting-grid student-budgeting-grid--multi budget-tab-panel" id="budgetTab-savings" hidden>
           <article class="student-budgeting-card">
             <h3 class="student-budgeting-card-title">🛡 Emergency Fund</h3>
             <p class="student-budgeting-card-desc">How long until you hit your 3–6 month safety net?</p>
@@ -486,16 +381,13 @@
               <div class="search-container-large budget-input-track">
                 <span class="search-icon" aria-hidden="true">$</span>
                 <input type="number" id="cfAlready" class="stock-search-input" min="0" step="500" value="0" inputmode="numeric" />
-              </div>
-            </div>
+        </div>
+      </div>
             <dl class="budget-results">
               <div class="budget-result-row budget-result-row--emphasis"><dt>Monthly savings needed</dt><dd id="cfMonthly">--</dd></div>
             </dl>
           </article>
-        </div>
 
-        <!-- VACATION -->
-        <div class="student-budgeting-grid budget-tab-panel" id="budgetTab-vacation" hidden>
           <article class="student-budgeting-card">
             <h3 class="student-budgeting-card-title">✈️ Trip Budget Planner</h3>
             <p class="student-budgeting-card-desc">Add up all your travel costs to see the full picture before you book.</p>
@@ -503,14 +395,14 @@
               <label class="budget-field-label" for="tripFlights">Flights / transport ($)</label>
               <div class="search-container-large budget-input-track">
                 <span class="search-icon" aria-hidden="true">✈️</span>
-                <input type="number" id="tripFlights" class="stock-search-input" min="0" step="25" value="600" inputmode="numeric" />
+                <input type="number" id="tripFlights" class="stock-search-input" min="0" step="50" value="600" inputmode="numeric" />
               </div>
             </div>
             <div class="budget-field">
               <label class="budget-field-label" for="tripHotel">Hotel / lodging ($)</label>
               <div class="search-container-large budget-input-track">
                 <span class="search-icon" aria-hidden="true">🏨</span>
-                <input type="number" id="tripHotel" class="stock-search-input" min="0" step="25" value="800" inputmode="numeric" />
+                <input type="number" id="tripHotel" class="stock-search-input" min="0" step="50" value="800" inputmode="numeric" />
               </div>
             </div>
             <div class="budget-field">
@@ -553,7 +445,7 @@
               <label class="budget-field-label" for="vacAlready">Already saved ($)</label>
               <div class="search-container-large budget-input-track">
                 <span class="search-icon" aria-hidden="true">$</span>
-                <input type="number" id="vacAlready" class="stock-search-input" min="0" step="100" value="0" inputmode="numeric" />
+                <input type="number" id="vacAlready" class="stock-search-input" min="0" step="50" value="0" inputmode="numeric" />
               </div>
             </div>
             <div class="budget-field">
@@ -583,7 +475,7 @@
               <label class="budget-field-label" for="dsbFixed">Fixed costs already covered ($)<span class="budget-field-hint">flights, hotel…</span></label>
               <div class="search-container-large budget-input-track">
                 <span class="search-icon" aria-hidden="true">−</span>
-                <input type="number" id="dsbFixed" class="stock-search-input" min="0" step="100" value="1400" inputmode="numeric" />
+                <input type="number" id="dsbFixed" class="stock-search-input" min="0" step="50" value="1400" inputmode="numeric" />
               </div>
             </div>
             <div class="budget-field">
@@ -600,16 +492,6 @@
           </article>
         </div>
 
-      </div>
-    </section>
-
-    <!-- Stock Ticker Section -->
-    <section class="stocks-ticker-section">
-      <div class="container">
-        <h2 class="section-title">Tech Stocks</h2>
-        <div id="stocksTicker" class="stocks-ticker">
-          <!-- Stock cards will be inserted here -->
-        </div>
       </div>
     </section>
   </main>
@@ -641,17 +523,6 @@
   </footer>
 
   <script src="./app.js"></script>
-  <script src="./financial-glossary.js"></script>
   <script src="./student-budgeting.js"></script>
-  <script src="./market-data.js"></script>
-  <script src="./interactive.js"></script>
-  <script src="./stocks.js"></script>
-  <script>
-    // Initialize stock ticker for this page
-    if (window.StockTicker) {
-      window.StockTicker.update();
-    }
-  </script>
 </body>
 </html>
-

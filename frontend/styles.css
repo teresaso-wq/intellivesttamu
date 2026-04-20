@@ -14,8 +14,8 @@
   --ink-400: #6b7b9e;
   --ink-100: #c7cfdf;
   --paper: #ffffff;
-  --paper-2: #f4f6f9;
-  --paper-3: #eef1f6;
+  --paper-2: #f2f6fb;
+  --paper-3: #e9f0f8;
   --focus: #7c9fd4;
   --accent-gold: #b8975a; /* subtle consulting-firm accent for rules & hovers */
   --accent-gold-muted: rgba(184, 151, 90, 0.25);
@@ -63,6 +63,15 @@ body {
   color: var(--ink-900);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+}
+html:not(.dark) body {
+  background: #edf3fa;
+}
+html:not(.dark) .site-main > section:not(.editorial-gradient-band):nth-of-type(odd) {
+  background: #f7fafe;
+}
+html:not(.dark) .site-main > section:not(.editorial-gradient-band):nth-of-type(even) {
+  background: #edf3fa;
 }
 
 .container { width: min(1120px, 92%); margin: 0 auto; }
@@ -1611,6 +1620,39 @@ body {
   border-top-color: rgba(255, 255, 255, 0.08);
   border-bottom-color: rgba(255, 255, 255, 0.08);
 }
+.budgeting-intro-tiles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(16px, 2.5vw, 24px);
+  margin-bottom: 28px;
+}
+@media (max-width: 719px) {
+  .budgeting-intro-tiles {
+    grid-template-columns: 1fr;
+  }
+}
+.budgeting-intro-tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 88px;
+  padding: 20px 16px;
+  background: var(--paper);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: var(--radius-2);
+  box-shadow: var(--shadow-1);
+}
+.dark .budgeting-intro-tile {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+.budgeting-intro-tile-title {
+  font-family: var(--font-serif);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--ink-900);
+  letter-spacing: -0.02em;
+}
+
 .student-budgeting-header {
   max-width: 52rem;
   margin-bottom: 32px;
@@ -1630,11 +1672,21 @@ body {
   gap: clamp(20px, 3vw, 28px);
   align-items: stretch;
 }
+.student-budgeting-grid--multi {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+}
+.student-budgeting-grid--multi .student-budgeting-card:nth-child(3) {
+  grid-column: auto;
+  max-width: none;
+  margin-left: 0;
+  margin-right: 0;
+  width: auto;
+}
 @media (max-width: 1023px) {
-  .student-budgeting-grid {
+  .student-budgeting-grid:not(.student-budgeting-grid--multi) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .student-budgeting-card:nth-child(3) {
+  .student-budgeting-grid:not(.student-budgeting-grid--multi) .student-budgeting-card:nth-child(3) {
     grid-column: 1 / -1;
     max-width: 40rem;
     margin-left: auto;
@@ -1643,7 +1695,10 @@ body {
   }
 }
 @media (max-width: 719px) {
-  .student-budgeting-grid {
+  .student-budgeting-grid:not(.student-budgeting-grid--multi) {
+    grid-template-columns: 1fr;
+  }
+  .student-budgeting-grid--multi {
     grid-template-columns: 1fr;
   }
 }
@@ -1673,6 +1728,9 @@ body {
   font-size: 0.9rem;
   color: var(--ink-500);
   line-height: 1.5;
+}
+.budget-tab-panel[hidden] {
+  display: none !important;
 }
 .budget-field {
   margin-bottom: 14px;
@@ -5033,6 +5091,10 @@ body.stock-compare-modal-active {
 .wbc-name   { font-size: 0.78rem; font-weight: 600; color: var(--ink-700); }
 .wbc-action { font-size: 0.92rem; font-weight: 700; color: var(--ink-900); }
 .wbc-amt    { font-size: 0.78rem; color: var(--ink-400); }
+.wbc-price  { font-size: 0.76rem; color: var(--ink-500); }
+.wbc-current { font-size: 0.76rem; color: var(--ink-500); margin-bottom: 0.2rem; }
+.wbc-pnl-pos { color: #16a34a; font-weight: 600; }
+.wbc-pnl-neg { color: #dc2626; font-weight: 600; }
 .wbc-period { font-size: 0.72rem; color: var(--ink-300); margin-bottom: 0.25rem; }
 .wbc-ago    { font-size: 0.68rem; color: var(--ink-400); font-style: italic; }
 .wbc-view   { margin-top: auto; }

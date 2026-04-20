@@ -5,6 +5,8 @@
     'intellivest_user_name',
     'intellivest_user_age',
     'intellivest_user_savings',
+    'intellivest_user_amount',
+    'intellivest_user_timeline',
     'intellivest_user_risk',
     'intellivest_user_goals'
   ];
@@ -37,6 +39,13 @@
     'Plan for retirement',
     'Other'
   ];
+  var TIMELINE_OPTS = [
+    'Under 1 year',
+    '1–3 years',
+    '3–5 years',
+    '5–10 years',
+    '10+ years'
+  ];
 
   function clearSurveyData() {
     KEYS.forEach(function (k) {
@@ -61,6 +70,8 @@
       localStorage.setItem('intellivest_user_name', draft.name || '');
       localStorage.setItem('intellivest_user_age', draft.age || '');
       localStorage.setItem('intellivest_user_savings', draft.savings || '');
+      localStorage.setItem('intellivest_user_amount', draft.amount || '');
+      localStorage.setItem('intellivest_user_timeline', draft.timeline || '');
       localStorage.setItem('intellivest_user_risk', draft.risk || '');
       localStorage.setItem('intellivest_user_goals', JSON.stringify(draft.goals || []));
       localStorage.setItem(KEY_DONE, 'true');
@@ -101,9 +112,10 @@
     var title = overlay.querySelector('.cb-survey-title');
     var bar = overlay.querySelector('.cb-survey-bar-fill');
     var stepLabel = overlay.querySelector('.cb-survey-step-label');
-    var pct = ((step + 1) / 5) * 100;
+    var totalSteps = 6;
+    var pct = ((step + 1) / totalSteps) * 100;
     if (bar) bar.style.width = pct + '%';
-    if (stepLabel) stepLabel.textContent = 'Step ' + (step + 1) + ' of 5';
+    if (stepLabel) stepLabel.textContent = 'Step ' + (step + 1) + ' of ' + totalSteps;
 
     if (step === 0) {
       title.textContent = 'What is your first name?';
@@ -146,8 +158,29 @@
             '</option>'
           );
         }).join('') +
-        '</select></label>';
+        '</select></label>' +
+        '<label class="cb-survey-field"><span class="cb-survey-label">Amount = (optional custom number)</span>' +
+        '<input type="text" class="cb-survey-input" id="cbAmount" inputmode="numeric" placeholder="e.g. 20,000,000" value="' +
+        (draft.amount || '').replace(/"/g, '&quot;') +
+        '" /></label>';
     } else if (step === 3) {
+      title.textContent = 'How long do you plan to keep this money invested?';
+      body.innerHTML =
+        '<label class="cb-survey-field"><span class="cb-survey-label">Timeline / holding period</span>' +
+        '<select class="cb-survey-select" id="cbTimeline">' +
+        TIMELINE_OPTS.map(function (o) {
+          return (
+            '<option value="' +
+            o.replace(/"/g, '&quot;') +
+            '"' +
+            (draft.timeline === o ? ' selected' : '') +
+            '>' +
+            o +
+            '</option>'
+          );
+        }).join('') +
+        '</select></label>';
+    } else if (step === 4) {
       title.textContent = 'How comfortable are you with financial risk?';
       body.innerHTML =
         '<div class="cb-risk-grid" id="cbRisk">' +
@@ -175,7 +208,7 @@
           draft.risk = btn.getAttribute('data-risk');
         });
       });
-    } else if (step === 4) {
+    } else if (step === 5) {
       title.textContent = 'What is your main financial goal? (select all that apply)';
       var g = draft.goals || [];
       body.innerHTML =
@@ -200,7 +233,7 @@
         '</div>';
     }
     var nextBtn = overlay.querySelector('.cb-survey-next');
-    if (nextBtn) nextBtn.textContent = step === 4 ? 'Finish' : 'Next';
+    if (nextBtn) nextBtn.textContent = step === 5 ? 'Finish' : 'Next';
   }
 
   function collect() {
@@ -213,9 +246,14 @@
     } else if (step === 2) {
       var el3 = document.getElementById('cbSavings');
       draft.savings = el3 ? el3.value : '';
+      var elAmount = document.getElementById('cbAmount');
+      draft.amount = elAmount ? String(elAmount.value || '').trim() : '';
     } else if (step === 3) {
-      /* draft.risk set by button */
+      var el4 = document.getElementById('cbTimeline');
+      draft.timeline = el4 ? el4.value : '';
     } else if (step === 4) {
+      /* draft.risk set by button */
+    } else if (step === 5) {
       draft.goals = [];
       document.querySelectorAll('#cbGoals input:checked').forEach(function (c) {
         draft.goals.push(c.value);
@@ -233,6 +271,10 @@
         draft.age = localStorage.getItem('intellivest_user_age');
       if (localStorage.getItem('intellivest_user_savings'))
         draft.savings = localStorage.getItem('intellivest_user_savings');
+      if (localStorage.getItem('intellivest_user_amount'))
+        draft.amount = localStorage.getItem('intellivest_user_amount');
+      if (localStorage.getItem('intellivest_user_timeline'))
+        draft.timeline = localStorage.getItem('intellivest_user_timeline');
       if (localStorage.getItem('intellivest_user_risk'))
         draft.risk = localStorage.getItem('intellivest_user_risk');
       var gj = localStorage.getItem('intellivest_user_goals');
@@ -249,7 +291,7 @@
     overlay.innerHTML =
       '<div class="cb-survey-modal" role="dialog" aria-modal="true">' +
       '<div class="cb-survey-progress">' +
-      '<div class="cb-survey-step-label">Step 1 of 5</div>' +
+      '<div class="cb-survey-step-label">Step 1 of 6</div>' +
       '<div class="cb-survey-bar"><div class="cb-survey-bar-fill"></div></div>' +
       '</div>' +
       '<h2 class="cb-survey-title">What is your first name?</h2>' +
@@ -274,7 +316,7 @@
         step--;
         render();
         overlay.querySelector('.cb-survey-back').style.visibility = step === 0 ? 'hidden' : 'visible';
-        overlay.querySelector('.cb-survey-next').textContent = step === 4 ? 'Finish' : 'Next';
+        overlay.querySelector('.cb-survey-next').textContent = step === 5 ? 'Finish' : 'Next';
       }
     });
 
@@ -284,19 +326,19 @@
         alert('Please enter your first name, or tap Skip Survey.');
         return;
       }
-      if (step === 3 && !draft.risk) {
+      if (step === 4 && !draft.risk) {
         alert('Please choose a risk level, or tap Skip Survey.');
         return;
       }
-      if (step === 4 && (!draft.goals || draft.goals.length === 0)) {
+      if (step === 5 && (!draft.goals || draft.goals.length === 0)) {
         alert('Please select at least one goal, or tap Skip Survey.');
         return;
       }
-      if (step < 4) {
+      if (step < 5) {
         step++;
         render();
         overlay.querySelector('.cb-survey-back').style.visibility = 'visible';
-        overlay.querySelector('.cb-survey-next').textContent = step === 4 ? 'Finish' : 'Next';
+        overlay.querySelector('.cb-survey-next').textContent = step === 5 ? 'Finish' : 'Next';
       } else {
         surveyFinishedComplete();
       }

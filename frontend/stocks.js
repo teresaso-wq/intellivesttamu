@@ -12,9 +12,6 @@ const CATEGORY_SYMBOLS = {
   tech: [
     'NVDA', 'AAPL', 'MSFT', 'META', 'GOOGL', 'AMD'
   ],
-  finance: [
-    'JPM', 'GS', 'V', 'MA', 'BLK', 'BAC'
-  ],
   energy: [
     'XOM', 'CVX', 'COP', 'SLB', 'EOG', 'OXY'
   ],

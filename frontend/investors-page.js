@@ -1,9 +1,10 @@
-/* global investors page — FMP & Quiver feeds with fallback; follow; overlap; compare */
+/* global investors page — FMP & Quiver feeds with fallback; follow; compare */
 (function () {
   'use strict';
 
   var FMP_KEY = 'YOUR_FMP_API_KEY_HERE';
   var QUIVER_KEY = 'YOUR_QUIVER_KEY_HERE';
+  var FINNHUB_KEY = 'd7g4cehr01qqb8ria6r0d7g4cehr01qqb8ria6rg';
 
   var CACHE_FMP = 'iv_feed_fmp_v1';
   var CACHE_QUIVER = 'iv_feed_quiver_v1';
@@ -26,6 +27,21 @@
     { period: '2026-02-03', name: 'George Soros', action: 'BUY', ticker: 'NVDA', amount: '~$250M', slug: 'george-soros', type: 'buy' },
     { period: '2026-01-28', name: 'David Tepper', action: 'BUY', ticker: 'GOOGL', amount: '~$190M', slug: 'david-tepper', type: 'buy' }
   ];
+
+  var TRADE_PRICE_ESTIMATE = {
+    AAPL: 185.42,
+    AMZN: 180.77,
+    GOOGL: 165.18,
+    META: 490.33,
+    MSFT: 425.61,
+    NVDA: 125.94,
+    OXY: 61.27,
+    PLTR: 26.11,
+    TSLA: 175.36,
+    NKE: 102.48,
+    GLD: 210.22
+  };
+  var quoteCache = {};
 
   var PREVIEW_TRADES = {
     'Warren Buffett': [
@@ -116,34 +132,6 @@
   function isRookieName(name) {
     return !!ROOKIE_NAMES[name];
   }
-
-  var OVERLAP_PAIRS = {};
-
-  function addPair(a, b, html) {
-    var k = [a, b].sort().join('|');
-    OVERLAP_PAIRS[k] = html;
-  }
-
-  addPair('Warren Buffett', 'Bill Ackman',
-    '<p><strong>Shared:</strong> None directly but both own quality consumer brands.</p><p>Buffett: KO, KHC · Ackman: CMG, QSR</p>');
-  addPair('Warren Buffett', 'George Soros',
-    '<p><strong>No direct overlap</strong> — different strategies entirely.</p>');
-  addPair('Warren Buffett', 'Bill Gates',
-    '<p><strong>Shared:</strong> BRK.B (Gates Foundation holds Berkshire as #1 position).</p>');
-  addPair('George Soros', 'David Tepper',
-    '<p><strong>Shared:</strong> NVDA, META, AMZN, GOOGL, MSFT — both heavy tech in Q3 2024.</p>');
-  addPair('George Soros', 'Steve Cohen',
-    '<p><strong>Shared:</strong> NVDA, META, AMZN, MSFT — AI / mega-cap tech.</p>');
-  addPair('Ken Griffin', 'Steve Cohen',
-    '<p><strong>Shared:</strong> NVDA, AAPL, MSFT, AMZN, META — quant / multi-strategy overlap.</p>');
-  addPair('David Tepper', 'Steve Cohen',
-    '<p><strong>Shared:</strong> NVDA, META, AMZN, GOOGL, MSFT — similar big-tech positioning.</p>');
-  addPair('Cathie Wood', 'George Soros',
-    '<p><strong>Shared:</strong> PLTR — both bought heavily Q3–Q4 2024.</p>');
-  addPair('Bill Ackman', 'David Tepper',
-    '<p><strong>Shared:</strong> GOOGL — both bought in 2024.</p>');
-  addPair('Nancy Pelosi', 'George Soros',
-    '<p><strong>Shared:</strong> NVDA — both bought heavily (disclosures vs. 13F).</p>');
 
   var COMPARE = {
     'Warren Buffett': { strategy: 'Value Investing', risk: 'Low–Medium', horizon: 'Forever', top: 'AAPL ~28%', ret: '~20%', size: '~$300B+', best: 'Beginners', rookie: true },
@@ -333,21 +321,123 @@
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   }
 
-  function renderWhosBuyingFeed(trades, isStale) {
+  function parseTradePrice(value, ticker) {
+    if (typeof value === 'number' && isFinite(value)) return value;
+    var parsed = parseFloat(String(value || '').replace(/[^0-9.]/g, ''));
+    if (isFinite(parsed)) return parsed;
+    return TRADE_PRICE_ESTIMATE[String(ticker || '').toUpperCase()] || null;
+  }
+
+  function formatUsd2(n) {
+    if (!isFinite(n)) return 'N/A';
+    return '$' + n.toFixed(2);
+  }
+
+  async function fetchCurrentPrices(symbols) {
+    var unique = Array.from(new Set(symbols.filter(Boolean)));
+    var uncached = unique.filter(function (s) { return !quoteCache[s]; });
+    if (!uncached.length) return quoteCache;
+
+    async function readFromUrl(url) {
+      try {
+        var res = await fetch(url);
+        if (!res.ok) return;
+        var json = await res.json();
+        var rows = (((json || {}).quoteResponse || {}).result) || [];
+        rows.forEach(function (row) {
+          var sym = row.symbol;
+          var px = row.regularMarketPrice;
+          if (sym && typeof px === 'number' && isFinite(px)) quoteCache[sym] = px;
+        });
+      } catch (e) {}
+    }
+
+    async function readYahooChart(symbol) {
+      try {
+        var chartUrl = 'https://corsproxy.io/?https://query1.finance.yahoo.com/v8/finance/chart/' + encodeURIComponent(symbol) + '?interval=1d&range=1d';
+        var res = await fetch(chartUrl, { headers: { Accept: 'application/json' } });
+        if (!res.ok) return;
+        var json = await res.json();
+        var result = (((json || {}).chart || {}).result || [])[0] || {};
+        var meta = result.meta || {};
+        var px = meta.regularMarketPrice || meta.chartPreviousClose || null;
+        if (typeof px === 'number' && isFinite(px)) quoteCache[symbol] = px;
+      } catch (e) {}
+    }
+
+    var csv = encodeURIComponent(uncached.join(','));
+    // Primary source: Yahoo Finance quote endpoint
+    await readFromUrl('https://query1.finance.yahoo.com/v7/finance/quote?symbols=' + csv);
+    var stillMissing = uncached.filter(function (s) { return !quoteCache[s]; });
+    // Secondary source: Yahoo Finance via corsproxy fallback
+    if (stillMissing.length) {
+      var csv2 = encodeURIComponent(stillMissing.join(','));
+      await readFromUrl('https://corsproxy.io/?https://query1.finance.yahoo.com/v7/finance/quote?symbols=' + csv2);
+    }
+    // Extra Yahoo fallback: query via allorigins proxy
+    stillMissing = uncached.filter(function (s) { return !quoteCache[s]; });
+    if (stillMissing.length) {
+      var csv3 = encodeURIComponent(stillMissing.join(','));
+      await readFromUrl('https://api.allorigins.win/raw?url=' + encodeURIComponent('https://query1.finance.yahoo.com/v7/finance/quote?symbols=' + decodeURIComponent(csv3)));
+    }
+    // Extra Yahoo fallback: per-symbol chart endpoint
+    stillMissing = uncached.filter(function (s) { return !quoteCache[s]; });
+    for (var y = 0; y < stillMissing.length; y++) {
+      await readYahooChart(stillMissing[y]);
+    }
+    // Tertiary source: Finnhub quote endpoint (requires API key)
+    stillMissing = uncached.filter(function (s) { return !quoteCache[s]; });
+    if (stillMissing.length && FINNHUB_KEY && FINNHUB_KEY.indexOf('YOUR_') !== 0) {
+      for (var i = 0; i < stillMissing.length; i++) {
+        var sym = stillMissing[i];
+        try {
+          var fr = await fetch(
+            'https://finnhub.io/api/v1/quote?symbol=' + encodeURIComponent(sym) + '&token=' + encodeURIComponent(FINNHUB_KEY)
+          );
+          if (!fr.ok) continue;
+          var fj = await fr.json();
+          if (fj && typeof fj.c === 'number' && isFinite(fj.c)) {
+            quoteCache[sym] = fj.c;
+          }
+        } catch (e) {}
+      }
+    }
+    return quoteCache;
+  }
+
+  async function renderWhosBuyingFeed(trades, isStale) {
     var feed = document.getElementById('whosBuyingFeed');
     var meta = document.getElementById('whosBuyingMeta');
     if (!feed) return;
+    var tickers = trades.map(function (tr) { return String(tr.ticker || '').toUpperCase(); });
+    var liveMap = await fetchCurrentPrices(tickers);
+
     feed.innerHTML = trades.map(function (tr) {
       var border = tr.type === 'sell' ? 'is-sell' : (tr.type === 'hold' || tr.type === 'new' ? 'is-hold' : 'is-buy');
       var ago = timeAgo(tr.period);
       var dateLabel = formatDate(tr.period);
-      var dateHtml = '<div class="wbc-period">📅 ' + (tr.type === 'sell' ? 'Sold' : 'Bought') + ' on ' + escapeHtml(dateLabel) +
+      var ticker = String(tr.ticker || '').toUpperCase();
+      var tradePriceNum = parseTradePrice(tr.priceAtTrade, ticker);
+      var currentPriceNum = liveMap[ticker];
+      var pnlLine = 'Current: N/A';
+      if (isFinite(tradePriceNum) && isFinite(currentPriceNum)) {
+        var diff = currentPriceNum - tradePriceNum;
+        var pct = tradePriceNum === 0 ? 0 : (diff / tradePriceNum) * 100;
+        var sign = diff >= 0 ? '+' : '';
+        var pnlCls = diff >= 0 ? 'wbc-pnl-pos' : 'wbc-pnl-neg';
+        pnlLine =
+          'Current: ' + formatUsd2(currentPriceNum) +
+          ' <span class="' + pnlCls + '">(' + sign + formatUsd2(diff) + ', ' + sign + pct.toFixed(2) + '%)</span>';
+      }
+      var dateHtml = '<div class="wbc-period">' + (tr.type === 'sell' ? 'Sold' : 'Bought') + ' on ' + escapeHtml(dateLabel) +
         (ago ? ' <span class="wbc-ago">(' + escapeHtml(ago) + ')</span>' : '') + '</div>';
       return (
         '<div class="whos-buying-card ' + border + '">' +
-        '<div class="wbc-name">👤 ' + escapeHtml(tr.name) + '</div>' +
-        '<div class="wbc-action">📈 ' + escapeHtml(tr.action) + ' ' + escapeHtml(tr.ticker) + '</div>' +
-        '<div class="wbc-amt">💰 ' + escapeHtml(tr.amount) + '</div>' +
+        '<div class="wbc-name">' + escapeHtml(tr.name) + '</div>' +
+        '<div class="wbc-action">' + escapeHtml(tr.action) + ' ' + escapeHtml(tr.ticker) + '</div>' +
+        '<div class="wbc-amt">' + escapeHtml(tr.amount) + '</div>' +
+        '<div class="wbc-price">Price at trade: ' + formatUsd2(tradePriceNum) + '</div>' +
+        '<div class="wbc-current">' + pnlLine + '</div>' +
         dateHtml +
         '<button type="button" class="btn secondary btn-sm wbc-view" data-slug="' + escapeHtml(tr.slug) + '">View Investor</button>' +
         '</div>'
@@ -501,14 +591,13 @@
       names.push(el.textContent.trim());
     });
     names.sort();
-    ['overlapSelect1', 'overlapSelect2', 'compareSelect1', 'compareSelect2'].forEach(function (id) {
+    ['compareSelect1', 'compareSelect2'].forEach(function (id) {
       var sel = document.getElementById(id);
       if (!sel) return;
-      var first = sel.firstElementChild ? sel.firstElementChild.textContent : '';
       sel.innerHTML = '';
       var o0 = document.createElement('option');
       o0.value = '';
-      o0.textContent = id.indexOf('overlap') === 0 ? 'Select Investor' : 'Investor';
+      o0.textContent = 'Investor';
       sel.appendChild(o0);
       names.forEach(function (n) {
         var o = document.createElement('option');
@@ -528,39 +617,6 @@
       return '<tr><td>' + escapeHtml(row.name) + '</td><td>' + escapeHtml(row.strategy) + '</td><td>' + escapeHtml(row.ret) + '</td><td class="' + cls + '">' + escapeHtml(row.vs) + '</td><td>' + bar + '</td></tr>';
     }).join('');
     tbody.innerHTML += '<tr class="perf-note-row"><td colspan="5"><small>*Cathie Wood: includes 2022 crash (−67%). Up 150% in 2020 alone.</small></td></tr>';
-  }
-
-  function overlapKey(a, b) {
-    return [a, b].sort().join('|');
-  }
-
-  function setupOverlap() {
-    var s1 = document.getElementById('overlapSelect1');
-    var s2 = document.getElementById('overlapSelect2');
-    var box = document.getElementById('overlapResults');
-    if (!s1 || !s2 || !box) return;
-    function run() {
-      var a = s1.value;
-      var b = s2.value;
-      if (!a || !b || a === b) {
-        box.hidden = true;
-        return;
-      }
-      box.hidden = false;
-      box.style.opacity = '0';
-      var k = overlapKey(a, b);
-      var html = OVERLAP_PAIRS[k];
-      if (!html) {
-        html = '<p>These two investors have very different styles. No significant overlap in recent filings.</p>';
-      }
-      box.innerHTML = '<div class="overlap-results-inner"><h4 class="overlap-h">🤝 ' + escapeHtml(a) + ' &amp; ' + escapeHtml(b) + '</h4>' + html + '</div>';
-      requestAnimationFrame(function () {
-        box.style.transition = 'opacity 0.35s ease';
-        box.style.opacity = '1';
-      });
-    }
-    s1.addEventListener('change', run);
-    s2.addEventListener('change', run);
   }
 
   function setupCompare() {
@@ -692,7 +748,6 @@
     renderFollowedSection();
     populateSelects();
     renderPerformanceTable();
-    setupOverlap();
     setupCompare();
     loadWhosBuyingFeed();
 

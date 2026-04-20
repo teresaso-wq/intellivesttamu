@@ -13,6 +13,95 @@
   });
 })();
 
+// Always start each page load at the top.
+(function forceInitialTopPosition() {
+  if ('scrollRestoration' in history) {
+    history.scrollRestoration = 'manual';
+  }
+  function goTop() {
+    window.scrollTo(0, 0);
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', goTop, { once: true });
+  } else {
+    goTop();
+  }
+  window.addEventListener('pageshow', goTop);
+})();
+
+// Remove emoji characters from visible UI text across pages.
+(function stripEmojiFromUi() {
+  function getEmojiRegex() {
+    try {
+      return /[\p{Emoji_Presentation}\p{Extended_Pictographic}\uFE0F]/gu;
+    } catch (e) {
+      return /[\u2600-\u27BF\u{1F000}-\u{1FAFF}]/gu;
+    }
+  }
+
+  const emojiRe = getEmojiRegex();
+
+  function cleanString(value) {
+    return String(value || '').replace(emojiRe, '').replace(/\s{2,}/g, ' ').trim();
+  }
+
+  function cleanTextNode(node) {
+    if (!node || !node.nodeValue) return;
+    const cleaned = cleanString(node.nodeValue);
+    if (cleaned !== node.nodeValue.trim()) {
+      node.nodeValue = cleaned;
+    }
+  }
+
+  function cleanElementAttrs(el) {
+    if (!el || el.nodeType !== 1) return;
+    ['placeholder', 'aria-label', 'title'].forEach((attr) => {
+      const v = el.getAttribute(attr);
+      if (!v) return;
+      const cleaned = cleanString(v);
+      if (cleaned !== v) el.setAttribute(attr, cleaned);
+    });
+  }
+
+  function walk(root) {
+    if (!root) return;
+    if (root.nodeType === Node.TEXT_NODE) {
+      cleanTextNode(root);
+      return;
+    }
+    if (root.nodeType !== Node.ELEMENT_NODE) return;
+    cleanElementAttrs(root);
+    root.childNodes.forEach(walk);
+  }
+
+  function run() {
+    walk(document.body);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', run);
+  } else {
+    run();
+  }
+
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((m) => {
+      m.addedNodes.forEach(walk);
+      if (m.type === 'characterData' && m.target) walk(m.target);
+    });
+  });
+  function startObserver() {
+    if (document.body) {
+      observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+    }
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', startObserver);
+  } else {
+    startObserver();
+  }
+})();
+
 // Custom cursor (disabled in CSS for corporate UI; skip animation if hidden)
 (function initCursor() {
   const cursor = document.getElementById('cursor');

@@ -2,13 +2,28 @@
 (function () {
   'use strict';
 
-  var FMP_KEY = 'YOUR_FMP_API_KEY_HERE';
-  var QUIVER_KEY = 'YOUR_QUIVER_KEY_HERE';
-  var FINNHUB_KEY = 'd7g4cehr01qqb8ria6r0d7g4cehr01qqb8ria6rg';
+  function readRuntimeKey(configName, localStorageName) {
+    try {
+      var cfg = window.INTELLIVEST_CONFIG || {};
+      var fromConfig = cfg[configName];
+      if (fromConfig && String(fromConfig).trim()) return String(fromConfig).trim();
+    } catch (e) {}
+    try {
+      var fromStorage = localStorage.getItem(localStorageName);
+      if (fromStorage && String(fromStorage).trim()) return String(fromStorage).trim();
+    } catch (e) {}
+    return '';
+  }
+
+  var FMP_KEY = readRuntimeKey('FMP_KEY', 'iv_fmp_key');
+  var QUIVER_KEY = readRuntimeKey('QUIVER_KEY', 'iv_quiver_key');
+  var FINNHUB_KEY = readRuntimeKey('FINNHUB_KEY', 'iv_finnhub_key') || 'd7g4cehr01qqb8ria6r0d7g4cehr01qqb8ria6rg';
 
   var CACHE_FMP = 'iv_feed_fmp_v1';
   var CACHE_QUIVER = 'iv_feed_quiver_v1';
   var CACHE_META = 'iv_feed_last_updated';
+  var REQUEST_TIMEOUT_MS = 3500;
+  var QUOTE_TIMEOUT_MS = 7000;
 
   var FALLBACK_TRADES = [
     { period: '2026-04-03', name: 'Cathie Wood', action: 'BUY', ticker: 'TSLA', amount: '~$180M', slug: 'cathie-wood', type: 'buy' },
@@ -333,36 +348,48 @@
     return '$' + n.toFixed(2);
   }
 
+  async function fetchJsonWithTimeout(url, options, timeoutMs) {
+    try {
+      var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+      var timeoutId = null;
+      if (controller) {
+        timeoutId = setTimeout(function () {
+          try { controller.abort(); } catch (e) {}
+        }, timeoutMs || REQUEST_TIMEOUT_MS);
+      }
+      var finalOptions = options ? Object.assign({}, options) : {};
+      if (controller) finalOptions.signal = controller.signal;
+      var res = await fetch(url, finalOptions);
+      if (timeoutId) clearTimeout(timeoutId);
+      if (!res.ok) return null;
+      return await res.json();
+    } catch (e) {
+      return null;
+    }
+  }
+
   async function fetchCurrentPrices(symbols) {
     var unique = Array.from(new Set(symbols.filter(Boolean)));
     var uncached = unique.filter(function (s) { return !quoteCache[s]; });
     if (!uncached.length) return quoteCache;
 
     async function readFromUrl(url) {
-      try {
-        var res = await fetch(url);
-        if (!res.ok) return;
-        var json = await res.json();
-        var rows = (((json || {}).quoteResponse || {}).result) || [];
-        rows.forEach(function (row) {
-          var sym = row.symbol;
-          var px = row.regularMarketPrice;
-          if (sym && typeof px === 'number' && isFinite(px)) quoteCache[sym] = px;
-        });
-      } catch (e) {}
+      var json = await fetchJsonWithTimeout(url, null, QUOTE_TIMEOUT_MS);
+      var rows = (((json || {}).quoteResponse || {}).result) || [];
+      rows.forEach(function (row) {
+        var sym = row.symbol;
+        var px = row.regularMarketPrice;
+        if (sym && typeof px === 'number' && isFinite(px)) quoteCache[sym] = px;
+      });
     }
 
     async function readYahooChart(symbol) {
-      try {
-        var chartUrl = 'https://corsproxy.io/?https://query1.finance.yahoo.com/v8/finance/chart/' + encodeURIComponent(symbol) + '?interval=1d&range=1d';
-        var res = await fetch(chartUrl, { headers: { Accept: 'application/json' } });
-        if (!res.ok) return;
-        var json = await res.json();
-        var result = (((json || {}).chart || {}).result || [])[0] || {};
-        var meta = result.meta || {};
-        var px = meta.regularMarketPrice || meta.chartPreviousClose || null;
-        if (typeof px === 'number' && isFinite(px)) quoteCache[symbol] = px;
-      } catch (e) {}
+      var chartUrl = 'https://corsproxy.io/?https://query1.finance.yahoo.com/v8/finance/chart/' + encodeURIComponent(symbol) + '?interval=1d&range=1d';
+      var json = await fetchJsonWithTimeout(chartUrl, { headers: { Accept: 'application/json' } }, QUOTE_TIMEOUT_MS);
+      var result = (((json || {}).chart || {}).result || [])[0] || {};
+      var meta = result.meta || {};
+      var px = meta.regularMarketPrice || meta.chartPreviousClose || null;
+      if (typeof px === 'number' && isFinite(px)) quoteCache[symbol] = px;
     }
 
     var csv = encodeURIComponent(uncached.join(','));
@@ -382,30 +409,23 @@
     }
     // Extra Yahoo fallback: per-symbol chart endpoint
     stillMissing = uncached.filter(function (s) { return !quoteCache[s]; });
-    for (var y = 0; y < stillMissing.length; y++) {
-      await readYahooChart(stillMissing[y]);
-    }
+    await Promise.all(stillMissing.map(function (sym) { return readYahooChart(sym); }));
     // Tertiary source: Finnhub quote endpoint (requires API key)
     stillMissing = uncached.filter(function (s) { return !quoteCache[s]; });
     if (stillMissing.length && FINNHUB_KEY && FINNHUB_KEY.indexOf('YOUR_') !== 0) {
-      for (var i = 0; i < stillMissing.length; i++) {
-        var sym = stillMissing[i];
-        try {
-          var fr = await fetch(
-            'https://finnhub.io/api/v1/quote?symbol=' + encodeURIComponent(sym) + '&token=' + encodeURIComponent(FINNHUB_KEY)
-          );
-          if (!fr.ok) continue;
-          var fj = await fr.json();
-          if (fj && typeof fj.c === 'number' && isFinite(fj.c)) {
-            quoteCache[sym] = fj.c;
-          }
-        } catch (e) {}
-      }
+      await Promise.all(stillMissing.map(async function (sym) {
+        var fj = await fetchJsonWithTimeout(
+          'https://finnhub.io/api/v1/quote?symbol=' + encodeURIComponent(sym) + '&token=' + encodeURIComponent(FINNHUB_KEY),
+          null,
+          QUOTE_TIMEOUT_MS
+        );
+        if (fj && typeof fj.c === 'number' && isFinite(fj.c)) quoteCache[sym] = fj.c;
+      }));
     }
     return quoteCache;
   }
 
-  async function renderWhosBuyingFeed(trades, isStale) {
+  async function renderWhosBuyingFeed(trades, isStale, missingLiveKeys) {
     var feed = document.getElementById('whosBuyingFeed');
     var meta = document.getElementById('whosBuyingMeta');
     if (!feed) return;
@@ -460,7 +480,11 @@
         else if (sec < 86400) ago = Math.floor(sec / 3600) + ' hours ago';
         else ago = Math.floor(sec / 86400) + ' days ago';
       }
-      meta.textContent = 'Last updated: ' + ago + ' — Source: SEC 13F Filings & Capitol Trades' + (isStale ? ' · Showing last known data' : '');
+      var keyNote = missingLiveKeys ? ' · Live API keys missing (showing fallback data)' : '';
+      meta.textContent =
+        'Last updated: ' + ago + ' — Source: SEC 13F Filings & Capitol Trades' +
+        (isStale ? ' · Showing last known data' : '') +
+        keyNote;
     }
   }
 
@@ -496,32 +520,28 @@
     var out = [];
     if (!FMP_KEY || FMP_KEY.indexOf('YOUR_') === 0) return out;
 
-    for (var i = 0; i < ciks.length; i++) {
-      try {
-        var url = 'https://financialmodelingprep.com/api/v3/form-thirteen-f/' + ciks[i].cik + '?apikey=' + encodeURIComponent(FMP_KEY);
-        var res = await fetch(url);
-        if (!res.ok) continue;
-        var data = await res.json();
-        var arr = Array.isArray(data) ? data : (data && data.data) || [];
-        var filed = (arr[0] && (arr[0].filingDate || arr[0].date)) || 'Recent';
-        var slice = arr.slice(0, 8);
-        slice.forEach(function (row) {
-          var h = row || {};
-          var ch = parseFloat(h.changeInShares || h.change || 0);
-          var type = ch < 0 ? 'sell' : (ch > 0 ? 'buy' : 'new');
-          var action = ch < 0 ? 'SELL' : (ch > 0 ? 'BUY' : 'NEW');
-          out.push({
-            period: String(filed).slice(0, 10),
-            name: ciks[i].name,
-            action: action,
-            ticker: h.ticker || h.symbol || '—',
-            amount: h.shares ? '~' + String(h.shares) + ' sh' : '—',
-            slug: slugify(ciks[i].name),
-            type: type === 'new' ? 'hold' : type
-          });
+    await Promise.all(ciks.map(async function (entry) {
+      var url = 'https://financialmodelingprep.com/api/v3/form-thirteen-f/' + entry.cik + '?apikey=' + encodeURIComponent(FMP_KEY);
+      var data = await fetchJsonWithTimeout(url);
+      var arr = Array.isArray(data) ? data : (data && data.data) || [];
+      var filed = (arr[0] && (arr[0].filingDate || arr[0].date)) || 'Recent';
+      var slice = arr.slice(0, 8);
+      slice.forEach(function (row) {
+        var h = row || {};
+        var ch = parseFloat(h.changeInShares || h.change || 0);
+        var type = ch < 0 ? 'sell' : (ch > 0 ? 'buy' : 'new');
+        var action = ch < 0 ? 'SELL' : (ch > 0 ? 'BUY' : 'NEW');
+        out.push({
+          period: String(filed).slice(0, 10),
+          name: entry.name,
+          action: action,
+          ticker: h.ticker || h.symbol || '—',
+          amount: h.shares ? '~' + String(h.shares) + ' sh' : '—',
+          slug: slugify(entry.name),
+          type: type === 'new' ? 'hold' : type
         });
-      } catch (e) {}
-    }
+      });
+    }));
     if (out.length) setCached(CACHE_FMP, out);
     return out;
   }
@@ -532,11 +552,9 @@
     if (!QUIVER_KEY || QUIVER_KEY.indexOf('YOUR_') === 0) return [];
 
     try {
-      var res = await fetch('https://api.quiverquant.com/beta/live/congresstrading', {
+      var data = await fetchJsonWithTimeout('https://api.quiverquant.com/beta/live/congresstrading', {
         headers: { Authorization: 'Token ' + QUIVER_KEY }
       });
-      if (!res.ok) return [];
-      var data = await res.json();
       var arr = Array.isArray(data) ? data : [];
       var want = ['Pelosi', 'Nancy'];
       var out = [];
@@ -564,10 +582,13 @@
 
   async function loadWhosBuyingFeed() {
     var isStale = false;
+    var missingLiveKeys = (!FMP_KEY || FMP_KEY.indexOf('YOUR_') === 0) &&
+      (!QUIVER_KEY || QUIVER_KEY.indexOf('YOUR_') === 0);
     var merged = [];
     try {
-      var a = await fetchFmpTrades();
-      var b = await fetchQuiverTrades();
+      var feeds = await Promise.all([fetchFmpTrades(), fetchQuiverTrades()]);
+      var a = feeds[0] || [];
+      var b = feeds[1] || [];
       merged = a.concat(b);
     } catch (e) {
       isStale = true;
@@ -582,7 +603,7 @@
       } catch (e) {}
     }
     merged.sort(function (x, y) { return String(y.period).localeCompare(String(x.period)); });
-    renderWhosBuyingFeed(merged.slice(0, 15), isStale);
+    renderWhosBuyingFeed(merged.slice(0, 15), isStale, missingLiveKeys);
   }
 
   function populateSelects() {

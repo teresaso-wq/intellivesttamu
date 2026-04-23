@@ -425,39 +425,22 @@
     return quoteCache;
   }
 
-  async function renderWhosBuyingFeed(trades, isStale, missingLiveKeys) {
+  function renderWhosBuyingFeed(trades, isStale, missingLiveKeys) {
     var feed = document.getElementById('whosBuyingFeed');
     var meta = document.getElementById('whosBuyingMeta');
     if (!feed) return;
-    var tickers = trades.map(function (tr) { return String(tr.ticker || '').toUpperCase(); });
-    var liveMap = await fetchCurrentPrices(tickers);
 
     feed.innerHTML = trades.map(function (tr) {
       var border = tr.type === 'sell' ? 'is-sell' : (tr.type === 'hold' || tr.type === 'new' ? 'is-hold' : 'is-buy');
       var ago = timeAgo(tr.period);
       var dateLabel = formatDate(tr.period);
-      var ticker = String(tr.ticker || '').toUpperCase();
-      var tradePriceNum = parseTradePrice(tr.priceAtTrade, ticker);
-      var currentPriceNum = liveMap[ticker];
-      var pnlLine = 'Current: N/A';
-      if (isFinite(tradePriceNum) && isFinite(currentPriceNum)) {
-        var diff = currentPriceNum - tradePriceNum;
-        var pct = tradePriceNum === 0 ? 0 : (diff / tradePriceNum) * 100;
-        var sign = diff >= 0 ? '+' : '';
-        var pnlCls = diff >= 0 ? 'wbc-pnl-pos' : 'wbc-pnl-neg';
-        pnlLine =
-          'Current: ' + formatUsd2(currentPriceNum) +
-          ' <span class="' + pnlCls + '">(' + sign + formatUsd2(diff) + ', ' + sign + pct.toFixed(2) + '%)</span>';
-      }
-      var dateHtml = '<div class="wbc-period">' + (tr.type === 'sell' ? 'Sold' : 'Bought') + ' on ' + escapeHtml(dateLabel) +
+      var dateHtml = '<div class="wbc-period">📅 ' + (tr.type === 'sell' ? 'Sold' : 'Bought') + ' on ' + escapeHtml(dateLabel) +
         (ago ? ' <span class="wbc-ago">(' + escapeHtml(ago) + ')</span>' : '') + '</div>';
       return (
         '<div class="whos-buying-card ' + border + '">' +
-        '<div class="wbc-name">' + escapeHtml(tr.name) + '</div>' +
-        '<div class="wbc-action">' + escapeHtml(tr.action) + ' ' + escapeHtml(tr.ticker) + '</div>' +
-        '<div class="wbc-amt">' + escapeHtml(tr.amount) + '</div>' +
-        '<div class="wbc-price">Price at trade: ' + formatUsd2(tradePriceNum) + '</div>' +
-        '<div class="wbc-current">' + pnlLine + '</div>' +
+        '<div class="wbc-name">👤 ' + escapeHtml(tr.name) + '</div>' +
+        '<div class="wbc-action">📈 ' + escapeHtml(tr.action) + ' ' + escapeHtml(tr.ticker) + '</div>' +
+        '<div class="wbc-amt">💰 ' + escapeHtml(tr.amount) + '</div>' +
         dateHtml +
         '<button type="button" class="btn secondary btn-sm wbc-view" data-slug="' + escapeHtml(tr.slug) + '">View Investor</button>' +
         '</div>'
@@ -581,29 +564,34 @@
   }
 
   async function loadWhosBuyingFeed() {
-    var isStale = false;
-    var missingLiveKeys = (!FMP_KEY || FMP_KEY.indexOf('YOUR_') === 0) &&
-      (!QUIVER_KEY || QUIVER_KEY.indexOf('YOUR_') === 0);
+    var noFmpKey = !FMP_KEY || FMP_KEY.indexOf('YOUR_') === 0;
+    var noQuiverKey = !QUIVER_KEY || QUIVER_KEY.indexOf('YOUR_') === 0;
+    var missingLiveKeys = noFmpKey && noQuiverKey;
+
+    // Show fallback immediately — no waiting. APIs never have valid keys on GitHub Pages.
+    if (missingLiveKeys) {
+      var sorted = FALLBACK_TRADES.slice().sort(function (x, y) {
+        return String(y.period).localeCompare(String(x.period));
+      });
+      renderWhosBuyingFeed(sorted.slice(0, 15), true, true);
+      return;
+    }
+
+    // Only reach here if real API keys are configured
     var merged = [];
     try {
       var feeds = await Promise.all([fetchFmpTrades(), fetchQuiverTrades()]);
-      var a = feeds[0] || [];
-      var b = feeds[1] || [];
-      merged = a.concat(b);
-    } catch (e) {
-      isStale = true;
-    }
+      merged = (feeds[0] || []).concat(feeds[1] || []);
+    } catch (e) {}
+
     if (!merged.length) {
       merged = FALLBACK_TRADES.slice();
-      isStale = true;
     } else {
       merged = merged.slice(0, 20);
-      try {
-        localStorage.setItem(CACHE_META, String(Date.now()));
-      } catch (e) {}
+      try { localStorage.setItem(CACHE_META, String(Date.now())); } catch (e) {}
     }
     merged.sort(function (x, y) { return String(y.period).localeCompare(String(x.period)); });
-    renderWhosBuyingFeed(merged.slice(0, 15), isStale, missingLiveKeys);
+    renderWhosBuyingFeed(merged.slice(0, 15), !merged.length, missingLiveKeys);
   }
 
   function populateSelects() {

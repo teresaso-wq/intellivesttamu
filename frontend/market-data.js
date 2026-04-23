@@ -348,39 +348,27 @@ async function fetchFinnhubQuote(ticker) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Daily quote: Finnhub first (fast), then backend, then Yahoo proxies as fallback.
+ * Daily quote: Finnhub first (fast), then one corsproxy fallback.
+ * Backend removed — site is GitHub Pages static only.
  */
 async function fetchDailyStockQuote(ticker) {
   // 1. Finnhub — fastest, direct API, no CORS proxy
   const finnhub = await fetchFinnhubQuote(ticker);
   if (finnhub && !finnhub.na) return finnhub;
 
-  // 2. Backend (if running locally)
-  const backend = await fetchDailyStockQuoteFromBackend(ticker);
-  if (backend && !backend.na) return backend;
-
-  // 3. Yahoo Finance via corsproxy.io
+  // 2. Single corsproxy fallback (avoids the slow 5-proxy sequential chain)
   try {
     const response = await fetch(buildCorsProxyYahooChartUrl(ticker), {
       method: 'GET',
-      headers: { Accept: 'application/json' }
+      headers: { Accept: 'application/json' },
+      signal: AbortSignal.timeout ? AbortSignal.timeout(4000) : undefined
     });
     if (response.ok) {
       const data = await response.json();
       const chartOut = parseChartMetaToQuote(data, ticker);
       if (chartOut && !chartOut.na) return chartOut;
     }
-  } catch (e) {
-    /* continue to fallback chain */
-  }
-
-  const v7 = await fetchJsonThroughProxies(buildYahooQuoteV7Url(ticker));
-  let out = v7 ? parseV7Quote(v7, ticker) : null;
-  if (out && !out.na) return out;
-
-  const chart = await fetchJsonThroughProxies(buildYahooChartUrl(ticker));
-  out = chart ? parseChartMetaToQuote(chart, ticker) : null;
-  if (out && !out.na) return out;
+  } catch (e) { /* ignore */ }
 
   return { na: true };
 }
@@ -420,18 +408,24 @@ const MOVER_SYMBOLS = [
   'NFLX','CRM','ORCL','INTC','BAC','XOM','GS','MA','WMT','COST'
 ];
 
-let _moverCache = null;      // cached results
-let _moverCacheTime = 0;     // timestamp
-const MOVER_CACHE_MS = 60000; // 60 seconds
+let _moverCache = null;
+let _moverCacheTime = 0;
+const MOVER_CACHE_MS = 5 * 60 * 1000; // 5 minutes — reduces API hammering
 
+// Stagger requests 60ms apart to avoid bursting Finnhub's free-tier rate limit
 async function fetchAllMovers() {
   const now = Date.now();
   if (_moverCache && now - _moverCacheTime < MOVER_CACHE_MS) return _moverCache;
 
-  const results = await Promise.all(
-    MOVER_SYMBOLS.map(sym => fetchMarketData(sym).catch(() => null))
-  );
-  _moverCache = results.filter(r => r !== null);
+  const results = [];
+  for (let i = 0; i < MOVER_SYMBOLS.length; i++) {
+    if (i > 0) await new Promise(r => setTimeout(r, 60)); // 60ms stagger ≈ 16/sec, well under 60/min
+    try {
+      const r = await fetchMarketData(MOVER_SYMBOLS[i]);
+      if (r) results.push(r);
+    } catch (e) { /* skip failed symbol */ }
+  }
+  _moverCache = results;
   _moverCacheTime = now;
   return _moverCache;
 }
@@ -457,18 +451,16 @@ async function updateMarketIndices() {
   container.innerHTML = '<div class="market-loading">Loading market data...</div>';
   
   try {
-    const indicesPromises = MARKET_INDICES.map(index => 
-      fetchMarketData(index.symbol).catch(err => ({
-        ...index,
-        price: 0,
-        change: 0,
-        changePercent: 0,
-        prices: [],
-        error: true
-      }))
-    );
-    
-    const indices = await Promise.all(indicesPromises);
+    const indices = [];
+    for (let i = 0; i < MARKET_INDICES.length; i++) {
+      if (i > 0) await new Promise(r => setTimeout(r, 60));
+      try {
+        const d = await fetchMarketData(MARKET_INDICES[i].symbol);
+        indices.push(d);
+      } catch (e) {
+        indices.push({ ...MARKET_INDICES[i], price: 0, change: 0, changePercent: 0, prices: [], error: true });
+      }
+    }
     
     container.innerHTML = indices.map(index => {
       if (index.error) {
@@ -621,17 +613,16 @@ async function updateMostActive() {
 // Initialize market dashboard — pre-fetch movers once, then render all 4 sections in parallel
 (function initMarketDashboard() {
   function refreshAll() {
-    _moverCache = null; // clear cache so fresh data is fetched
-    Promise.all([
-      updateMarketIndices(),
-      updateTopGainers(),
-      updateTopLosers(),
-      updateMostActive()
-    ]);
+    // Don't clear _moverCache here — let the 5-min TTL handle expiry.
+    // Running all 4 in sequence avoids a simultaneous burst of API calls.
+    updateMarketIndices()
+      .then(() => updateTopGainers())
+      .then(() => updateTopLosers())
+      .then(() => updateMostActive());
   }
 
   refreshAll();
-  setInterval(refreshAll, 60000);
+  setInterval(refreshAll, 5 * 60 * 1000); // re-fetch every 5 minutes
 })();
 
 // Export for use in other pages (fetchDailyStockQuote was set earlier)

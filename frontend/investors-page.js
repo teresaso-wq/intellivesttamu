@@ -26,21 +26,21 @@
   var QUOTE_TIMEOUT_MS = 7000;
 
   var FALLBACK_TRADES = [
-    { period: '2026-04-03', name: 'Cathie Wood', action: 'BUY', ticker: 'TSLA', amount: '~$180M', slug: 'cathie-wood', type: 'buy' },
-    { period: '2026-04-01', name: 'Ken Griffin', action: 'BUY', ticker: 'NVDA', amount: '~$520M', slug: 'ken-griffin', type: 'buy' },
-    { period: '2026-03-28', name: 'Bill Ackman', action: 'BUY', ticker: 'NKE', amount: '~$1.4B', slug: 'bill-ackman', type: 'buy' },
-    { period: '2026-03-21', name: 'Nancy Pelosi', action: 'BUY', ticker: 'NVDA', amount: '~$1-5M', slug: 'nancy-pelosi', type: 'buy' },
-    { period: '2026-03-14', name: 'Warren Buffett', action: 'BUY', ticker: 'OXY', amount: '~$410M', slug: 'warren-buffett', type: 'buy' },
-    { period: '2026-03-10', name: 'George Soros', action: 'BUY', ticker: 'PLTR', amount: '~$90M', slug: 'george-soros', type: 'buy' },
-    { period: '2026-03-07', name: 'David Tepper', action: 'BUY', ticker: 'META', amount: '~$270M', slug: 'david-tepper', type: 'buy' },
-    { period: '2026-03-03', name: 'Ray Dalio', action: 'BUY', ticker: 'GLD', amount: '~$200M', slug: 'ray-dalio', type: 'buy' },
-    { period: '2026-02-25', name: 'Steve Cohen', action: 'BUY', ticker: 'AMZN', amount: '~$340M', slug: 'steve-cohen', type: 'buy' },
-    { period: '2026-02-19', name: 'Cathie Wood', action: 'BUY', ticker: 'PLTR', amount: '~$215M', slug: 'cathie-wood', type: 'buy' },
-    { period: '2026-02-14', name: 'Bill Ackman', action: 'BUY', ticker: 'GOOGL', amount: '~$680M', slug: 'bill-ackman', type: 'buy' },
-    { period: '2026-02-10', name: 'Ken Griffin', action: 'BUY', ticker: 'MSFT', amount: '~$380M', slug: 'ken-griffin', type: 'buy' },
-    { period: '2026-02-06', name: 'Warren Buffett', action: 'SELL', ticker: 'AAPL', amount: '~$3B reduction', slug: 'warren-buffett', type: 'sell' },
-    { period: '2026-02-03', name: 'George Soros', action: 'BUY', ticker: 'NVDA', amount: '~$250M', slug: 'george-soros', type: 'buy' },
-    { period: '2026-01-28', name: 'David Tepper', action: 'BUY', ticker: 'GOOGL', amount: '~$190M', slug: 'david-tepper', type: 'buy' }
+    { period: '2026-04-03', name: 'Cathie Wood',    action: 'BUY',  ticker: 'TSLA', amount: '~$180M', slug: 'cathie-wood',    type: 'buy',  priceAtTrade: 252.10 },
+    { period: '2026-04-01', name: 'Ken Griffin',    action: 'BUY',  ticker: 'NVDA', amount: '~$520M', slug: 'ken-griffin',    type: 'buy',  priceAtTrade: 108.35 },
+    { period: '2026-03-28', name: 'Bill Ackman',    action: 'BUY',  ticker: 'NKE',  amount: '~$1.4B', slug: 'bill-ackman',    type: 'buy',  priceAtTrade: 73.18  },
+    { period: '2026-03-21', name: 'Nancy Pelosi',   action: 'BUY',  ticker: 'NVDA', amount: '~$1-5M', slug: 'nancy-pelosi',   type: 'buy',  priceAtTrade: 113.60 },
+    { period: '2026-03-14', name: 'Warren Buffett', action: 'BUY',  ticker: 'OXY',  amount: '~$410M', slug: 'warren-buffett', type: 'buy',  priceAtTrade: 44.82  },
+    { period: '2026-03-10', name: 'George Soros',   action: 'BUY',  ticker: 'PLTR', amount: '~$90M',  slug: 'george-soros',   type: 'buy',  priceAtTrade: 92.14  },
+    { period: '2026-03-07', name: 'David Tepper',   action: 'BUY',  ticker: 'META', amount: '~$270M', slug: 'david-tepper',   type: 'buy',  priceAtTrade: 589.44 },
+    { period: '2026-03-03', name: 'Ray Dalio',      action: 'BUY',  ticker: 'GLD',  amount: '~$200M', slug: 'ray-dalio',      type: 'buy',  priceAtTrade: 271.55 },
+    { period: '2026-02-25', name: 'Steve Cohen',    action: 'BUY',  ticker: 'AMZN', amount: '~$340M', slug: 'steve-cohen',    type: 'buy',  priceAtTrade: 207.82 },
+    { period: '2026-02-19', name: 'Cathie Wood',    action: 'BUY',  ticker: 'PLTR', amount: '~$215M', slug: 'cathie-wood',    type: 'buy',  priceAtTrade: 98.73  },
+    { period: '2026-02-14', name: 'Bill Ackman',    action: 'BUY',  ticker: 'GOOGL', amount: '~$680M',slug: 'bill-ackman',    type: 'buy',  priceAtTrade: 193.40 },
+    { period: '2026-02-10', name: 'Ken Griffin',    action: 'BUY',  ticker: 'MSFT', amount: '~$380M', slug: 'ken-griffin',    type: 'buy',  priceAtTrade: 404.17 },
+    { period: '2026-02-06', name: 'Warren Buffett', action: 'SELL', ticker: 'AAPL', amount: '~$3B',   slug: 'warren-buffett', type: 'sell', priceAtTrade: 227.63 },
+    { period: '2026-02-03', name: 'George Soros',   action: 'BUY',  ticker: 'NVDA', amount: '~$250M', slug: 'george-soros',   type: 'buy',  priceAtTrade: 124.92 },
+    { period: '2026-01-28', name: 'David Tepper',   action: 'BUY',  ticker: 'GOOGL', amount: '~$190M',slug: 'david-tepper',   type: 'buy',  priceAtTrade: 199.15 }
   ];
 
   var TRADE_PRICE_ESTIMATE = {
@@ -425,23 +425,74 @@
     return quoteCache;
   }
 
+  async function fetchAndInjectLivePrices(trades) {
+    var tickers = [];
+    trades.forEach(function (tr) {
+      if (tr.ticker && tickers.indexOf(tr.ticker) === -1) tickers.push(tr.ticker);
+    });
+    if (!tickers.length || !FINNHUB_KEY || FINNHUB_KEY.indexOf('YOUR_') === 0) {
+      document.querySelectorAll('.wbc-live-price').forEach(function (el) { el.textContent = ''; });
+      return;
+    }
+
+    var priceMap = {};
+    for (var fi = 0; fi < tickers.length; fi++) {
+      if (fi > 0) await new Promise(function (r) { setTimeout(r, 60); });
+      var sym = tickers[fi];
+      try {
+        var fj = await fetchJsonWithTimeout(
+          'https://finnhub.io/api/v1/quote?symbol=' + encodeURIComponent(sym) + '&token=' + encodeURIComponent(FINNHUB_KEY),
+          null,
+          QUOTE_TIMEOUT_MS
+        );
+        if (fj && typeof fj.c === 'number' && isFinite(fj.c) && fj.c > 0) priceMap[sym] = fj.c;
+      } catch (e) {}
+    }
+
+    document.querySelectorAll('.wbc-live-price').forEach(function (el) {
+      var ticker = el.getAttribute('data-ticker');
+      var tradePrice = parseFloat(el.getAttribute('data-trade-price'));
+      var tradeType = el.getAttribute('data-trade-type');
+      var livePrice = priceMap[ticker];
+      if (!livePrice || !isFinite(tradePrice) || tradePrice <= 0) {
+        el.textContent = '';
+        return;
+      }
+      var pct = ((livePrice - tradePrice) / tradePrice) * 100;
+      var sign = pct >= 0 ? '+' : '';
+      var isGain = tradeType === 'sell' ? pct <= 0 : pct >= 0;
+      var color = isGain ? '#22c55e' : '#ef4444';
+      el.innerHTML = 'Now: <strong style="color:' + color + '">' + formatUsd2(livePrice) +
+        ' <span style="font-size:0.82em">(' + sign + pct.toFixed(1) + '%)</span></strong>';
+    });
+  }
+
   function renderWhosBuyingFeed(trades, isStale, missingLiveKeys) {
     var feed = document.getElementById('whosBuyingFeed');
     var meta = document.getElementById('whosBuyingMeta');
     if (!feed) return;
 
-    feed.innerHTML = trades.map(function (tr) {
+    feed.innerHTML = trades.map(function (tr, i) {
       var border = tr.type === 'sell' ? 'is-sell' : (tr.type === 'hold' || tr.type === 'new' ? 'is-hold' : 'is-buy');
       var ago = timeAgo(tr.period);
       var dateLabel = formatDate(tr.period);
       var dateHtml = '<div class="wbc-period">📅 ' + (tr.type === 'sell' ? 'Sold' : 'Bought') + ' on ' + escapeHtml(dateLabel) +
         (ago ? ' <span class="wbc-ago">(' + escapeHtml(ago) + ')</span>' : '') + '</div>';
+      var tradePrice = (typeof tr.priceAtTrade === 'number' && isFinite(tr.priceAtTrade)) ? tr.priceAtTrade : null;
+      var priceHtml = tradePrice !== null
+        ? '<div class="wbc-prices">' +
+          '<span class="wbc-price-at-trade">' + (tr.type === 'sell' ? 'Sold' : 'Bought') + ' at: <strong>' + formatUsd2(tradePrice) + '</strong></span>' +
+          '<span class="wbc-price-sep"> · </span>' +
+          '<span class="wbc-live-price" id="wbc-live-' + i + '" data-ticker="' + escapeHtml(tr.ticker) + '" data-trade-price="' + tradePrice + '" data-trade-type="' + escapeHtml(tr.type || 'buy') + '">Now: <em>loading…</em></span>' +
+          '</div>'
+        : '';
       return (
         '<div class="whos-buying-card ' + border + '">' +
         '<div class="wbc-name">👤 ' + escapeHtml(tr.name) + '</div>' +
         '<div class="wbc-action">📈 ' + escapeHtml(tr.action) + ' ' + escapeHtml(tr.ticker) + '</div>' +
         '<div class="wbc-amt">💰 ' + escapeHtml(tr.amount) + '</div>' +
         dateHtml +
+        priceHtml +
         '<button type="button" class="btn secondary btn-sm wbc-view" data-slug="' + escapeHtml(tr.slug) + '">View Investor</button>' +
         '</div>'
       );
@@ -573,7 +624,9 @@
       var sorted = FALLBACK_TRADES.slice().sort(function (x, y) {
         return String(y.period).localeCompare(String(x.period));
       });
-      renderWhosBuyingFeed(sorted.slice(0, 15), true, true);
+      var toShow = sorted.slice(0, 15);
+      renderWhosBuyingFeed(toShow, true, true);
+      fetchAndInjectLivePrices(toShow); // background — no await
       return;
     }
 

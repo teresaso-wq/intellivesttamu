@@ -370,10 +370,10 @@
       (staleNote ? '<div class="foresight-stale">' + staleNote + '</div>' : '') +
       '<div class="foresight-score">' +
         '<span class="foresight-score-value">' + out.score + '</span>' +
-        '<span class="foresight-score-label">Foresight Score</span>' +
+        '<span class="foresight-score-label" style="display:flex;flex-direction:column;gap:2px">Foresight Score<span style="font-size:10px;letter-spacing:0.1em;opacity:0.65">out of 100</span></span>' +
       '</div>' +
       '<dl class="foresight-metrics">' +
-        '<div class="foresight-metric"><dt>Confidence</dt><dd>' + out.confidence + '</dd></div>' +
+        '<div class="foresight-metric"><dt>Confidence</dt><dd>' + out.score + ' / 100</dd></div>' +
         '<div class="foresight-metric"><dt>Risk band</dt><dd>' + out.risk + '</dd></div>' +
         '<div class="foresight-metric"><dt>Est. return range</dt><dd>' + out.returnLow + '% to ' + out.returnHigh + '%</dd></div>' +
       '</dl>';

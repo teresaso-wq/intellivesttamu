@@ -5097,6 +5097,11 @@ body.stock-compare-modal-active {
 .wbc-pnl-neg { color: #dc2626; font-weight: 600; }
 .wbc-period { font-size: 0.72rem; color: var(--ink-300); margin-bottom: 0.25rem; }
 .wbc-ago    { font-size: 0.68rem; color: var(--ink-400); font-style: italic; }
+.wbc-prices { font-size: 0.75rem; color: var(--ink-300); margin-bottom: 0.3rem; display: flex; flex-wrap: wrap; gap: 0.15rem; align-items: center; }
+.wbc-price-at-trade { white-space: nowrap; }
+.wbc-price-sep { color: var(--ink-400); }
+.wbc-live-price { white-space: nowrap; }
+.wbc-live-price em { font-style: normal; color: var(--ink-400); font-size: 0.7rem; }
 .wbc-view   { margin-top: auto; }
 
 /* Performance bar */

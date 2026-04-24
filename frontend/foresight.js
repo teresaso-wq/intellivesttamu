@@ -81,38 +81,163 @@
     run();
   }
 
-  // ── Data fetch (reuses existing Intellivest endpoints) ────────────────────
-  async function fetchJson(url) {
-    const res = await fetch(url, { headers: { Accept: 'application/json' } });
-    if (!res.ok) throw new Error(url + ' — ' + res.status);
-    return res.json();
+  // ── Data fetch ────────────────────────────────────────────────────────────
+  // Foresight works in two deployment modes:
+  //   1. Full stack: the Intellivest FastAPI backend is serving the page, so
+  //      /api/stocks/history and /api/news are live (yfinance + SQLite cache).
+  //   2. Static hosting (npm run serve, Live Server, GitHub Pages, file://):
+  //      those /api routes don't exist, so we fall through to Yahoo Finance
+  //      directly via the same CORS-proxy chain the rest of the site uses
+  //      (see market-data.js / stocks.js). No API keys are required for
+  //      either path — Yahoo's chart and search endpoints are public.
+  async function fetchJsonSameOrigin(url) {
+    try {
+      const res = await fetch(url, { headers: { Accept: 'application/json' } });
+      if (!res.ok) return null;
+      return await res.json();
+    } catch (_) {
+      return null;
+    }
   }
 
-  // Try the preferred range first, then progressively broader ranges so that
-  // cached / latest-available bars are used if the live feed is unavailable.
-  async function getHistory() {
-    const ranges = ['1M', '1Y', 'MAX'];
-    for (let i = 0; i < ranges.length; i++) {
+  function safeParse(text) {
+    if (!text || typeof text !== 'string') return null;
+    const trimmed = text.trim();
+    if (!trimmed || trimmed.startsWith('<')) return null;
+    try { return JSON.parse(trimmed); } catch (_) { return null; }
+  }
+
+  async function fetchWithTimeout(url, timeoutMs) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs || 4500);
+    try {
+      return await fetch(url, {
+        method: 'GET',
+        headers: { Accept: 'application/json' },
+        signal: controller.signal
+      });
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  // Generic Yahoo-through-proxies helper. Mirrors market-data.js so Foresight
+  // keeps working even when allorigins or corsproxy is slow for a moment.
+  async function fetchYahooJson(url) {
+    const attempts = [
+      async () => {
+        const r = await fetchWithTimeout('https://corsproxy.io/?' + encodeURIComponent(url));
+        if (!r.ok) return null;
+        return safeParse(await r.text());
+      },
+      async () => {
+        const r = await fetchWithTimeout('https://api.allorigins.win/raw?url=' + encodeURIComponent(url));
+        if (!r.ok) return null;
+        return safeParse(await r.text());
+      },
+      async () => {
+        const r = await fetchWithTimeout('https://api.allorigins.win/get?url=' + encodeURIComponent(url));
+        if (!r.ok) return null;
+        const wrapped = await r.json();
+        if (!wrapped || !wrapped.contents) return null;
+        return safeParse(wrapped.contents);
+      },
+      async () => {
+        const r = await fetchWithTimeout('https://thingproxy.freeboard.io/fetch/' + encodeURIComponent(url));
+        if (!r.ok) return null;
+        return safeParse(await r.text());
+      },
+      async () => {
+        // Last resort: same-origin (works for users who disabled CORS, or on
+        // a deployment that already proxies Yahoo).
+        const r = await fetchWithTimeout(url);
+        if (!r.ok) return null;
+        return safeParse(await r.text());
+      }
+    ];
+    for (const fn of attempts) {
       try {
-        const j = await fetchJson('/api/stocks/history/' + currentTicker + '?range=' + ranges[i]);
-        if (Array.isArray(j.data) && j.data.length) return j.data;
-      } catch (_) { /* try next range */ }
+        const data = await fn();
+        if (data && !(data.error && !data.chart && !data.news && !data.quoteResponse)) {
+          return data;
+        }
+      } catch (_) { /* next */ }
+    }
+    return null;
+  }
+
+  // Map the Foresight UI range → Yahoo chart "range" parameter. We ask for a
+  // broader window than we strictly need so signals have enough history even
+  // on partial days.
+  async function fetchYahooBars(range) {
+    const url = 'https://query1.finance.yahoo.com/v8/finance/chart/' +
+                encodeURIComponent(currentTicker) +
+                '?interval=1d&range=' + range;
+    const data = await fetchYahooJson(url);
+    const result = data && data.chart && Array.isArray(data.chart.result) ? data.chart.result[0] : null;
+    if (!result) return [];
+    const ts = Array.isArray(result.timestamp) ? result.timestamp : [];
+    const q = (result.indicators && Array.isArray(result.indicators.quote)) ? result.indicators.quote[0] || {} : {};
+    const opens = q.open || [];
+    const highs = q.high || [];
+    const lows = q.low || [];
+    const closes = q.close || [];
+    const vols = q.volume || [];
+    const bars = [];
+    for (let i = 0; i < ts.length; i++) {
+      const c = closes[i];
+      if (c == null || Number.isNaN(Number(c))) continue;
+      const d = new Date(ts[i] * 1000);
+      const iso = d.toISOString().replace('T', ' ').slice(0, 19);
+      bars.push({
+        date: iso,
+        open: Number(opens[i] != null ? opens[i] : c),
+        high: Number(highs[i] != null ? highs[i] : c),
+        low: Number(lows[i] != null ? lows[i] : c),
+        close: Number(c),
+        volume: Number(vols[i] != null ? vols[i] : 0) || 0
+      });
+    }
+    return bars;
+  }
+
+  // Try the FastAPI backend first (when running), then Yahoo directly. Both
+  // paths produce the same bar shape, so downstream signals don't care which
+  // one succeeded.
+  async function getHistory() {
+    const backendRanges = ['1M', '1Y', 'MAX'];
+    for (let i = 0; i < backendRanges.length; i++) {
+      const j = await fetchJsonSameOrigin('/api/stocks/history/' + currentTicker + '?range=' + backendRanges[i]);
+      if (j && Array.isArray(j.data) && j.data.length) return j.data;
+    }
+    const yahooRanges = ['3mo', '1y', '2y'];
+    for (let i = 0; i < yahooRanges.length; i++) {
+      const bars = await fetchYahooBars(yahooRanges[i]);
+      if (bars.length) return bars;
     }
     return [];
   }
 
   async function getNews() {
-    try {
-      const j = await fetchJson('/api/news/' + currentTicker + '?limit=20');
-      return Array.isArray(j.news) ? j.news : [];
-    } catch (_) {
-      try {
-        const j2 = await fetchJson('/api/stocks/news/' + currentTicker + '?limit=20');
-        return Array.isArray(j2.news) ? j2.news : [];
-      } catch (__) {
-        return [];
-      }
+    // Backend (yfinance) first.
+    const jA = await fetchJsonSameOrigin('/api/news/' + currentTicker + '?limit=20');
+    if (jA && Array.isArray(jA.news) && jA.news.length) return jA.news;
+    const jB = await fetchJsonSameOrigin('/api/stocks/news/' + currentTicker + '?limit=20');
+    if (jB && Array.isArray(jB.news) && jB.news.length) return jB.news;
+
+    // Yahoo search endpoint returns a `news` array of headlines for a ticker.
+    const url = 'https://query1.finance.yahoo.com/v1/finance/search?q=' +
+                encodeURIComponent(currentTicker) +
+                '&quotesCount=0&newsCount=20&enableFuzzyQuery=false';
+    const data = await fetchYahooJson(url);
+    if (data && Array.isArray(data.news)) {
+      return data.news.map(n => ({
+        title: n.title || '',
+        publisher: n.publisher || '',
+        link: n.link || ''
+      }));
     }
+    return [];
   }
 
   // ── Signal derivation (plain-English labels only) ─────────────────────────

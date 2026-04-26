@@ -283,7 +283,7 @@ const apiCache = {
 
 // Yahoo Finance search API - find any stock by name or ticker
 async function searchYahooStocks(query) {
-  if (!query || query.trim().length < 2) return [];
+  if (!query || !query.trim()) return [];
   const q = encodeURIComponent(query.trim());
   const url = `https://query2.finance.yahoo.com/v1/finance/search?q=${q}&quotesCount=15&newsCount=0`;
   try {
@@ -308,6 +308,22 @@ async function searchYahooStocks(query) {
     console.warn('Yahoo search failed:', e);
     return [];
   }
+}
+
+// Finnhub symbol search — fallback for short tickers Yahoo misses (e.g. GO, F, X)
+async function searchFinnhubStocks(query) {
+  const FKEY = 'd7g4cehr01qqb8ria6r0d7g4cehr01qqb8ria6rg';
+  try {
+    const res = await fetch(
+      `https://finnhub.io/api/v1/search?q=${encodeURIComponent(query.trim())}&token=${FKEY}`
+    );
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (data.result || [])
+      .filter(r => r.type === 'Common Stock' && r.symbol && !r.symbol.includes('.'))
+      .slice(0, 8)
+      .map(r => ({ symbol: r.symbol, name: r.description || r.symbol, exchange: '', type: 'EQUITY' }));
+  } catch (e) { return []; }
 }
 
 // Fetch extended financial data for filtering
@@ -709,11 +725,15 @@ async function searchStock(query) {
     return;
   }
   window.lastStockSearchQuery = query.trim();
-  resultsDiv.innerHTML = '<div class="search-loading">Searching Yahoo Finance...</div>';
+  resultsDiv.innerHTML = '<div class="search-loading">Searching...</div>';
 
-  const suggestions = await searchYahooStocks(query);
+  let suggestions = await searchYahooStocks(query);
+  // Fallback to Finnhub for short tickers (e.g. GO, F, X) that Yahoo misses
   if (suggestions.length === 0) {
-    resultsDiv.innerHTML = `<div class="search-error">No stocks found for "${query}". Try a ticker (e.g., AAPL) or company name.</div>`;
+    suggestions = await searchFinnhubStocks(query);
+  }
+  if (suggestions.length === 0) {
+    resultsDiv.innerHTML = `<div class="search-error">No stocks found for "${query}". Try a full ticker (e.g., AAPL) or company name.</div>`;
     return;
   }
 

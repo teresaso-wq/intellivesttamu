@@ -57,40 +57,137 @@
     </div>
   </header>
 
-  <main class="site-main chatbot-main">
-    <div class="container chatbot-container">
-      <div class="chatbot-header">
-        <h1>Ask Intellivest</h1>
-        <p class="chatbot-subtitle">Get personalized financial advice from our AI chatbot. Ask anything about financial literacy, investing, budgeting, and more.</p>
-        <div class="chatbot-toolbar">
-          <button type="button" class="btn secondary btn-sm" id="chatbotUpdateProfile">📋 Update My Profile</button>
-          <button type="button" class="btn secondary btn-sm" id="chatbotClearHistory">🗑️ Clear Memory</button>
+  <main class="site-main chatbot-main" id="chatbotMain">
+    <div class="cb-split-root" id="cbSplitRoot">
+
+      <!-- ── LEFT: Chatbot ─────────────────────────────────────── -->
+      <div class="cb-split-pane cb-pane-chat" id="cbPaneChat">
+        <div class="container chatbot-container">
+          <div class="chatbot-header">
+            <div class="cb-header-top">
+              <h1>Ask Intellivest</h1>
+              <button type="button" class="cb-portfolio-pill" id="cbTogglePortfolio" title="Open paper portfolio alongside the chat">
+                💼 Test it here <span class="cb-pill-arrow">→</span>
+              </button>
+            </div>
+            <p class="chatbot-subtitle">Get personalized financial advice from our AI chatbot. Ask anything about financial literacy, investing, budgeting, and more.</p>
+            <div class="chatbot-toolbar">
+              <button type="button" class="btn secondary btn-sm" id="chatbotUpdateProfile">📋 Update My Profile</button>
+              <button type="button" class="btn secondary btn-sm" id="chatbotClearHistory">🗑️ Clear Memory</button>
+            </div>
+          </div>
+
+          <div class="chatbot-window">
+            <div class="chatbot-messages" id="chatbotMessages"></div>
+            <div class="chatbot-input-container">
+              <form id="chatbotForm" class="chatbot-form">
+                <input type="text" id="chatbotInput" class="chatbot-input" placeholder="Ask me anything about finance..." autocomplete="off" required />
+                <button type="submit" class="chatbot-send-btn" aria-label="Send message">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                  </svg>
+                </button>
+              </form>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div class="chatbot-window">
-        <div class="chatbot-messages" id="chatbotMessages"></div>
+      <!-- ── RIGHT: Paper Portfolio Panel ─────────────────────── -->
+      <div class="cb-split-pane cb-pane-portfolio" id="cbPanePortfolio" aria-hidden="true">
+        <div class="cb-pp-panel">
+          <div class="cb-pp-panel-header">
+            <div>
+              <div class="pp-eyebrow">Hypothetical · No real money</div>
+              <h2 class="cb-pp-panel-title">💼 Paper Portfolio</h2>
+              <p class="cb-pp-panel-sub">Invest with fake money — see if the bot's picks actually pay off.</p>
+            </div>
+            <button type="button" class="cb-pp-close" id="cbClosePortfolio" aria-label="Close portfolio panel">✕</button>
+          </div>
 
-        <div class="chatbot-input-container">
-          <form id="chatbotForm" class="chatbot-form">
-            <input 
-              type="text" 
-              id="chatbotInput" 
-              class="chatbot-input" 
-              placeholder="Ask me anything about finance..." 
-              autocomplete="off"
-              required
-            />
-            <button type="submit" class="chatbot-send-btn" aria-label="Send message">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="22" y1="2" x2="11" y2="13"></line>
-                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-              </svg>
-            </button>
-          </form>
+          <div id="paperPortfolioSection" class="cb-pp-panel-body">
+            <!-- Summary -->
+            <div class="cb-pp-summary">
+              <div class="cb-pp-summary-block">
+                <div class="pp-balance-label">Total Portfolio Value</div>
+                <div class="pp-balance-value" id="ppTotalValue">$10,000.00</div>
+                <div class="pp-balance-pnl" id="ppTotalPnl">—</div>
+              </div>
+              <div class="cb-pp-summary-block cb-pp-summary-block--right">
+                <div class="pp-balance-label">Cash Available</div>
+                <div class="pp-balance-value pp-balance-value--sm" id="ppCashDisplay">$10,000.00</div>
+              </div>
+            </div>
+
+            <!-- Buy form -->
+            <div class="pp-add-form">
+              <h3 class="pp-form-heading">Add a position</h3>
+              <div class="pp-form-row">
+                <div class="pp-form-group">
+                  <label class="pp-label" for="ppTickerInput">Ticker symbol</label>
+                  <input type="text" id="ppTickerInput" class="pp-input" placeholder="e.g. NVDA" maxlength="10" autocomplete="off" />
+                </div>
+                <div class="pp-form-group">
+                  <label class="pp-label" for="ppAmountInput">Dollar amount</label>
+                  <input type="number" id="ppAmountInput" class="pp-input" placeholder="e.g. 500" min="1" step="1" autocomplete="off" />
+                </div>
+                <div class="pp-form-group pp-form-group--action">
+                  <label class="pp-label pp-label--hidden" aria-hidden="true">Buy</label>
+                  <button type="button" id="ppBuyBtn" class="btn primary pp-buy-btn">Buy</button>
+                </div>
+              </div>
+              <div id="ppFormMsg" class="pp-form-msg" hidden></div>
+            </div>
+
+            <!-- Holdings -->
+            <div id="ppEmpty" class="pp-empty">
+              <div class="pp-empty-icon">📊</div>
+              <p>No positions yet.</p>
+              <p class="pp-empty-hint">Bot suggested a stock? Enter its ticker above and watch it live.</p>
+            </div>
+
+            <div class="pp-table-wrap" id="ppTableWrap">
+              <table class="pp-table" id="ppTable" hidden>
+                <thead>
+                  <tr>
+                    <th>Stock</th>
+                    <th>Shares</th>
+                    <th>Bought at</th>
+                    <th>Current price</th>
+                    <th class="pp-th-perf">1 Week</th>
+                    <th class="pp-th-perf">1 Month</th>
+                    <th class="pp-th-perf">1 Year</th>
+                    <th>Your P&amp;L</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="ppTableBody"></tbody>
+                <tfoot>
+                  <tr class="pp-tfoot-row">
+                    <td colspan="7" class="pp-tfoot-label">Total gain / loss</td>
+                    <td id="ppFooterPnl" class="pp-footer-pnl">—</td>
+                    <td></td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+
+            <!-- Reset controls -->
+            <div class="pp-controls-row">
+              <div class="pp-starting-wrap">
+                <label class="pp-label" for="ppStartingBalance">Starting balance ($)</label>
+                <input type="number" id="ppStartingBalance" class="pp-input pp-input--sm" value="10000" min="100" max="10000000" />
+              </div>
+              <button type="button" id="ppResetBtn" class="btn secondary pp-reset-btn">↺ Reset Portfolio</button>
+            </div>
+
+            <p class="pp-disclaimer">Educational only. Live prices from Finnhub. No real money involved.</p>
+          </div>
         </div>
       </div>
-    </div>
+
+    </div><!-- /.cb-split-root -->
   </main>
 
   <footer class="site-footer">
@@ -123,6 +220,33 @@
   <script src="./auth-ui.js"></script>
   <script src="./chatbot-survey.js"></script>
   <script src="./chatbot.js"></script>
+  <script src="./paper-portfolio.js"></script>
+  <script>
+    (function () {
+      var root   = document.getElementById('cbSplitRoot');
+      var toggle = document.getElementById('cbTogglePortfolio');
+      var close  = document.getElementById('cbClosePortfolio');
+      var pane   = document.getElementById('cbPanePortfolio');
+
+      function openPortfolio() {
+        root.classList.add('is-split');
+        pane.removeAttribute('aria-hidden');
+        toggle.innerHTML = '← Hide Portfolio';
+        toggle.classList.add('is-open');
+      }
+      function closePortfolio() {
+        root.classList.remove('is-split');
+        pane.setAttribute('aria-hidden', 'true');
+        toggle.innerHTML = '💼 Test it here <span class="cb-pill-arrow">→</span>';
+        toggle.classList.remove('is-open');
+      }
+
+      toggle.addEventListener('click', function () {
+        root.classList.contains('is-split') ? closePortfolio() : openPortfolio();
+      });
+      close.addEventListener('click', closePortfolio);
+    })();
+  </script>
 </body>
 </html>
 

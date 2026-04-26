@@ -197,6 +197,96 @@
       </div>
     </section>
 
+    <!-- ── Paper Portfolio ─────────────────────────────────────────── -->
+    <section id="paperPortfolioSection" class="paper-portfolio-section">
+      <div class="container">
+
+        <div class="pp-header">
+          <div class="pp-header-left">
+            <div class="pp-eyebrow">Hypothetical · No real money</div>
+            <h2 class="pp-title">💼 Paper Portfolio</h2>
+            <p class="pp-subtitle">
+              Test any stock with fake money. See the bot suggest NVDA? Buy it here and track
+              whether it actually pays off — week over week, month over month, year over year.
+            </p>
+          </div>
+          <div class="pp-balance-card">
+            <div class="pp-balance-label">Total Portfolio Value</div>
+            <div class="pp-balance-value" id="ppTotalValue">$10,000.00</div>
+            <div class="pp-balance-pnl" id="ppTotalPnl">—</div>
+            <div class="pp-cash-line">Cash available: <strong id="ppCashDisplay">$10,000.00</strong></div>
+          </div>
+        </div>
+
+        <!-- Add stock form -->
+        <div class="pp-add-form">
+          <h3 class="pp-form-heading">Add a position</h3>
+          <div class="pp-form-row">
+            <div class="pp-form-group">
+              <label class="pp-label" for="ppTickerInput">Ticker symbol</label>
+              <input type="text" id="ppTickerInput" class="pp-input" placeholder="e.g. NVDA" maxlength="10" autocomplete="off" />
+            </div>
+            <div class="pp-form-group">
+              <label class="pp-label" for="ppAmountInput">Dollar amount to invest</label>
+              <input type="number" id="ppAmountInput" class="pp-input" placeholder="e.g. 500" min="1" step="1" autocomplete="off" />
+            </div>
+            <div class="pp-form-group pp-form-group--action">
+              <label class="pp-label pp-label--hidden" aria-hidden="true">Buy</label>
+              <button type="button" id="ppBuyBtn" class="btn primary pp-buy-btn">Buy</button>
+            </div>
+          </div>
+          <div id="ppFormMsg" class="pp-form-msg" hidden></div>
+        </div>
+
+        <!-- Holdings table -->
+        <div id="ppEmpty" class="pp-empty">
+          <div class="pp-empty-icon">📊</div>
+          <p>No positions yet — enter a ticker above and invest some of your $10,000.</p>
+          <p class="pp-empty-hint">Try a stock the AI bot recommended and see if it actually grows.</p>
+        </div>
+
+        <div class="pp-table-wrap" id="ppTableWrap">
+          <table class="pp-table" id="ppTable" hidden>
+            <thead>
+              <tr>
+                <th>Stock</th>
+                <th>Shares</th>
+                <th>Bought at</th>
+                <th>Current price</th>
+                <th class="pp-th-perf">1 Week</th>
+                <th class="pp-th-perf">1 Month</th>
+                <th class="pp-th-perf">1 Year</th>
+                <th>Your P&amp;L</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="ppTableBody"></tbody>
+            <tfoot>
+              <tr class="pp-tfoot-row">
+                <td colspan="7" class="pp-tfoot-label">Total gain / loss</td>
+                <td id="ppFooterPnl" class="pp-footer-pnl">—</td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <!-- Footer controls -->
+        <div class="pp-controls-row">
+          <div class="pp-starting-wrap">
+            <label class="pp-label" for="ppStartingBalance">Starting balance ($)</label>
+            <input type="number" id="ppStartingBalance" class="pp-input pp-input--sm" value="10000" min="100" max="10000000" />
+          </div>
+          <button type="button" id="ppResetBtn" class="btn secondary pp-reset-btn">↺ Reset Portfolio</button>
+        </div>
+
+        <p class="pp-disclaimer">
+          Paper Portfolio is for educational use only. Live prices are from Finnhub. No real money is
+          involved. Past performance does not guarantee future results.
+        </p>
+      </div>
+    </section>
+
     <div
       id="stockCompareModal"
       class="stock-compare-modal"
@@ -250,5 +340,6 @@
   <script src="./app.js?v=20250417"></script>
   <script src="./market-data.js?v=20250417"></script>
   <script src="./stocks.js?v=20250417"></script>
+  <script src="./paper-portfolio.js"></script>
 </body>
 </html>

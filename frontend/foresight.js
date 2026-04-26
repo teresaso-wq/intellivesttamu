@@ -107,68 +107,54 @@
     try { return JSON.parse(trimmed); } catch (_) { return null; }
   }
 
-  async function fetchWithTimeout(url, timeoutMs) {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), timeoutMs || 4500);
+  // ── Cache helpers (30-minute TTL per ticker) ─────────────────────────────
+  const CACHE_TTL = 30 * 60 * 1000;
+  function cacheGet(key) {
     try {
-      return await fetch(url, {
-        method: 'GET',
-        headers: { Accept: 'application/json' },
-        signal: controller.signal
-      });
-    } finally {
-      clearTimeout(timer);
-    }
+      const raw = localStorage.getItem(key);
+      if (!raw) return null;
+      const obj = JSON.parse(raw);
+      if (Date.now() - obj.ts > CACHE_TTL) return null;
+      return obj.data;
+    } catch (_) { return null; }
+  }
+  function cacheSet(key, data) {
+    try { localStorage.setItem(key, JSON.stringify({ data, ts: Date.now() })); } catch (_) {}
   }
 
-  // Generic Yahoo-through-proxies helper. Mirrors market-data.js so Foresight
-  // keeps working even when allorigins or corsproxy is slow for a moment.
+  // ── Fast parallel-proxy fetch ─────────────────────────────────────────────
+  // Races multiple CORS proxies simultaneously — takes whichever responds
+  // first instead of waiting for each to time out before trying the next.
   async function fetchYahooJson(url) {
-    const attempts = [
-      async () => {
-        const r = await fetchWithTimeout('https://corsproxy.io/?' + encodeURIComponent(url));
-        if (!r.ok) return null;
-        return safeParse(await r.text());
-      },
-      async () => {
-        const r = await fetchWithTimeout('https://api.allorigins.win/raw?url=' + encodeURIComponent(url));
-        if (!r.ok) return null;
-        return safeParse(await r.text());
-      },
-      async () => {
-        const r = await fetchWithTimeout('https://api.allorigins.win/get?url=' + encodeURIComponent(url));
-        if (!r.ok) return null;
-        const wrapped = await r.json();
-        if (!wrapped || !wrapped.contents) return null;
-        return safeParse(wrapped.contents);
-      },
-      async () => {
-        const r = await fetchWithTimeout('https://thingproxy.freeboard.io/fetch/' + encodeURIComponent(url));
-        if (!r.ok) return null;
-        return safeParse(await r.text());
-      },
-      async () => {
-        // Last resort: same-origin (works for users who disabled CORS, or on
-        // a deployment that already proxies Yahoo).
-        const r = await fetchWithTimeout(url);
-        if (!r.ok) return null;
-        return safeParse(await r.text());
-      }
+    const proxies = [
+      'https://corsproxy.io/?' + encodeURIComponent(url),
+      'https://api.allorigins.win/raw?url=' + encodeURIComponent(url)
     ];
-    for (const fn of attempts) {
-      try {
-        const data = await fn();
-        if (data && !(data.error && !data.chart && !data.news && !data.quoteResponse)) {
-          return data;
-        }
-      } catch (_) { /* next */ }
-    }
-    return null;
+
+    return new Promise((resolve) => {
+      let done = false;
+      let settled = 0;
+
+      proxies.forEach((proxyUrl) => {
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), 3000);
+
+        fetch(proxyUrl, { signal: ctrl.signal, headers: { Accept: 'application/json' } })
+          .then(async (r) => {
+            clearTimeout(timer);
+            if (!r.ok) throw new Error('not ok');
+            const data = safeParse(await r.text());
+            if (data && !done) { done = true; resolve(data); }
+          })
+          .catch(() => { clearTimeout(timer); })
+          .finally(() => {
+            settled++;
+            if (settled === proxies.length && !done) resolve(null);
+          });
+      });
+    });
   }
 
-  // Map the Foresight UI range → Yahoo chart "range" parameter. We ask for a
-  // broader window than we strictly need so signals have enough history even
-  // on partial days.
   async function fetchYahooBars(range) {
     const url = 'https://query1.finance.yahoo.com/v8/finance/chart/' +
                 encodeURIComponent(currentTicker) +
@@ -178,11 +164,8 @@
     if (!result) return [];
     const ts = Array.isArray(result.timestamp) ? result.timestamp : [];
     const q = (result.indicators && Array.isArray(result.indicators.quote)) ? result.indicators.quote[0] || {} : {};
-    const opens = q.open || [];
-    const highs = q.high || [];
-    const lows = q.low || [];
-    const closes = q.close || [];
-    const vols = q.volume || [];
+    const opens = q.open || [], highs = q.high || [], lows = q.low || [],
+          closes = q.close || [], vols = q.volume || [];
     const bars = [];
     for (let i = 0; i < ts.length; i++) {
       const c = closes[i];
@@ -191,51 +174,46 @@
       const iso = d.toISOString().replace('T', ' ').slice(0, 19);
       bars.push({
         date: iso,
-        open: Number(opens[i] != null ? opens[i] : c),
-        high: Number(highs[i] != null ? highs[i] : c),
-        low: Number(lows[i] != null ? lows[i] : c),
-        close: Number(c),
-        volume: Number(vols[i] != null ? vols[i] : 0) || 0
+        open:   Number(opens[i]  != null ? opens[i]  : c),
+        high:   Number(highs[i]  != null ? highs[i]  : c),
+        low:    Number(lows[i]   != null ? lows[i]   : c),
+        close:  Number(c),
+        volume: Number(vols[i]   != null ? vols[i]   : 0) || 0
       });
     }
     return bars;
   }
 
-  // Try the FastAPI backend first (when running), then Yahoo directly. Both
-  // paths produce the same bar shape, so downstream signals don't care which
-  // one succeeded.
+  // Fetch price history — skips backend (not available on GitHub Pages),
+  // goes straight to Yahoo. Caches result for 30 minutes.
   async function getHistory() {
-    const backendRanges = ['1M', '1Y', 'MAX'];
-    for (let i = 0; i < backendRanges.length; i++) {
-      const j = await fetchJsonSameOrigin('/api/stocks/history/' + currentTicker + '?range=' + backendRanges[i]);
-      if (j && Array.isArray(j.data) && j.data.length) return j.data;
-    }
-    const yahooRanges = ['3mo', '1y', '2y'];
-    for (let i = 0; i < yahooRanges.length; i++) {
-      const bars = await fetchYahooBars(yahooRanges[i]);
-      if (bars.length) return bars;
-    }
+    const cacheKey = 'foresight.bars.' + currentTicker;
+    const cached = cacheGet(cacheKey);
+    if (cached && cached.length) return cached;
+
+    const bars = await fetchYahooBars('3mo');
+    if (bars.length) { cacheSet(cacheKey, bars); return bars; }
+    // Fallback range if market is closed / partial day
+    const bars2 = await fetchYahooBars('1y');
+    if (bars2.length) { cacheSet(cacheKey, bars2); return bars2; }
     return [];
   }
 
+  // Fetch news headlines — skips backend, goes straight to Yahoo.
+  // Caches result for 30 minutes.
   async function getNews() {
-    // Backend (yfinance) first.
-    const jA = await fetchJsonSameOrigin('/api/news/' + currentTicker + '?limit=20');
-    if (jA && Array.isArray(jA.news) && jA.news.length) return jA.news;
-    const jB = await fetchJsonSameOrigin('/api/stocks/news/' + currentTicker + '?limit=20');
-    if (jB && Array.isArray(jB.news) && jB.news.length) return jB.news;
+    const cacheKey = 'foresight.news.' + currentTicker;
+    const cached = cacheGet(cacheKey);
+    if (cached) return cached;
 
-    // Yahoo search endpoint returns a `news` array of headlines for a ticker.
     const url = 'https://query1.finance.yahoo.com/v1/finance/search?q=' +
                 encodeURIComponent(currentTicker) +
                 '&quotesCount=0&newsCount=20&enableFuzzyQuery=false';
     const data = await fetchYahooJson(url);
     if (data && Array.isArray(data.news)) {
-      return data.news.map(n => ({
-        title: n.title || '',
-        publisher: n.publisher || '',
-        link: n.link || ''
-      }));
+      const news = data.news.map(n => ({ title: n.title || '', publisher: n.publisher || '', link: n.link || '' }));
+      cacheSet(cacheKey, news);
+      return news;
     }
     return [];
   }

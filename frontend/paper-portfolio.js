@@ -2,7 +2,7 @@
 (function () {
   'use strict';
 
-  var FINNHUB_KEY = 'd7g4cehr01qqb8ria6r0d7g4cehr01qqb8ria6rg';
+  var FINNHUB_KEY = '__FINNHUB_KEY__';
   var STORAGE_KEY  = 'iv_paper_portfolio_v2';
   var CACHE_KEY    = 'iv_pp_price_cache_v2';
   var CACHE_TTL    = 5 * 60 * 1000;   // 5 min

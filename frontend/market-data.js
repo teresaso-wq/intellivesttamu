@@ -295,7 +295,7 @@ async function fetchDailyStockQuoteFromBackend(ticker) {
 
 // ── Finnhub (fast, free, no CORS proxy needed) ──────────────────────────────
 // Get your FREE API key at: https://finnhub.io/register (takes 30 seconds)
-const FINNHUB_API_KEY = 'd7g4cehr01qqb8ria6r0d7g4cehr01qqb8ria6rg';
+const FINNHUB_API_KEY = '__FINNHUB_KEY__';
 
 const FINNHUB_COMPANY_NAMES = {
   // Index ETFs

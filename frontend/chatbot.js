@@ -14,8 +14,8 @@ window.clearChatHistory = function() { localStorage.removeItem(HISTORY_KEY); };
 // ─────────────────────────────────────────────────────────────────────────────
 
 // ── Groq AI + Finnhub live data ───────────────────────────────────────────────
-var _k = ['gsk_ngiMfcAp','HoqLGqssoO','vwWGdyb3FY','N7NqxQ2Sh3','ONJGGo4WgXoaKI'];
-var _fk = 'd7g4cehr01qqb8ria6r0d7g4cehr01qqb8ria6rg'; // Finnhub
+var _k = '__GROQ_KEY__';
+var _fk = '__FINNHUB_KEY__'; // Finnhub
 
 // ── Step 1: detect ticker symbols in the user message ────────────────────────
 var TICKER_STOPWORDS = new Set([
@@ -186,7 +186,7 @@ async function buildMarketContext(userMessage) {
 //   { ok: false, error: "reason" }       → API error
 //   null                                 → network down
 async function callGemini(userMessage, profile, history) {
-  var key = _k.join('');
+  var key = _k;
 
   // Fetch live market data for any tickers mentioned
   var marketCtx = await buildMarketContext(userMessage);

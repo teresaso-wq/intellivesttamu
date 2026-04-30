@@ -312,7 +312,7 @@ async function searchYahooStocks(query) {
 
 // Finnhub symbol search — fallback for short tickers Yahoo misses (e.g. GO, F, X)
 async function searchFinnhubStocks(query) {
-  const FKEY = 'd7g4cehr01qqb8ria6r0d7g4cehr01qqb8ria6rg';
+  const FKEY = '__FINNHUB_KEY__';
   try {
     const res = await fetch(
       `https://finnhub.io/api/v1/search?q=${encodeURIComponent(query.trim())}&token=${FKEY}`

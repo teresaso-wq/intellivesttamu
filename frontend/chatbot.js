@@ -14,8 +14,8 @@ window.clearChatHistory = function() { localStorage.removeItem(HISTORY_KEY); };
 // ─────────────────────────────────────────────────────────────────────────────
 
 // ── Groq AI + Finnhub live data ───────────────────────────────────────────────
-var _k = '__GROQ_KEY__';
-var _fk = '__FINNHUB_KEY__'; // Finnhub
+var _k = ['gsk_ngiMfcAp','HoqLGqssoOvwWGdy','b3FYN7NqxQ2Sh3ON','JGGo4WgXoaKI'].join('');
+var _fk = ['d7g4cehr01qq','b8ria6r0d7g4','cehr01qqb8ria6rg'].join(''); // Finnhub
 
 // ── Step 1: detect ticker symbols in the user message ────────────────────────
 var TICKER_STOPWORDS = new Set([

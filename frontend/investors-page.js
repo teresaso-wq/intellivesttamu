@@ -17,7 +17,7 @@
 
   var FMP_KEY = readRuntimeKey('FMP_KEY', 'iv_fmp_key');
   var QUIVER_KEY = readRuntimeKey('QUIVER_KEY', 'iv_quiver_key');
-  var FINNHUB_KEY = readRuntimeKey('FINNHUB_KEY', 'iv_finnhub_key') || '__FINNHUB_KEY__';
+  var FINNHUB_KEY = readRuntimeKey('FINNHUB_KEY', 'iv_finnhub_key') || 'd7g4cehr01qqb8ria6r0d7g4cehr01qqb8ria6rg';
 
   var CACHE_FMP = 'iv_feed_fmp_v1';
   var CACHE_QUIVER = 'iv_feed_quiver_v1';

@@ -93,13 +93,20 @@
       if (i > 0) await sleep(70);
       var t = tickers[i];
       var cached = priceCache[t];
-      if (cached && (now - cached.ts) < CACHE_TTL) continue;
+
+      // Skip only if cache is fresh AND historical data is present
+      var histOk = cached && cached.w1 != null && cached.m1 != null && cached.y1 != null;
+      if (cached && (now - cached.ts) < CACHE_TTL && histOk) continue;
 
       var current = await fetchCurrentPrice(t);
       await sleep(70);
       var hist = await fetchHistoricalPrices(t);
 
-      priceCache[t] = { current: current, w1: hist.w1, m1: hist.m1, y1: hist.y1, ts: Date.now() };
+      priceCache[t] = {
+        current: current || (cached && cached.current) || null,
+        w1: hist.w1, m1: hist.m1, y1: hist.y1,
+        ts: Date.now()
+      };
     }
     saveCache();
     render();
@@ -330,6 +337,14 @@
 
     portfolio = loadPortfolio();
     loadCache();
+
+    // Evict any cache entries where historical data is missing (force re-fetch)
+    Object.keys(priceCache).forEach(function (t) {
+      var c = priceCache[t];
+      if (!c || c.w1 == null || c.m1 == null || c.y1 == null) {
+        delete priceCache[t];
+      }
+    });
 
     var elStartBal = document.getElementById('ppStartingBalance');
     if (elStartBal) elStartBal.value = portfolio.startingBalance;

@@ -5606,6 +5606,8 @@ body.stock-compare-modal-active {
               max-width  0.35s cubic-bezier(0.4,0,0.2,1);
   flex-shrink: 0;
 }
+/* Portfolio pane needs horizontal scroll so the table is reachable */
+.cb-pane-portfolio { overflow-x: auto; }
 
 /* Chat pane — full width by default */
 .cb-pane-chat {
@@ -5743,8 +5745,10 @@ body.stock-compare-modal-active {
 .pp-balance-value--sm { font-size: 22px; }
 
 /* Compact table for the panel — allow horizontal scroll */
-.cb-pp-panel-body .pp-table-wrap { overflow-x: auto; }
-.cb-pp-panel-body .pp-table { min-width: 560px; }
+.cb-pp-panel-body .pp-table-wrap { overflow-x: auto; margin-right: -4px; }
+.cb-pp-panel-body .pp-table { min-width: 700px; }
+.cb-pp-panel-body .pp-table th,
+.cb-pp-panel-body .pp-table td { padding: 10px 10px; font-size: 13px; }
 
 /* Mobile: stack vertically, no split */
 @media (max-width: 768px) {

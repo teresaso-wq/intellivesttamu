@@ -59,13 +59,14 @@
     return (data && data.c > 0) ? data.c : null;
   }
 
-  // One weekly-candle call covers 1W, 1M, and 1Y in a single request
+  // One daily-candle call covers 1W, 1M, and 1Y reference prices in a single request
+  // Uses resolution=D (daily) which is available on Finnhub free tier
   async function fetchHistoricalPrices(ticker) {
-    var now      = Math.floor(Date.now() / 1000);
-    var fromTs   = now - 400 * 86400; // ~13 months back
-    var data = await fetchJson(
+    var now    = Math.floor(Date.now() / 1000);
+    var fromTs = now - 400 * 86400; // ~13 months back
+    var data   = await fetchJson(
       'https://finnhub.io/api/v1/stock/candle?symbol=' + encodeURIComponent(ticker) +
-      '&resolution=W&from=' + fromTs + '&to=' + now + '&token=' + FINNHUB_KEY
+      '&resolution=D&from=' + fromTs + '&to=' + now + '&token=' + FINNHUB_KEY
     );
     if (!data || data.s !== 'ok' || !data.t || !data.c || !data.c.length) {
       return { w1: null, m1: null, y1: null };
@@ -79,8 +80,8 @@
       return data.c[bestIdx];
     }
     return {
-      w1: closest(now - 7  * 86400),
-      m1: closest(now - 30 * 86400),
+      w1: closest(now - 7   * 86400),
+      m1: closest(now - 30  * 86400),
       y1: closest(now - 365 * 86400)
     };
   }

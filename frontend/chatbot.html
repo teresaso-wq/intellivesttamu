@@ -94,6 +94,9 @@
         </div>
       </div>
 
+      <!-- ── DIVIDER (drag to resize) ────────────────────────── -->
+      <div class="cb-split-divider" id="cbSplitDivider" title="Drag to resize"></div>
+
       <!-- ── RIGHT: Paper Portfolio Panel ─────────────────────── -->
       <div class="cb-split-pane cb-pane-portfolio" id="cbPanePortfolio" aria-hidden="true">
         <div class="cb-pp-panel">
@@ -223,16 +226,23 @@
   <script src="./paper-portfolio.js"></script>
   <script>
     (function () {
-      var root   = document.getElementById('cbSplitRoot');
-      var toggle = document.getElementById('cbTogglePortfolio');
-      var close  = document.getElementById('cbClosePortfolio');
-      var pane   = document.getElementById('cbPanePortfolio');
+      var root     = document.getElementById('cbSplitRoot');
+      var toggle   = document.getElementById('cbTogglePortfolio');
+      var close    = document.getElementById('cbClosePortfolio');
+      var pane     = document.getElementById('cbPanePortfolio');
+      var chatPane = document.getElementById('cbPaneChat');
+      var divider  = document.getElementById('cbSplitDivider');
 
       function openPortfolio() {
         root.classList.add('is-split');
         pane.removeAttribute('aria-hidden');
         toggle.innerHTML = '← Hide Portfolio';
         toggle.classList.add('is-open');
+        // Reset to 50/50 when opening
+        chatPane.style.flex = '';
+        chatPane.style.maxWidth = '';
+        pane.style.flex = '';
+        pane.style.maxWidth = '';
       }
       function closePortfolio() {
         root.classList.remove('is-split');
@@ -245,6 +255,62 @@
         root.classList.contains('is-split') ? closePortfolio() : openPortfolio();
       });
       close.addEventListener('click', closePortfolio);
+
+      // ── Drag-to-resize divider ──────────────────────────────────
+      var dragging = false;
+
+      divider.addEventListener('mousedown', function (e) {
+        if (!root.classList.contains('is-split')) return;
+        dragging = true;
+        divider.classList.add('is-dragging');
+        document.body.style.cursor    = 'col-resize';
+        document.body.style.userSelect = 'none';
+        e.preventDefault();
+      });
+
+      document.addEventListener('mousemove', function (e) {
+        if (!dragging) return;
+        var rect     = root.getBoundingClientRect();
+        var offset   = e.clientX - rect.left;
+        var total    = rect.width;
+        var chatPct  = Math.max(25, Math.min(75, (offset / total) * 100));
+        var portPct  = 100 - chatPct;
+        chatPane.style.flex     = '0 0 ' + chatPct + '%';
+        chatPane.style.maxWidth = chatPct + '%';
+        pane.style.flex         = '0 0 ' + portPct + '%';
+        pane.style.maxWidth     = portPct + '%';
+      });
+
+      document.addEventListener('mouseup', function () {
+        if (!dragging) return;
+        dragging = false;
+        divider.classList.remove('is-dragging');
+        document.body.style.cursor    = '';
+        document.body.style.userSelect = '';
+      });
+
+      // Touch support for mobile
+      divider.addEventListener('touchstart', function (e) {
+        if (!root.classList.contains('is-split')) return;
+        dragging = true;
+        e.preventDefault();
+      }, { passive: false });
+
+      document.addEventListener('touchmove', function (e) {
+        if (!dragging) return;
+        var touch    = e.touches[0];
+        var rect     = root.getBoundingClientRect();
+        var offset   = touch.clientX - rect.left;
+        var total    = rect.width;
+        var chatPct  = Math.max(25, Math.min(75, (offset / total) * 100));
+        var portPct  = 100 - chatPct;
+        chatPane.style.flex     = '0 0 ' + chatPct + '%';
+        chatPane.style.maxWidth = chatPct + '%';
+        pane.style.flex         = '0 0 ' + portPct + '%';
+        pane.style.maxWidth     = portPct + '%';
+      }, { passive: false });
+
+      document.addEventListener('touchend', function () { dragging = false; });
     })();
   </script>
 </body>

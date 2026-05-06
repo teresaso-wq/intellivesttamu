@@ -5609,6 +5609,38 @@ body.stock-compare-modal-active {
 /* Portfolio pane needs horizontal scroll so the table is reachable */
 .cb-pane-portfolio { overflow-x: auto; }
 
+/* Drag-to-resize divider — hidden until split is active */
+.cb-split-divider {
+  display: none;
+  width: 6px;
+  flex-shrink: 0;
+  background: rgba(0, 43, 92, 0.08);
+  cursor: col-resize;
+  position: relative;
+  transition: background 0.2s;
+  z-index: 10;
+}
+.cb-split-divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 2px;
+  height: 32px;
+  border-radius: 2px;
+  background: rgba(0, 43, 92, 0.2);
+  transition: background 0.2s;
+}
+.cb-split-root.is-split .cb-split-divider { display: block; }
+.cb-split-divider:hover,
+.cb-split-divider.is-dragging { background: rgba(184,151,90,0.25); }
+.cb-split-divider:hover::after,
+.cb-split-divider.is-dragging::after { background: var(--accent-gold); }
+.dark .cb-split-divider { background: rgba(255,255,255,0.06); }
+.dark .cb-split-divider:hover,
+.dark .cb-split-divider.is-dragging { background: rgba(184,151,90,0.2); }
+
 /* Chat pane — full width by default */
 .cb-pane-chat {
   flex: 1 1 100%;

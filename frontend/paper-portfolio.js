@@ -4,7 +4,7 @@
 
   var FINNHUB_KEY = 'd7g4cehr01qqb8ria6r0d7g4cehr01qqb8ria6rg';
   var STORAGE_KEY  = 'iv_paper_portfolio_v2';
-  var CACHE_KEY    = 'iv_pp_price_cache_v2';
+  var CACHE_KEY    = 'iv_pp_price_cache_v3'; // bumped: switched to Yahoo Finance
   var CACHE_TTL    = 5 * 60 * 1000;   // 5 min
   var DEFAULT_BAL  = 10000;
 
@@ -59,25 +59,62 @@
     return (data && data.c > 0) ? data.c : null;
   }
 
-  // One daily-candle call covers 1W, 1M, and 1Y reference prices in a single request
-  // Uses resolution=D (daily) which is available on Finnhub free tier
+  // Race multiple CORS proxies simultaneously — return first success
+  function raceProxies(url, timeoutMs) {
+    var proxies = [
+      'https://corsproxy.io/?' + encodeURIComponent(url),
+      'https://api.allorigins.win/raw?url=' + encodeURIComponent(url)
+    ];
+    return new Promise(function (resolve) {
+      var done = false, settled = 0;
+      proxies.forEach(function (proxyUrl) {
+        var ctrl  = new AbortController();
+        var timer = setTimeout(function () { ctrl.abort(); }, timeoutMs || 7000);
+        fetch(proxyUrl, { signal: ctrl.signal })
+          .then(function (r) {
+            clearTimeout(timer);
+            if (!r.ok) throw new Error('not ok');
+            return r.json();
+          })
+          .then(function (data) {
+            if (data && !done) { done = true; resolve(data); }
+          })
+          .catch(function () { clearTimeout(timer); })
+          .finally(function () {
+            settled++;
+            if (settled === proxies.length && !done) resolve(null);
+          });
+      });
+    });
+  }
+
+  // Fetch 1W, 1M, 1Y reference prices via Yahoo Finance (free, no API key needed)
   async function fetchHistoricalPrices(ticker) {
-    var now    = Math.floor(Date.now() / 1000);
-    var fromTs = now - 400 * 86400; // ~13 months back
-    var data   = await fetchJson(
-      'https://finnhub.io/api/v1/stock/candle?symbol=' + encodeURIComponent(ticker) +
-      '&resolution=D&from=' + fromTs + '&to=' + now + '&token=' + FINNHUB_KEY
-    );
-    if (!data || data.s !== 'ok' || !data.t || !data.c || !data.c.length) {
+    var url  = 'https://query1.finance.yahoo.com/v8/finance/chart/' +
+               encodeURIComponent(ticker) + '?interval=1d&range=1y&includePrePost=false';
+    var data = await raceProxies(url, 8000);
+
+    if (!data || !data.chart || !data.chart.result || !data.chart.result[0]) {
       return { w1: null, m1: null, y1: null };
     }
+    var result = data.chart.result[0];
+    var ts     = result.timestamp;
+    var closes = result.indicators &&
+                 result.indicators.quote &&
+                 result.indicators.quote[0] &&
+                 result.indicators.quote[0].close;
+
+    if (!ts || !closes || !ts.length) return { w1: null, m1: null, y1: null };
+
+    var now = Math.floor(Date.now() / 1000);
     function closest(targetTs) {
       var bestIdx = 0, bestDiff = Infinity;
-      for (var i = 0; i < data.t.length; i++) {
-        var d = Math.abs(data.t[i] - targetTs);
+      for (var i = 0; i < ts.length; i++) {
+        if (closes[i] == null) continue;
+        var d = Math.abs(ts[i] - targetTs);
         if (d < bestDiff) { bestDiff = d; bestIdx = i; }
       }
-      return data.c[bestIdx];
+      return closes[bestIdx] || null;
     }
     return {
       w1: closest(now - 7   * 86400),
